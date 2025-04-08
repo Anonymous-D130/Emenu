@@ -16,6 +16,7 @@ import {formatEnumString, initialToastState} from "../../utils/Utility.js";
 import ErrorPage from "./ErrorPage.jsx";
 import Toast from "../../utils/Toast.jsx";
 import OrderPlacedModal from "../components/OrderPlacedModal.jsx";
+import ContactModal from "../components/ContactModal.jsx";
 
 const filterOptions = [
     { label: "Veg", icon: <img src={`${Veg}`} alt="veg" className="w-4 h-4 bg-white" />, value: "VEG" },
@@ -42,6 +43,7 @@ const Food = () => {
     const [orders, setOrders] = useState([]);
     const [bellLoading, setBellLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [showContactModal, setShowContactModal] = useState(false);
     const [cart, setCart] = useState({
         id: null,
         items: [],
@@ -56,7 +58,7 @@ const Food = () => {
             setHasError(false);
         } catch (error) {
             console.error("Error fetching customer details : ", error);
-            setToast({message: error.response.data ? error.response.data.message : error.message, type: "error"});
+            setToast({message: error.response.data ? error.response?.data?.message : error.message, type: "error"});
             setHasError(true);
         }
     }, [customer?.id, tableNumber]);
@@ -77,7 +79,7 @@ const Food = () => {
             setHasError(true);
             console.error("Error fetching tags: ", error);
             setHasError(true);
-            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+            setToast({ message: error.response ? error.response?.data?.message : error.message, type: "error" });
         } finally {
             setLoading(false);
         }
@@ -96,7 +98,7 @@ const Food = () => {
             setHasError(false);
         } catch (error) {
             console.error("Error fetching orders: ", error);
-            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+            setToast({ message: error.response ? error.response?.data?.message : error.message, type: "error" });
             setHasError(true);
         } finally {
             setLoading(false);
@@ -112,9 +114,9 @@ const Food = () => {
             setBellLoading(true);
             try {
                 const response = await axios.post(RING_BELL(customer.id, restaurantId));
-                setToast({message: response.data.message, type: "success" });
+                setToast({message: response?.data?.message, type: "success" });
             } catch (error) {
-                setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+                setToast({ message: error.response ? error.response?.data?.message : error?.message, type: "error" });
                 console.error("Error ringing bell: ", error);
             } finally {
                 setTimeout(() => setBellLoading(false), 5000)
@@ -287,7 +289,12 @@ const Food = () => {
                         <li>Private Dinners & Special Occasions</li>
                         <li>Custom Menus for All Dietary Needs</li>
                     </ul>
-                    <button className="w-full bg-black text-white text-base py-3 rounded-lg mt-3">Book Our Catering Services</button>
+                    <button
+                        onClick={() => setShowContactModal(true)}
+                        className="w-full bg-black text-white text-base py-3 rounded-lg mt-3"
+                    >
+                        Book Our Catering Services
+                    </button>
                 </div>
             </div>
 
@@ -337,6 +344,13 @@ const Food = () => {
 
 
             </footer>
+
+            <ContactModal
+                open={showContactModal}
+                onClose={() => setShowContactModal(false)}
+                restaurantId={restaurantId}
+                setToast={setToast}
+            />
 
             <PlacingOrderModal
                 cart={cart}

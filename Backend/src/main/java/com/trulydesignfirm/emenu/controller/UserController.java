@@ -1,12 +1,15 @@
 package com.trulydesignfirm.emenu.controller;
 
 import com.trulydesignfirm.emenu.actions.Response;
+import com.trulydesignfirm.emenu.dto.EventDetails;
 import com.trulydesignfirm.emenu.model.LoginUser;
 import com.trulydesignfirm.emenu.model.Subscription;
 import com.trulydesignfirm.emenu.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
@@ -43,5 +46,11 @@ public class UserController {
                                                    @RequestParam String token) {
         Response response = userService.verifyForgotPasswordOtp(password, email, token);
         return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/event-details/{restaurantId}")
+    public ResponseEntity<Response> getEventDetails(@RequestBody EventDetails event, @PathVariable UUID restaurantId) {
+        Response eventDetails = userService.getEventDetails(event, restaurantId);
+        return ResponseEntity.status(eventDetails.getStatus()).body(eventDetails);
     }
 }

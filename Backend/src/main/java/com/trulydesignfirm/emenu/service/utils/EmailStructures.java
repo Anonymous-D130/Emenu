@@ -86,4 +86,49 @@ public class EmailStructures {
        </html>
     """.formatted(websiteUrl, token, email, expiryTime, websiteUrl, token, email, companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl);
     }
+
+    public String generateEventInquiryEmail(String name, String email, String mobile, String eventDetails) {
+        return """
+        <html>
+           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+               <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                   <h2 style="color: #007bff; text-align: center;">📋 New Catering Service Inquiry</h2>
+
+                   <p>Dear Admin,</p>
+                   <p>You’ve received a new inquiry for catering services. Below are the details:</p>
+
+                   <table style="width: 100%%; margin-top: 20px; border-collapse: collapse;">
+                       <tr>
+                           <td style="padding: 8px; font-weight: bold; border: 1px solid #eee;">Full Name:</td>
+                           <td style="padding: 8px; border: 1px solid #eee;">%s</td>
+                       </tr>
+                       <tr>
+                           <td style="padding: 8px; font-weight: bold; border: 1px solid #eee;">Email:</td>
+                           <td style="padding: 8px; border: 1px solid #eee;">%s</td>
+                       </tr>
+                       <tr>
+                           <td style="padding: 8px; font-weight: bold; border: 1px solid #eee;">Mobile:</td>
+                           <td style="padding: 8px; border: 1px solid #eee;">%s</td>
+                       </tr>
+                       <tr>
+                           <td style="padding: 8px; font-weight: bold; border: 1px solid #eee;">Event Details:</td>
+                           <td style="padding: 8px; border: 1px solid #eee;">%s</td>
+                       </tr>
+                   </table>
+
+                   <p style="margin-top: 30px;">Please reach out to the customer at your earliest convenience.</p>
+
+                   <hr style="margin-top: 40px;">
+
+                   <p style="text-align: center; font-size: 14px; color: #555;">
+                       <b>The %s Team</b> <br>
+                       📧 Email: <a href="mailto:%s" style="color: #007bff;">%s</a> <br>
+                       📞 Phone: %s <br>
+                       🌐 Website: <a href="%s" style="color: #007bff;">%s</a>
+                   </p>
+               </div>
+           </body>
+       </html>
+    """.formatted(name, email, mobile, eventDetails, companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl);
+    }
 }

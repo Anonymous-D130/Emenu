@@ -8,6 +8,8 @@ export const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
 export const RAZORPAY_CURRENCY = "INR";
 export const COMPANY_NAME = import.meta.env.VITE_COMPANY_NAME;
 
+export const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
 //Unsecured Routes
 export const LOGIN_URL = `${BACKEND_URL}/api/auth/login`;
 export const FORGOT_PASSWORD_URL = `${BACKEND_URL}/api/user/forgot-password`;
@@ -23,6 +25,7 @@ export const FETCH_SERVING_INFO = `${BACKEND_URL}/api/public/serving-info`;
 //Secured Routes
 export const FETCH_USER_PROFILE = `${BACKEND_URL}/api/user/profile`;
 export const FETCH_USER_SUBSCRIPTION = `${BACKEND_URL}/api/user/subscription`;
+export const SEND_EVENT_DETAILS = (restaurantId) => `${BACKEND_URL}/api/user/event-details/${restaurantId}`;
 export const FETCH_RESTAURANT = `${BACKEND_URL}/api/restaurants/get`;
 export const TOGGLE_RESTAURANT = `${BACKEND_URL}/api/restaurants/toggle`;
 export const REGISTER_RESTAURANT = `${BACKEND_URL}/api/restaurants/register`;
@@ -46,9 +49,6 @@ export const IS_SUBSCRIPTION_ACTIVE = `${BACKEND_URL}/api/restaurants/active-sub
 export const FETCH_PLANS = `${BACKEND_URL}/api/restaurants/plans`;
 export const INITIATE_PAYMENT = (planId) => `${BACKEND_URL}/api/restaurants/subscribe/${planId}`;
 export const VERIFY_PAYMENT = `${BACKEND_URL}/api/restaurants/verify-payment`;
-
-//Extras
-export const FRONTEND_URL = `getMenu.com`;
 
 //Customer Routes
 export const REGISTER_CUSTOMER = (restaurantId) => `${BACKEND_URL}/api/customers/register/${restaurantId}`;
