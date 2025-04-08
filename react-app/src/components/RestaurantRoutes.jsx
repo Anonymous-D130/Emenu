@@ -1,4 +1,4 @@
-import {Routes, Route, useNavigate} from "react-router-dom";
+import {Routes, Route, useNavigate, useLocation} from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import Orders from "../pages/Orders";
 import Menu from "../pages/Menu";
@@ -12,13 +12,14 @@ import CreateRestaurant from "../pages/CreateRestaurant.jsx";
 import Subscription from "./Subscription.jsx";
 import {useEffect} from "react";
 import axios from "axios";
-import {IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
+import {FETCH_USER_SUBSCRIPTION, IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
 import OfferZone from "../pages/OfferZone.jsx";
 import ExpiredSubscription from "./ExpiredSubscription.jsx";
 
 const RestaurantRoutes = () => {
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const fetchSubscription = async () => {
@@ -31,6 +32,28 @@ const RestaurantRoutes = () => {
         };
         fetchSubscription().then(r => r);
     }, [token, navigate]);
+
+    useEffect(() => {
+
+        const fetchSubscription = async () => {
+            try {
+                const response = await axios.get(FETCH_USER_SUBSCRIPTION, {headers: {Authorization: `Bearer ${token}`}});
+                console.log(
+                    response.data
+                )
+                if (response.status === 200 && location.pathname === "/restaurant") {
+                    navigate("/restaurant/dashboard");
+                }
+            } catch (error) {
+                console.error("Error while fetching: ", error);
+                if(error.response.status === 500) {
+                    navigate("/restaurant/expired");
+                }
+            }
+        };
+
+        fetchSubscription().then(r => r);
+    }, [token, navigate, location.pathname]);
 
     return (
         <div className="flex min-h-screen bg-gray-100 justify-between">
