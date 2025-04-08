@@ -3,7 +3,6 @@ package com.trulydesignfirm.emenu.service.impl;
 import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.dto.EventDetails;
 import com.trulydesignfirm.emenu.model.LoginUser;
-import com.trulydesignfirm.emenu.model.Restaurant;
 import com.trulydesignfirm.emenu.model.Subscription;
 import com.trulydesignfirm.emenu.repository.SubscriptionRepo;
 import com.trulydesignfirm.emenu.repository.UserRepo;
