@@ -9,7 +9,7 @@ const ContactModal = ({ open, onClose, restaurantId, setToast }) => {
         name: "",
         email: "",
         mobile: "",
-        details: "",
+        eventDetails: "",
     });
 
     const handleChange = (e) => {
