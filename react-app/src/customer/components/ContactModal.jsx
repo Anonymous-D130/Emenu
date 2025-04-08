@@ -26,7 +26,7 @@ const ContactModal = ({ open, onClose, restaurantId, setToast }) => {
         try {
             const response = await axios.post(SEND_EVENT_DETAILS(restaurantId), formData);
             setToast({message: response?.data?.message, type: "success"});
-            setFormData({ name: "", email: "", mobile: "", details: "" });
+            setFormData({ name: "", email: "", mobile: "", eventDetails: "" });
             onClose();
         } catch (error) {
             console.log(error);
@@ -87,8 +87,8 @@ const ContactModal = ({ open, onClose, restaurantId, setToast }) => {
                         <div>
                             <label className="block font-medium mb-1">Event Details</label>
                             <textarea
-                                name="details"
-                                value={formData.details}
+                                name="eventDetails"
+                                value={formData.eventDetails}
                                 onChange={handleChange}
                                 rows="4"
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2"
