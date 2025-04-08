@@ -1,0 +1,130 @@
+import { Avatar } from "@mui/material";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import { IoMdNotificationsOutline } from "react-icons/io";
+import logo from "../assets/logo.png"
+import {FiLogOut} from "react-icons/fi";
+import {useNavigate} from "react-router-dom";
+import {initialToastState} from "../utils/Utility.js";
+import axios from "axios";
+import {FETCH_RESTAURANT, TOGGLE_RESTAURANT} from "../utils/config.js";
+import Toast from "../utils/Toast.jsx";
+
+const Header = () => {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const [isOnline, setIsOnline] = useState(false);
+    const [showLogout, setShowLogout] = useState(false);
+    const dropdownRef = useRef(null);
+    const navigate = useNavigate();
+    const [toast, setToast] = useState(initialToastState);
+
+    const fetchRestaurant = useCallback(async () => {
+        try {
+            const response = await axios.get(FETCH_RESTAURANT, {headers: {Authorization: `Bearer ${token}`}});
+            setIsOnline(response.data?.active);
+
+        } catch (error) {
+            console.error("Error while fetching: ", error);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        fetchRestaurant().then(r => r);
+    }, [fetchRestaurant]);
+    
+    const toggleRestaurant = async () => {
+        try {
+            const response = await axios.put(TOGGLE_RESTAURANT, {}, {headers: {Authorization: `Bearer ${token}`}});
+            setToast({message: response?.data.message, type: "success"});
+            fetchRestaurant().then(r => r);
+        } catch (error) {
+            console.error("Error updating restaurant status :", error);
+            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
+        }
+    }
+
+    return (
+        <header className="bg-white shadow-md rounded-lg p-4 flex flex-col md:flex-row items-center justify-between w-full fixed top-0 left-0 right-0 z-50">
+            {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
+
+            <a href="/" className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-left w-full md:w-auto md:mx-20"
+            >
+                <img src={`${logo}`} alt="logo"/>
+            </a>
+
+            {/* Right Section: Notifications & Profile */}
+            <div className="flex items-center gap-3 md:gap-4 mt-4 md:mt-0 w-full md:w-auto justify-center md:justify-end">
+
+                {/* Notification Icon */}
+                <IoMdNotificationsOutline size={40} className="text-purple-800 cursor-pointer bg-purple-300 rounded-full p-2" />
+
+                {/* Online/Offline Toggle */}
+                <div className={`flex items-center gap-2 p-2 rounded-full shadow-lg border ${isOnline ? "border-green-400" : "border-red-400"} bg-white/80 backdrop-blur-md`}>
+                    {/* Status Indicator */}
+                    <span className={`text-xs font-medium ${isOnline ? "text-green-600" : "text-red-500"}`}>
+                        {isOnline ? "Online" : "Offline"}
+                    </span>
+
+                    {/* Toggle Switch */}
+                    <button
+                        onClick={toggleRestaurant}
+                        className={`relative w-11 h-6 flex items-center rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
+                            isOnline ? "bg-green-500 shadow-green-300" : "bg-red-500 shadow-red-300"
+                        }`}
+                    >
+                      <span
+                          className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 ease-in-out ${
+                              isOnline ? "translate-x-5" : "translate-x-0"
+                          }`}
+                      />
+                    </button>
+
+                </div>
+
+                {/* Avatar Box */}
+                <div
+                    className="relative w-48"
+                    ref={dropdownRef}
+                    onMouseEnter={() => setShowLogout(true)}
+                    onMouseLeave={() => setShowLogout(false)}
+                >
+                    <div
+                        className="flex items-center justify-between bg-white px-3 py-2 rounded-lg shadow-md w-full cursor-pointer hover:bg-gray-100 transition-all"
+                        onClick={() => setShowLogout(!showLogout)}
+                    >
+                        <Avatar
+                            variant="circle"
+                            className="w-10 h-10 md:w-12 md:h-12 border border-gray-300 shadow-sm"
+                        />
+                        <div className="text-xs md:text-base">
+                            <div className="font-semibold text-gray-800">{user?.name}</div>
+                            <div className="text-gray-500 text-xs">QR ID: {user.id.substring(0, 6)}...</div>
+                        </div>
+                        <span className="border-l-6 border-l-transparent border-r-6 border-r-transparent border-t-6 border-indigo-500 transition-transform duration-300 transform"
+                              style={{ transform: showLogout ? "rotate(180deg)" : "rotate(0deg)" }}>
+                        </span>
+                    </div>
+
+                    {/* Logout Dropdown (Smooth Transition) */}
+                    <div
+                        className={`absolute right-0 w-full bg-gray-100 border-t-2 border-gray-300 rounded-b-lg shadow-lg p-2 transition-all duration-300 ease-in-out ${
+                            showLogout ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+                        }`}
+                    >
+                        <button
+                            onClick={() => {
+                                navigate("/logout");
+                            }}
+                            className="w-full flex items-center gap-2 text-left px-4 py-2 hover:bg-red-50 text-red-600 font-semibold rounded-md transition-all"
+                        >
+                            <FiLogOut className="text-xl" />
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+}
+
+export default Header;

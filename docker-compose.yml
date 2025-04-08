@@ -1,0 +1,82 @@
+services:
+
+  emenu-db:
+    image: postgres:latest
+    container_name: emenu-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: emenu-db
+    ports:
+      - "5431:5432"
+    volumes:
+      - emenu-data:/var/lib/postgresql/data
+    networks:
+      - emenu-network
+
+  # SMTP Server for Testing (Mailhog)
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI to view emails
+    networks:
+      - emenu-network
+  # Spring Boot Backend
+  emenu-backend:
+    build: ./Backend
+    container_name: emenu-backend
+    environment:
+      # Database Configuration
+      DATASOURCE_URL: jdbc:postgresql://emenu-db:5432/emenu-db
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
+
+      #Google Oauth
+      GOOGLE_CLIENT_ID: 984049733138-kcap0ms3qqal60q1ol8ko1fmf795b604.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+
+      #SMTP
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: test@emenu.com
+      MAIL_PASSWORD: test-password
+
+      #Payment Gateway
+      RAZORPAY_CURRENCY: INR
+      RAZORPAY_KEY: rzp_test_uK9Ed39SkZUntE
+      RAZORPAY_SECRET: aUA7XpSkESfsPUpx5TQvLyfy
+
+      # Frontend URL
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "8081:8080"
+    depends_on:
+      - emenu-db
+    networks:
+      - emenu-network
+
+  # Frontend (React.js)
+  emenu-frontend:
+    build: ./react-app
+    container_name: emenu-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_BACKEND_URL: http://localhost:8080
+      VITE_CLOUD_NAME: dft2nlkmz
+      VITE_UPLOAD_PRESET: truly-design
+      VITE_RAZORPAY_KEY: rzp_test_uK9Ed39SkZUntE
+      VITE_COMPANY_NAME: EMENU
+    depends_on:
+      - emenu-backend
+    networks:
+      - emenu-network
+
+volumes:
+  emenu-data:
+
+networks:
+  emenu-network:
+    driver: bridge
