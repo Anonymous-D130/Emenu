@@ -36,6 +36,7 @@ const CreateRestaurant = () => {
     const [restaurant, setRestaurant] = useState(initialRestaurantState);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(initialToastState);
+    const [paymentLoading, setPaymentLoading] = useState(false);
 
     const fetchRestaurant = useCallback(async () => {
         try {
@@ -135,13 +136,13 @@ const CreateRestaurant = () => {
 
     const handleSubmit = async () => {
         if (currentStep !== 4) return;
-
+        setPaymentLoading(true);
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded) {
             setToast({ message: "Failed to load Razorpay SDK. Check your internet connection.", type: "error" });
+            setLoading(false);
             return;
         }
-
         try {
             const { data } = await axios.post(INITIATE_PAYMENT(selectedPlan), {}, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -158,6 +159,8 @@ const CreateRestaurant = () => {
         } catch (error) {
             console.error("Subscription/payment initiation failed:", error);
             setToast({message: error.response ? error.response.data.message : error.message || "Failed to initiate payment", type: "error",});
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -179,6 +182,7 @@ const CreateRestaurant = () => {
                 onNext={handleNext}
                 onPrevious={() => setCurrentStep((prev) => Math.max(prev - 1, 1))}
                 handleSubmit={handleSubmit}
+                paymentLoading={paymentLoading}
             />
         </main>
     );

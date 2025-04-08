@@ -81,7 +81,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 return response;
             }
             log.info("Verifying payment for Order ID: {}", orderId);
-            PaymentDetails paymentDetails = paymentRepo.findById(orderId)
+            PaymentDetails paymentDetails = paymentRepo.findByOrderId(orderId)
                     .orElseThrow(() -> new RuntimeException("Invalid orderId: " + orderId));
             log.info("Payment ID: {}", paymentId);
             paymentDetails.setOrderStatus("PAID");

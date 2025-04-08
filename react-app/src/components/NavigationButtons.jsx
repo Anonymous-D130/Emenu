@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCheck } from "react-icons/fa6";
 
-const NavigationButtons = ({ onPrevious, onNext, currentStep, handleSubmit }) => {
+const NavigationButtons = ({ onPrevious, onNext, currentStep, handleSubmit, paymentLoading }) => {
     return (
         <div className="fixed md:bottom-0 bottom-15 left-0 w-full bg-white shadow-md p-4 flex justify-center z-100">
             <div className="flex justify-between w-full md:px-60 mx-auto">
@@ -20,12 +20,20 @@ const NavigationButtons = ({ onPrevious, onNext, currentStep, handleSubmit }) =>
 
                 {/* Next Button */}
                 <button
+                    disabled={paymentLoading}
                     onClick={currentStep === 4 ? handleSubmit : onNext}
-                    className="bg-indigo-600 text-white px-10 py-3 rounded-lg text-md font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2"
+                    className={`text-white px-10 py-3 rounded-lg text-md font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2
+                    ${paymentLoading ? "bg-indigo-400" : "bg-indigo-600"}`}
                 >
                     {currentStep === 4 ? (
                         <>
-                            SUBMIT <FaCheck />
+                            {paymentLoading ? (
+                                "SUBMITTING...."
+                            ) : (
+                                <>
+                                    SUBMIT <FaCheck />
+                                </>
+                            )}
                         </>
                     ) : (
                         "NEXT →"

@@ -85,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void savePaymentDetails(Order order, LoginUser user, SubscriptionPlan plan, boolean trial) {
-        PaymentDetails details = new PaymentDetails();
+        PaymentDetails details = paymentRepo.getPaymentDetailsByUser(user).orElse(new PaymentDetails());
         details.setUser(user);
         details.setPlan(plan);
         if (trial)

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -12,6 +13,9 @@ import java.math.BigDecimal;
 public class PaymentDetails {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     private String orderId;
     private BigDecimal amount;
     private String receipt;
