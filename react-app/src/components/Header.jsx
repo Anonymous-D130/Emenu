@@ -17,6 +17,7 @@ const Header = () => {
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const [toast, setToast] = useState(initialToastState);
+    const [loading, setLoading] = useState(false);
 
     const fetchRestaurant = useCallback(async () => {
         try {
@@ -33,6 +34,7 @@ const Header = () => {
     }, [fetchRestaurant]);
     
     const toggleRestaurant = async () => {
+        setLoading(true);
         try {
             const response = await axios.put(TOGGLE_RESTAURANT, {}, {headers: {Authorization: `Bearer ${token}`}});
             setToast({message: response?.data.message, type: "success"});
@@ -40,6 +42,8 @@ const Header = () => {
         } catch (error) {
             console.error("Error updating restaurant status :", error);
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -67,9 +71,10 @@ const Header = () => {
 
                     {/* Toggle Switch */}
                     <button
+                        disabled={loading}
                         onClick={toggleRestaurant}
                         className={`relative w-11 h-6 flex items-center rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
-                            isOnline ? "bg-green-500 shadow-green-300" : "bg-red-500 shadow-red-300"
+                            isOnline ? (loading ? "bg-green-300" : "bg-green-500 shadow-green-300") : (loading ? "bg-red-300" : "bg-red-500 shadow-red-300")
                         }`}
                     >
                       <span
