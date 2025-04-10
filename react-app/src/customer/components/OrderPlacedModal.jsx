@@ -55,11 +55,7 @@ const statusConfig = {
     }
 };
 
-const OrderPlacedModal = ({ open, handleClose, orders, ringBell, bellLoading }) => {
-    const handleRing = () => {
-        alert("Waiter has been notified!");
-    };
-
+const OrderPlacedModal = ({ open, handleClose, orders, ringBell, loading, bellLoading }) => {
     const [liveOrders, setLiveOrders] = useState(orders);
 
     useEffect(() => {
@@ -67,7 +63,7 @@ const OrderPlacedModal = ({ open, handleClose, orders, ringBell, bellLoading }) 
     }, [orders]);
 
     useEffect(() => {
-        const socket = new SockJS(WEBSOCKET_URL); // Replace with your deployed URL
+        const socket = new SockJS(WEBSOCKET_URL);
         const stompClient = over(socket);
 
         stompClient.connect({}, () => {
@@ -105,71 +101,98 @@ const OrderPlacedModal = ({ open, handleClose, orders, ringBell, bellLoading }) 
                     </div>
 
                     {/* Orders List */}
-                    {liveOrders.map((order) => {
-                        const totalAmount = order.orderItems.reduce(
-                            (sum, item) => sum + item.food?.offerPrice * item.quantity,
-                            0
-                        );
-
-                        const status = order.status;
-                        const statusInfo = statusConfig[status] || {
-                            icon: <FaRegFaceGrinBeamSweat />,
-                            color: "text-gray-400",
-                            label: formatEnumString(status)
-                        };
-
-                        return (
+                    {/* Loading State */}
+                    {loading ? (
+                        // Skeleton Placeholder
+                        Array.from({ length: 2 }).map((_, idx) => (
                             <div
-                                key={order.id}
-                                className="border rounded-xl p-3 shadow-sm bg-gray-50 mb-2"
+                                key={idx}
+                                className="animate-pulse border rounded-xl p-3 shadow-sm bg-gray-100 mb-2"
                             >
-                                {/* Table Number */}
-                                <div className="flex justify-between items-center text-md font-semibold text-gray-700 border-b pb-1 mb-2">
-                                    <span>Table No: {order.tableNumber}</span>
-                                    <span>Total: ₹{totalAmount} + GST</span>
+                                <div className="flex justify-between items-center mb-3">
+                                    <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-1/4"></div>
                                 </div>
-
-                                {/* Items */}
-                                {order.orderItems.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex justify-between items-start py-2 border-b border-gray-200"
-                                    >
-                                        <div className="flex items-start gap-2">
-                                            <img
-                                                className="w-5 h-5"
-                                                src={`${item.food?.veg ? Veg : nonVeg}`}
-                                                alt={`${item.food?.veg ? "Veg" : "Non-Veg"}`}
-                                            />
-                                            <p className="font-medium text-base w-[90%]">
-                                                {item.food?.name}
-                                            </p>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex gap-2 items-center">
+                                            <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                                            <div className="h-4 bg-gray-300 rounded w-48"></div>
                                         </div>
-                                        <div className="flex items-end gap-1 flex-nowrap">
-                                            <p className="font-medium text-base">x</p>
-                                            <p className="font-medium text-base">{item?.quantity}</p>
-                                        </div>
-                                        <p className="text-base px-3 font-semibold whitespace-nowrap">
-                                            ₹{item.food?.offerPrice * item.quantity}
-                                        </p>
+                                        <div className="h-4 bg-gray-300 rounded w-10"></div>
+                                        <div className="h-4 bg-gray-300 rounded w-12"></div>
                                     </div>
-                                ))}
-
-                                {/* Status */}
-                                <div className="flex items-center gap-3 pt-2">
-                                    <div className={`text-2xl ${statusInfo.color}`}>
-                                        {statusInfo.icon}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Order Status</p>
-                                        <p className="text-base font-semibold">
-                                            {formatEnumString(order?.status)}
-                                        </p>
-                                    </div>
+                                    <div className="h-4 bg-gray-300 rounded w-1/3 mt-3"></div>
                                 </div>
                             </div>
-                        );
-                    })}
+                        ))
+                    ) : (
+                        // Actual Orders
+                        liveOrders.map((order) => {
+                            const totalAmount = order.orderItems.reduce(
+                                (sum, item) => sum + item.food?.offerPrice * item.quantity,
+                                0
+                            );
+                            const status = order.status;
+                            const statusInfo = statusConfig[status] || {
+                                icon: <FaRegFaceGrinBeamSweat />,
+                                color: "text-gray-400",
+                                label: formatEnumString(status)
+                            };
+
+                            return (
+                                <div
+                                    key={order.id}
+                                    className="border rounded-xl p-3 shadow-sm bg-gray-50 mb-2"
+                                >
+                                    {/* Table Number */}
+                                    <div className="flex justify-between items-center text-md font-semibold text-gray-700 border-b pb-1 mb-2">
+                                        <span>Table No: {order.tableNumber}</span>
+                                        <span>Total: ₹{totalAmount} + GST</span>
+                                    </div>
+
+                                    {/* Items */}
+                                    {order.orderItems.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex justify-between items-start py-2 border-b border-gray-200"
+                                        >
+                                            <div className="flex items-start gap-2">
+                                                <img
+                                                    className="w-5 h-5"
+                                                    src={`${item.food?.veg ? Veg : nonVeg}`}
+                                                    alt={`${item.food?.veg ? "Veg" : "Non-Veg"}`}
+                                                />
+                                                <p className="font-medium text-base w-[90%]">
+                                                    {item.food?.name}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-end gap-1 flex-nowrap">
+                                                <p className="font-medium text-base">x</p>
+                                                <p className="font-medium text-base">{item?.quantity}</p>
+                                            </div>
+                                            <p className="text-base px-3 font-semibold whitespace-nowrap">
+                                                ₹{item.food?.offerPrice * item.quantity}
+                                            </p>
+                                        </div>
+                                    ))}
+
+                                    {/* Status */}
+                                    <div className="flex items-center gap-3 pt-2">
+                                        <div className={`text-2xl ${statusInfo.color}`}>
+                                            {statusInfo.icon}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Order Status</p>
+                                            <p className="text-base font-semibold">
+                                                {formatEnumString(order?.status)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
 
                     {/* Bottom Buttons */}
                     <div className="flex justify-between items-center p-2 mt-4">

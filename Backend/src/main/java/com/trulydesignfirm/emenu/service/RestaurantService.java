@@ -7,6 +7,7 @@ import com.trulydesignfirm.emenu.model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -15,6 +16,7 @@ public interface RestaurantService {
     SubscriptionStatus getSubscriptionStatus(String token);
     Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest);
     Restaurant getRestaurantById(UUID id);
+    Map<String, ?> getDashboard(String token);
     List<Category> getRestaurantCategories(String token);
     Response toggleActive(String token);
     Response addRestaurantCategory(String token, Category category);

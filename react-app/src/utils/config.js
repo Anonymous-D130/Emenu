@@ -11,6 +11,7 @@ export const COMPANY_NAME = import.meta.env.VITE_COMPANY_NAME;
 export const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 //Unsecured Routes
+//Authentication Routes
 export const LOGIN_URL = `${BACKEND_URL}/api/auth/login`;
 export const FORGOT_PASSWORD_URL = `${BACKEND_URL}/api/user/forgot-password`;
 export const VERIFY_TOKEN_URL = `${BACKEND_URL}/api/user/verify-token`;
@@ -18,9 +19,12 @@ export const RESET_PASSWORD_URL =`${BACKEND_URL}/api/user/reset-password`;
 export const OAUTH_URL = `${BACKEND_URL}/oauth2/authorization/google`;
 export const GET_OTP = `${BACKEND_URL}/api/auth/get-otp`;
 export const REGISTER_URL = `${BACKEND_URL}/api/auth/register`;
+
+//Fetching General Information (Can be hardcoded if always static)
 export const FETCH_TAGS = `${BACKEND_URL}/api/public/tags`;
 export const FETCH_MEAT_TYPES = `${BACKEND_URL}/api/public/meat-types`;
 export const FETCH_SERVING_INFO = `${BACKEND_URL}/api/public/serving-info`;
+export const FETCH_ORDER_STATUS = `${BACKEND_URL}/api/public/order-status`;
 
 //Secured Routes
 export const FETCH_USER_PROFILE = `${BACKEND_URL}/api/user/profile`;
@@ -29,6 +33,7 @@ export const SEND_EVENT_DETAILS = (restaurantId) => `${BACKEND_URL}/api/user/eve
 export const FETCH_RESTAURANT = `${BACKEND_URL}/api/restaurants/get`;
 export const TOGGLE_RESTAURANT = `${BACKEND_URL}/api/restaurants/toggle`;
 export const REGISTER_RESTAURANT = `${BACKEND_URL}/api/restaurants/register`;
+export const FETCH_DASHBOARD = `${BACKEND_URL}/api/restaurants/dashboard`;
 export const FETCH_CATEGORIES = `${BACKEND_URL}/api/restaurants/categories`;
 export const ADD_CATEGORY = `${BACKEND_URL}/api/restaurants/category`;
 export const FETCH_SUBCATEGORY = (categoryId)=> `${BACKEND_URL}/api/restaurants/sub-categories/${categoryId}`;

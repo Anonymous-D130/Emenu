@@ -1,17 +1,21 @@
 import { Pencil, Trash2 } from "lucide-react";
 import veg from "../assets/veg.png";
 import nonVeg from "../assets/Non-veg.png";
-import AddItemModal from "./AddItemModal.jsx";
+import AddItemModal from "../modals/AddItemModal.jsx";
 import React, {useState} from "react";
 import axios from "axios";
-import {DELETE_FOOD_ITEM, UPDATE_FOOD_ITEM} from "../utils/config.js";
+import {DELETE_FOOD_ITEM, TOGGLE_FOOD_ITEM, UPDATE_FOOD_ITEM} from "../utils/config.js";
 import {validateFoodForm} from "../utils/Utility.js";
 
-const FoodItemCard = ({ food, toggleAvailability, setToast, fetchFoodItems, categories }) => {
+const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
     const token = localStorage.getItem("token");
-
+    const [isAvailable, setIsAvailable] = useState(food?.available);
     const [showItemModal, setShowItemModal] = useState(false);
     const [foodItem, setFoodItem] = useState(food);
+    const [isToggling, setIsToggling] = useState(false);
+    const [imagePreview, setImagePreview] = useState("");
+    const [buttonLoading, setButtonLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const showAddItemModal = () => {
         setShowItemModal(true);
@@ -21,29 +25,57 @@ const FoodItemCard = ({ food, toggleAvailability, setToast, fetchFoodItems, cate
         setShowItemModal(false);
     };
 
+    const toggleAvailability = async (id) => {
+        const prevState = isAvailable;
+        const newState = !isAvailable;
+        setIsToggling(true);
+        setIsAvailable(newState);
+        try {
+            const response = await axios.put(TOGGLE_FOOD_ITEM(id), {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setToast({ message: response?.data.message, type: "success" });
+        } catch (error) {
+            setIsAvailable(prevState);
+            setToast({ message: error?.response?.data?.message || error.message, type: "error" });
+            console.error("Error changing availability", error);
+        } finally {
+            setIsToggling(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(!validateFoodForm(foodItem, setToast)) return;
+        setButtonLoading(true);
         try {
             const response = await axios.put(UPDATE_FOOD_ITEM(foodItem.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
             setToast({ message: response?.data.message, type: "success" });
-            fetchFoodItems(foodItem.subCategory.id);
+            fetchFoodItems();
+            setImagePreview("");
             closeAddItemModal();
         } catch (error) {
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
             console.error("Error adding food item", error);
+        } finally {
+            setButtonLoading(false);
         }
     }
 
     async function handleDelete() {
+        const confirmDelete = window.confirm("Are you sure you want to delete this food item?");
+        if (!confirmDelete) return;
+        setDeleteLoading(true);
         try {
             const response = await axios.delete(DELETE_FOOD_ITEM(foodItem.id), { headers: { Authorization: `Bearer ${token}` }});
+            fetchFoodItems();
             setToast({ message: response?.data.message, type: "success" });
-            fetchFoodItems(foodItem.subCategory.id);
             closeAddItemModal();
         } catch (error) {
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
             console.error("Error deleting food item", error);
+        } finally {
+            setDeleteLoading(false);
         }
     }
 
@@ -77,26 +109,37 @@ const FoodItemCard = ({ food, toggleAvailability, setToast, fetchFoodItems, cate
                 {/* Toggle Button */}
                 <button
                     onClick={() => toggleAvailability(food.id)}
-                    aria-pressed={food.available}
-                    className={`relative w-11 h-6 flex items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                        food.available ? "bg-green-500 shadow-lg shadow-green-300" : "bg-red-500 shadow-lg shadow-red-300"
+                    aria-pressed={isAvailable}
+                    className={`relative w-11 h-6 flex items-center justify-start rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
+                        isAvailable
+                            ? isToggling
+                                ? "bg-green-300"
+                                : "bg-green-500 shadow-green-300"
+                            : isToggling
+                                ? "bg-red-300"
+                                : "bg-red-500 shadow-red-300"
                     }`}
                 >
                     {/* Toggle Knob */}
-                    <span
-                        className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-md ${
-                            food.available ? "translate-x-5" : "translate-x-0"
-                        }`}
-                    ></span>
+                    {isToggling && (
+                        <span className="absolute left-1/2 top-1/2 w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin transform -translate-x-1/2 -translate-y-1/2 z-10" />
+                    )}
+                    {!isToggling && (
+                        <span
+                            className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 ease-in-out ${
+                                isAvailable ? "translate-x-5" : "translate-x-0"
+                            }`}
+                        />
+                    )}
                 </button>
 
                 {/* Status Text */}
                 <span
                     className={`text-sm font-medium transition-colors duration-300 ${
-                        food.available ? "text-green-700" : "text-red-700"
+                        isAvailable ? "text-green-700" : "text-red-700"
                     }`}
                 >
-                    {food.available ? "In stock" : "Out of stock"}
+                    {isAvailable ? "In stock" : "Out of stock"}
                 </span>
             </div>
 
@@ -111,11 +154,16 @@ const FoodItemCard = ({ food, toggleAvailability, setToast, fetchFoodItems, cate
                     <Pencil size={16} />
                 </button>
                 <button
-                    className="p-2 rounded-md text-red-600 hover:bg-red-200"
+                    className="p-2 rounded-md text-red-600 hover:bg-red-200 disabled:opacity-50"
                     onClick={handleDelete}
+                    disabled={deleteLoading}
                     aria-label="Delete item"
                 >
-                    <Trash2 size={16} />
+                    {deleteLoading ? (
+                        <span className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin inline-block" />
+                    ) : (
+                        <Trash2 size={16} />
+                    )}
                 </button>
             </div>
 
@@ -128,6 +176,9 @@ const FoodItemCard = ({ food, toggleAvailability, setToast, fetchFoodItems, cate
                 handleSubmit={handleSubmit}
                 setToast={setToast}
                 categories={categories}
+                buttonLoading={buttonLoading}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
             />
         </div>
     );

@@ -69,6 +69,11 @@ public class RestaurantController {
         return new ResponseEntity<>(response, response.getStatus());
     }
 
+    @GetMapping("/dashboard")
+    public ResponseEntity<Map<String , ?>> getDashboard(@RequestHeader("Authorization") String token){
+        return ResponseEntity.ok(restaurantService.getDashboard(token));
+    }
+
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getCategories(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(restaurantService.getRestaurantCategories(token));

@@ -92,6 +92,34 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
+    public Map<String, Object> getDashboard(String token) {
+        Restaurant restaurant = getRestaurantByToken(token);
+        Map<String, Object> dashboard = new LinkedHashMap<>();
+        List<OrderStatus> inProgressStatuses = List.of(
+                OrderStatus.PREPARING,
+                OrderStatus.ACCEPTED,
+                OrderStatus.READY_FOR_PICKUP
+        );
+        long totalOrders = orderRepo.countByRestaurant(restaurant);
+        long completedOrders = orderRepo.countByRestaurantAndStatus(restaurant, OrderStatus.COMPLETED);
+        long pendingOrders = orderRepo.countByRestaurantAndStatus(restaurant, OrderStatus.PENDING);
+        long inProgressOrders = orderRepo.countByRestaurantAndStatusIn(restaurant, inProgressStatuses);
+        long rejectedOrders = orderRepo.countByRestaurantAndStatus(restaurant, OrderStatus.REJECTED);
+        double totalBillingAmount = orderRepo.sumTotalAmountByRestaurant(restaurant).orElse(0.0);
+        List<Integer> tablesFilled = orderRepo.findDistinctTableNumbersByRestaurantAndStatusIn(restaurant, inProgressStatuses);
+        int totalTables = restaurant.getTables();
+        dashboard.put("totalOrders", totalOrders);
+        dashboard.put("completedOrders", completedOrders);
+        dashboard.put("pendingOrders", pendingOrders);
+        dashboard.put("inProgressOrders", inProgressOrders);
+        dashboard.put("rejectedOrders", rejectedOrders);
+        dashboard.put("totalBillingAmount", totalBillingAmount);
+        dashboard.put("tablesFilled", tablesFilled);
+        dashboard.put("totalTables", totalTables);
+        return dashboard;
+    }
+
+    @Override
     public List<Category> getRestaurantCategories(String token) {
         return getRestaurantByToken(token).getCategories();
     }
@@ -252,6 +280,9 @@ public class RestaurantServiceImpl implements RestaurantService {
         }
         SubCategory subCategory = subCategoryRepo.findById(subCategoryId)
                         .orElseThrow(() -> new RuntimeException("SubCategory not found"));
+        if(food.getMenuPrice() <= 0 || food.getOfferPrice() <= 0){
+            throw new RuntimeException("Price must be greater than 0");
+        }
         food.setSubCategory(subCategory);
         food.setRestaurant(restaurant);
         foodRepo.save(food);
@@ -355,7 +386,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public List<Order> getOrdersByRestaurant(String token) {
-        return orderRepo.findByRestaurant(getRestaurantByToken(token));
+        return orderRepo.findByRestaurantOrderByCreatedAtDesc(getRestaurantByToken(token));
     }
 
     @Override

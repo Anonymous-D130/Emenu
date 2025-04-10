@@ -1,20 +1,19 @@
 import {Routes, Route, useNavigate, useLocation} from "react-router-dom";
-import Dashboard from "../pages/Dashboard";
-import Orders from "../pages/Orders";
-import Menu from "../pages/Menu";
-import QRCode from "../pages/QRCode";
-import Settings from "../pages/Settings";
-import HelpCentre from "../pages/HelpCentre";
+import Dashboard from "../components/Dashboard.jsx";
+import Orders from "../pages/Orders.jsx";
+import Menu from "../pages/Menu.jsx";
+import QRCode from "../pages/QRCode.jsx";
+import Settings from "../pages/Settings.jsx";
 import NotFound from "../pages/NotFound.jsx";
 import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
 import CreateRestaurant from "../pages/CreateRestaurant.jsx";
-import Subscription from "./Subscription.jsx";
+import Subscription from "../pages/Subscription.jsx";
 import {useEffect} from "react";
 import axios from "axios";
-import {FETCH_USER_SUBSCRIPTION, IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
+import {IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
 import OfferZone from "../pages/OfferZone.jsx";
-import ExpiredSubscription from "./ExpiredSubscription.jsx";
+import ExpiredSubscription from "../components/ExpiredSubscription.jsx";
 
 const RestaurantRoutes = () => {
     const token = localStorage.getItem("token");
@@ -55,7 +54,6 @@ const RestaurantRoutes = () => {
                 <Route path="/qr-code" element={<QRCode />} />
                 <Route path="/subscription" element={<Subscription />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/help" element={<HelpCentre />} />
                 <Route path="/expired" element={<ExpiredSubscription />} />
                 <Route path="/*" element={<NotFound />} />
             </Routes>

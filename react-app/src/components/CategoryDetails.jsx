@@ -1,28 +1,10 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import FoodItemCard from "./FoodItemCard.jsx";
-import axios from "axios";
-import {FETCH_SUBCATEGORY_FOOD, TOGGLE_FOOD_ITEM} from "../utils/config.js";
+import FoodItemCardSkeleton from "../skeleton/FoodItemCardSkeleton.jsx";
 
-const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemModal, setToast, categories }) => {
-    const token = localStorage.getItem("token");
-    const [foodItems, setFoodItems] = useState([]);
+const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemModal, setToast, categories, foodItems, fetchFoodItems, loading }) => {
     const [filteredFoodItems, setFilteredFoods] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
-    
-    const fetchFoodItems = useCallback(async () => {
-        if(!selectedSubCategory) return;
-        try {
-            const response = await axios.get(FETCH_SUBCATEGORY_FOOD(selectedSubCategory.id),{headers:{Authorization: `Bearer ${token}`}});
-            setFoodItems(response.data);
-        } catch (error) {
-            console.error("Error fetching food Items", error);
-            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
-        }
-    }, [selectedSubCategory, setToast, token])
-
-    useEffect(() => {
-        fetchFoodItems().then(f => f);
-    }, [fetchFoodItems]);
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -35,17 +17,6 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemMod
             setFilteredFoods(filtered);
         }
     }, [searchQuery, foodItems]);
-
-    const toggleAvailability = async (id) => {
-        try {
-            const response = await axios.put(TOGGLE_FOOD_ITEM(id),{}, {headers: { Authorization: `Bearer ${token}` }});
-            setToast({ message: response?.data.message, type: "success" });
-            fetchFoodItems().then(f => f);
-        } catch (error) {
-            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
-            console.error("Error changing availability", error);
-        }
-    }
 
     return (
         <div className="w-full p-4">
@@ -78,21 +49,24 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemMod
                         <span className="absolute left-3 top-3 text-gray-400 text-lg">🔍</span>
                     </div>
                     <div className="w-full">
-                        {filteredFoodItems.length > 0 ? filteredFoodItems.map((food) => (
-                            <FoodItemCard
-                                key={food.id}
-                                food={food}
-                                toggleAvailability={toggleAvailability}
-                                setToast={setToast}
-                                fetchFoodItems={fetchFoodItems}
-                                categories={categories}
-                            />
-                        )) : (
+                        {loading ? (
+                            // 🦴 Show 4 skeletons while loading
+                            Array.from({ length: 2 }).map((_, idx) => <FoodItemCardSkeleton key={idx} />)
+                        ) : filteredFoodItems.length > 0 ? (
+                            filteredFoodItems.map((food) => (
+                                <FoodItemCard
+                                    key={food.id}
+                                    food={food}
+                                    setToast={setToast}
+                                    fetchFoodItems={fetchFoodItems}
+                                    categories={categories}
+                                />
+                            ))
+                        ) : (
                             <div className="flex justify-center items-center text-gray-500 text-lg py-4">
                                 No food items available
                             </div>
-                        )
-                        }
+                        )}
                     </div>
                 </>
             ) : (

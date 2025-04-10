@@ -1,6 +1,7 @@
 package com.trulydesignfirm.emenu.controller;
 
 import com.trulydesignfirm.emenu.enums.MeatType;
+import com.trulydesignfirm.emenu.enums.OrderStatus;
 import com.trulydesignfirm.emenu.enums.ServingInfo;
 import com.trulydesignfirm.emenu.enums.Tag;
 import com.trulydesignfirm.emenu.model.SubscriptionPlan;
@@ -39,5 +40,10 @@ public class PublicController {
     @GetMapping("/serving-info")
     public ResponseEntity<List<ServingInfo>> getServingInfo() {
         return ResponseEntity.ok(Arrays.asList(ServingInfo.values()));
+    }
+
+    @GetMapping("/order-status")
+    public ResponseEntity<List<OrderStatus>> getOrderStatus() {
+        return ResponseEntity.ok(Arrays.asList(OrderStatus.values()));
     }
 }

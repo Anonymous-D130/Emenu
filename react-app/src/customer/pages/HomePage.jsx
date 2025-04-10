@@ -117,7 +117,7 @@ const HomePage = () => {
                 <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
             </div>}
             {/* Header Section */}
-            <div className="w-full bg-white text-black pt-10 flex flex-col items-center rounded-b-3xl z-5">
+            <div className="w-full bg-white text-black pt-5 flex flex-col items-center rounded-b-3xl z-5">
                 <h2 className="text-2xl font-semibold">Welcome to</h2>
                 <div className="bg-yellow-400 px-4 w-full flex items-center justify-center rounded-b-3xl">
                     <img src={restaurant?.logo} alt="logo" className="h-35 max-w-screen" />
@@ -127,9 +127,9 @@ const HomePage = () => {
             {/* Main Image and Video Section */}
             <div className="flex-1 w-full flex flex-col items-center justify-end relative">
                 <img
-                    src={restaurant?.welcomeScreen} // Replace with actual image path
+                    src={restaurant?.welcomeScreen}
                     alt="Delicious Food"
-                    className="w-full h-full object-cover absolute -top-5 left-0 z-1"
+                    className="w-full h-[calc(100vh-150px)] object-cover absolute overflow-hidden -top-10 left-0 z-[1]"
                 />
 
                 <div className="z-10 flex flex-col items-center mb-30">

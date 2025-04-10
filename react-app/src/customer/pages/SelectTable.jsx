@@ -1,116 +1,110 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {Check} from "lucide-react";
-import { IoChevronBackOutline } from "react-icons/io5";
-import {useNavigate, useSearchParams} from "react-router-dom";
-import axios from "axios";
-import {GET_RESTAURANT_TABLES} from "../../utils/config.js";
-import {initialToastState} from "../../utils/Utility.js";
-import ErrorPage from "./ErrorPage.jsx";
+import { useState } from "react";
+import { Check } from "lucide-react"; // Or any other icon library you prefer
 
-const SelectTable = () => {
-    const [selectedTable, setSelectedTable] = useState(null);
-    const [totalTables, setTotalTables] = useState(0);
+const Dashboard = () => {
+    const [selectedTable, setSelectedTable] = useState(4);
 
-    const [searchParams] = useSearchParams();
-    const restaurantId = searchParams.get('restaurantId');
-    const tableNumber = searchParams.get('tableNumber');
-    const logo = searchParams.get('logo');
-    const navigate = useNavigate();
-    const [toast, setToast] = useState(initialToastState);
-    const [loading, setLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
-
-    const fetchTables = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(GET_RESTAURANT_TABLES(restaurantId));
-            setTotalTables(response.data);
-            setHasError(false);
-        } catch (error) {
-            console.error("Error fetching tables: ", error);
-            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
-            setHasError(true);
-        } finally {
-            setLoading(false);
-        }
-    }, [restaurantId]);
-    
-    useEffect(() => {
-        fetchTables().then(f => f);
-    }, [fetchTables])
-
-    const showErrorPage = !restaurantId || !tableNumber || hasError || !logo;
-
-    useEffect(() => {
-        if(!showErrorPage) setSelectedTable(tableNumber);
-    }, [showErrorPage, tableNumber]);
-
-    if (showErrorPage) {
-        return (
-            <ErrorPage
-                loading={loading}
-                toast={toast}
-                setToast={setToast}
-            />
-        );
-    }
-
-    const handleTableSelect = (tableNum) => {
-        setSelectedTable(tableNum);
-        setTimeout(() => navigate(`/customer/order/restaurant/food?restaurantId=${restaurantId}&tableNumber=${tableNum}&logo=${logo}`), 200);
+    const dummyData = {
+        totalOrders: 24,
+        completedOrders: 20,
+        pendingOrders: 2,
+        inProgressOrders: 2,
+        totalBillingAmount: 20000,
     };
 
     return (
-        <div className="min-h-screen bg-white p-4 w-full">
-            {/* Header */}
-            <div className="flex items-center gap-2 bg-[#F5F5F5] p-2 mb-10 rounded-lg">
-                <button
-                    onClick={() => navigate(`/customer/order/restaurant?restaurantId=${restaurantId}&tableNumber=${tableNumber}`)}
-                    className="text-xl font-bold border border-white bg-white p-2 rounded-full cursor-pointer"
-                >
-                    <IoChevronBackOutline className="text-2xl"/>
-                </button>
-                <h2 className="text-xl font-bold">Select Table</h2>
-            </div>
+        <div className="min-h-screen bg-gray-100 p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Tables Section */}
+                <div className="col-span-1 bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4">Tables</h2>
+                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                            <span className="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span>
+                            Tables Filled (1)
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <span className="w-3 h-3 rounded-full bg-gray-300 inline-block"></span>
+                            Tables Available (11)
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                        {Array.from({ length: 12 }).map((_, index) => {
+                            const tableNumber = index + 1;
+                            const isSelected = tableNumber === selectedTable;
 
-            {/* Grid of Tables */}
-            <div className="grid grid-cols-3 gap-4">
-                {Array.from({ length: totalTables }, (_, i) => (i + 1).toString()).map((tableNum) => {
-                    const isSelected = selectedTable === tableNum;
-                    return (
-                        <button
-                            key={`${tableNum}`}
-                            onClick={() => handleTableSelect(tableNum)}
-                            className={`relative cursor-pointer flex items-center justify-center h-24 rounded-xl transition-all
-                                ${isSelected ? "bg-[#FFC300] border-[3px] border-black" : "bg-[#F5F5F5]"}`}
-                        >
-                            {/* Table Icon */}
-                            <div className="relative w-12 h-12 bg-white rounded-sm border border-gray-600 flex items-center justify-center z-2">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center 
-                                ${isSelected ? "bg-yellow-400 text-black" : "bg-[#d9d9d9] text-gray-700"}`}>
-                                    <span className="font-bold text-lg">{tableNum}</span>
+                            return (
+                                <div
+                                    key={tableNumber}
+                                    onClick={() => setSelectedTable(tableNumber)}
+                                    className={`relative w-full aspect-square flex items-center justify-center rounded-xl border border-gray-300 cursor-pointer transition-all duration-200 ${
+                                        isSelected
+                                            ? "bg-yellow-400 border-[3px] border-black"
+                                            : "bg-gray-100 hover:bg-gray-200"
+                                    }`}
+                                >
+                                    <span className="text-xl font-semibold">{tableNumber}</span>
+                                    {isSelected && (
+                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-[2px] border-2 border-white">
+                                            <Check size={14} color="white" />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Orders + Billing Section */}
+                <div className="col-span-2 grid grid-cols-3 md:grid-cols-2 gap-6">
+                    {/* Orders Card */}
+                    <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4">Orders</h2>
+                            <div className="text-5xl font-bold mb-2">
+                                {dummyData.totalOrders}
+                            </div>
+                            <div className="text-sm text-gray-500 border-b pb-2 mb-4">
+                                Total Orders
+                            </div>
+                            <div className="flex justify-between text-center text-lg">
+                                <div>
+                                    <div className="font-bold">
+                                        {dummyData.completedOrders}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Completed</div>
+                                </div>
+                                <div>
+                                    <div className="font-bold">{dummyData.pendingOrders}</div>
+                                    <div className="text-sm text-gray-600">Pending</div>
+                                </div>
+                                <div>
+                                    <div className="font-bold">
+                                        {dummyData.inProgressOrders}
+                                    </div>
+                                    <div className="text-sm text-gray-600">In Progress</div>
                                 </div>
                             </div>
-                            <div className="z-1">
-                                {/* Mini seats around (optional, basic shape) */}
-                                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
-                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
-                                <div className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
-                            </div>
+                        </div>
+                    </div>
 
-                            {/* Checkmark */}
-                            {isSelected && (
-                                <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-[4px] border-2 border-white">
-                                    <Check size={14} color="white" />
-                                </div>
-                            )}
-                        </button>
-                    );
-                })}
+                    {/* Billing Card */}
+                    <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4">Total Amount</h2>
+                            <div className="text-5xl font-bold text-green-600 mb-2">
+                                ₹{" "}
+                                {dummyData.totalBillingAmount.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                })}
+                            </div>
+                        </div>
+                        <div className="text-sm text-gray-500">Total Billing Amount</div>
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
 
-export default SelectTable;
+export default Dashboard;

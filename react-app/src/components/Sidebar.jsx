@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiShoppingCart, FiList, FiTag, FiGrid, FiSettings, FiHelpCircle } from "react-icons/fi";
+import { FiHome, FiShoppingCart, FiList, FiTag, FiGrid, FiSettings } from "react-icons/fi";
 import { MdSubscriptions } from "react-icons/md";
 import { IoClose, IoOptions } from "react-icons/io5";
 
@@ -17,7 +17,6 @@ const Sidebar = () => {
         { name: "QR Code", icon: <FiGrid size={20} />, path: "/restaurant/qr-code" },
         { name: "Subscription", icon: <MdSubscriptions size={20} />, path: "/restaurant/subscription" },
         { name: "Settings", icon: <FiSettings size={20} />, path: "/restaurant/settings" },
-        { name: "Help Centre", icon: <FiHelpCircle size={20} />, path: "/restaurant/help" },
     ];
 
     const handleNavigation = (path) => {

@@ -368,6 +368,7 @@ const Food = () => {
             <OrderPlacedModal
                 open={showModal}
                 ringBell={ringBell}
+                loading={loading}
                 bellLoading={bellLoading}
                 handleClose={() => setShowModal(false)}
                 orders={orders}

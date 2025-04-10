@@ -103,7 +103,7 @@ const OrderModal = ({ isOpen, onClose, tableNumber, order, updateOrderStatus, ca
                             <>
                                 <button
                                     disabled
-                                    className="w-full py-2 rounded-xl bg-green-300 text-white font-bold tracking-wider hover:bg-green-600"
+                                    className={`w-full py-2 rounded-xl cursor-not-allowed text-white font-bold tracking-wider ${order?.status === "REJECTED" ? "bg-red-300" : "bg-green-300"}`}
                                 >
                                     {order?.status}
                                 </button>

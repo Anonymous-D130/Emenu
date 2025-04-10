@@ -103,7 +103,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<Order> getOrders(UUID customerId, Restaurant restaurant) {
-        return orderRepo.findOrdersByRestaurantAndCustomer(restaurant, getCustomerById(customerId));
+        return orderRepo.findOrdersByRestaurantAndCustomerOrderByCreatedAtDesc(restaurant, getCustomerById(customerId));
     }
 
     @Override

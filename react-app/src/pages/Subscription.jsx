@@ -36,7 +36,7 @@ const Subscription = () => {
     const token = localStorage.getItem("token");
     const [subscription, setSubscription] = useState(initialSubscriptionState);
     const [plans, setPlans] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(initialToastState);
 
     const fetchPlans = useCallback(async () => {
@@ -117,7 +117,7 @@ const Subscription = () => {
                             }`}
                         >
                             {/* Plan Header */}
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                                 <div>
                                     <h3 className="text-2xl font-bold text-gray-900">
                                         {subscription.plan?.title}

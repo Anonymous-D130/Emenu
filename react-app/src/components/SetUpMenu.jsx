@@ -1,11 +1,17 @@
 import React, {useCallback, useEffect, useState} from "react";
 import CategoryList from "./CategoryList";
 import CategoryDetails from "./CategoryDetails";
-import AddCategoryModal from "./AddCategoryModal";
-import AddSubCategoryModal from "./AddSubCategoryModal";
-import AddItemModal from "./AddItemModal.jsx";
+import AddCategoryModal from "../modals/AddCategoryModal.jsx";
+import AddSubCategoryModal from "../modals/AddSubCategoryModal.jsx";
+import AddItemModal from "../modals/AddItemModal.jsx";
 import axios from "axios";
-import {ADD_CATEGORY, FETCH_CATEGORIES, ADD_SUBCATEGORY, ADD_FOOD_ITEM} from "../utils/config.js";
+import {
+    ADD_CATEGORY,
+    FETCH_CATEGORIES,
+    ADD_SUBCATEGORY,
+    ADD_FOOD_ITEM,
+    FETCH_SUBCATEGORY_FOOD
+} from "../utils/config.js";
 import {validateFoodForm} from "../utils/Utility.js";
 
 const initialState = {
@@ -43,7 +49,10 @@ const SetUpMenu = ({ setToast }) => {
     const [categoryName, setCategoryName] = useState("");
     const [subCategory, setSubCategory] = useState("");
     const [loading, setLoading] = useState(false);
+    const [foodLoading, setFoodLoading] = useState(false);
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [imagePreview, setImagePreview] = useState("");
+    const [foodItems, setFoodItems] = useState([]);
     const [subCategoryParent, setSubCategoryParent] = useState({
         name: "",
         subCategories: []
@@ -57,15 +66,32 @@ const SetUpMenu = ({ setToast }) => {
             setCategories(response.data);
         } catch (error) {
             console.error("Error fetching categories:", error);
-            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setLoading(false);
         }
-    }, [setToast, token]);
+    }, [token]);
 
     useEffect(() => {
         fetchCategories().then(r => r);
     }, [fetchCategories]);
+
+    const fetchFoodItems = useCallback(async () => {
+        if(!selectedSubCategory) return;
+        setFoodLoading(true);
+        try {
+            const response = await axios.get(FETCH_SUBCATEGORY_FOOD(selectedSubCategory.id),{headers:{Authorization: `Bearer ${token}`}});
+            setFoodItems(response.data);
+        } catch (error) {
+            console.error("Error fetching food Items", error);
+            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
+        } finally {
+            setFoodLoading(false);
+        }
+    }, [selectedSubCategory, setToast, token])
+
+    useEffect(() => {
+        fetchFoodItems().then(f => f);
+    }, [fetchFoodItems]);
 
 
     // Open & Close Modals
@@ -144,9 +170,10 @@ const SetUpMenu = ({ setToast }) => {
         try {
             const response = await axios.post(ADD_FOOD_ITEM(foodItem.subCategory?.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
             setToast({ message: response?.data.message, type: "success" });
-            fetchCategories().then(r => r);
-            closeAddItemModal();
+            fetchFoodItems().then(f => f);
             setFoodItem(initialState);
+            setImagePreview("");
+            closeAddItemModal();
         } catch (error) {
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
             console.log("Error adding food item", error);
@@ -193,9 +220,11 @@ const SetUpMenu = ({ setToast }) => {
                         selectedCategory={selectedCategory}
                         selectedSubCategory={selectedSubCategory}
                         showAddItemModal={showAddItemModal}
-                        closeAddItemModal={closeAddItemModal}
                         setToast={setToast}
                         categories={categories}
+                        fetchFoodItems={fetchFoodItems}
+                        foodItems={foodItems}
+                        loading={foodLoading}
                     />
                 </div>
 
@@ -221,7 +250,6 @@ const SetUpMenu = ({ setToast }) => {
             />
 
             <AddItemModal
-                buttonLoading={buttonLoading}
                 showItemModal={showItemModal}
                 closeAddItemModal={closeAddItemModal}
                 foodItem={foodItem}
@@ -229,6 +257,9 @@ const SetUpMenu = ({ setToast }) => {
                 handleSubmit={handleSubmit}
                 setToast={setToast}
                 categories={categories}
+                buttonLoading={buttonLoading}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
             />
         </div>
     );

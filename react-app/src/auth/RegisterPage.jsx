@@ -5,6 +5,7 @@ import { features } from "../utils/features.jsx";
 import axios from "axios";
 import {GET_OTP, OAUTH_URL, REGISTER_URL} from "../utils/config.js";
 import Toast from "../utils/Toast.jsx";
+import {Loader} from "lucide-react";
 
 const RegisterPage = () => {
     const [name, setName] = useState("");
@@ -198,8 +199,14 @@ const RegisterPage = () => {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full mt-4 py-2 font-semibold bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                                    CONTINUE
+                                    disabled={loading || !name || !email || !password}
+                                    className={`w-full mt-4 py-2 font-semibold text-white rounded-lg ${
+                                        loading || !name || !email || !password
+                                            ? "bg-purple-300 cursor-not-allowed"
+                                            : "bg-purple-600 hover:bg-purple-700"
+                                    }`}
+                                >
+                                    {loading ? <Loader/> : "CONTINUE"}
                                 </button>
                             </form>
                             <p className="text-center mt-6 text-gray-700 font-bold">Already have an account?</p>

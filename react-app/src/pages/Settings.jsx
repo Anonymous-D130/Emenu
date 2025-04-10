@@ -61,11 +61,14 @@ const Settings = () => {
 
     return (
         <main className="w-full p-4 md:p-10 lg:p-12 mt-45 md:mt-15 relative">
-            {loading && <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-            </div>}
-            {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
-            <SetUpRestaurant restaurant={restaurant} setRestaurant={setRestaurant} setToast={setToast} />
+            {loading &&
+                <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div
+                        className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                </div>}
+            {toast.message &&
+                <Toast message={toast.message} type={toast.type} onClose={() => setToast({message: "", type: ""})}/>}
+            <SetUpRestaurant restaurant={restaurant} setRestaurant={setRestaurant} setToast={setToast}/>
             <div className="w-full p-4 flex bg-[#fff] shadow-2xl rounded-2xl rounded-t-none">
                 <button
                     onClick={handleUpdateRestaurant}

@@ -1,8 +1,23 @@
 import React, {useCallback, useEffect, useState} from "react";
 import { FaCheckCircle, FaUpload, FaImage } from "react-icons/fa";
-import example from "../assets/example_logo.png";
+import example from "../assets/img.png";
 import {CLOUD_NAME, FRONTEND_URL, UPLOAD_PRESET} from "../utils/config.js";
 import axios from "axios";
+
+const PhoneMockup = ({ imageUrl }) => {
+    return (
+        <div className="flex justify-center items-start bg-transparent">
+            <div className="relative w-[250px] h-[180px] overflow-hidden rounded-t-[40px] shadow-2xl border-[6px] border-gray-700 bg-black">
+                <div className="w-full bg-white text-black flex flex-col items-center rounded-b-3xl z-5">
+                    <h2 className="text-sm font-semibold mt-2 p-1">Welcome to</h2>
+                    <div className="bg-yellow-400 px-4 w-full flex items-center justify-center rounded-b-3xl">
+                        <img src={imageUrl} alt="logo" className="h-25 max-w-screen overflow-hidden" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
     const [editingSlug, setEditingSlug] = useState(false);
@@ -145,9 +160,11 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                     <div>
                         <label className="md:pl-8 block text-sm font-medium text-gray-700">{restaurant.logo ?"Your logo" : "Example Logo"}</label>
                         <div className="p-4 rounded-lg flex items-center">
-                            {restaurant.logo ? <img src={restaurant.logo} alt="Logo Preview" className="h-40 w-auto" />
+                            {restaurant.logo ?
+                                <PhoneMockup imageUrl={restaurant.logo} />
                                 :
-                            <img src={`${example}`} alt="Example Logo" className="h-40 w-auto" />}
+                            // <img src={`${example}`} alt="Example Logo" className="h-40 w-auto" />
+                            <PhoneMockup imageUrl={example} />}
                         </div>
                     </div>
                 </div>

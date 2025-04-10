@@ -12,9 +12,8 @@ import {
 import axios from "axios";
 import {formatEnumString} from "../utils/Utility.js";
 
-const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem, handleSubmit, setToast, categories, buttonLoading }) => {
-    const [imagePreview, setImagePreview] = useState(foodItem.imageUrl);
-    const [uploading, setUploading] = useState({ image: false });
+const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem, handleSubmit, setToast, categories, buttonLoading, imagePreview, setImagePreview }) => {
+    const [uploading, setUploading] = useState({ imageUrl: false });
     const [subCategories, setSubCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [meatTypes, setMeatTypes] = useState([]);
@@ -63,12 +62,12 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
     }, [fetchMeatTypes, fetchServingInfo, fetchTags]);
 
     useEffect(() => {
-        if(foodItem.category){
-            setSelectedCategory(foodItem.category);
+        if(foodItem?.category){
+            setSelectedCategory(foodItem?.category);
         } else {
             setSelectedCategory(null);
         }
-    }, [foodItem.category]);
+    }, [foodItem?.category]);
 
     useEffect(() => {
         if (selectedCategory && selectedCategory.subCategories) {
@@ -144,7 +143,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
         } finally {
             setUploading((prev) => ({ ...prev, [key]: false }));
         }
-    }, [setFoodItem]);
+    }, [setFoodItem, setImagePreview]);
 
     return (
         <Modal open={showItemModal} onClose={closeAddItemModal}>
@@ -168,7 +167,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <input
                             type="text"
                             name="name"
-                            value={foodItem.name}
+                            value={foodItem?.name}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="Eg. Desserts"
@@ -180,7 +179,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                     <div className="col-span-2 sm:col-span-2 sm:row-span-2">
                         <label className="font-semibold mb-2">Item Photo <span className="text-red-600">*</span></label>
                         <label className="border-dashed border-2 border-gray-300 p-2 flex flex-col items-center justify-center rounded-lg cursor-pointer hover:bg-gray-100 transition">
-                            {uploading.image ? (
+                            {uploading.imageUrl ? (
                                 <span className="flex items-center gap-2 text-sm text-gray-600 italic p-8">
                                   <svg className="animate-spin h-4 w-4 text-gray-500" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -206,7 +205,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <input
                             type="number"
                             name="menuPrice"
-                            value={foodItem.menuPrice}
+                            value={foodItem?.menuPrice}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="Enter MRP Price"
@@ -218,7 +217,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <input
                             type="number"
                             name="offerPrice"
-                            value={foodItem.offerPrice}
+                            value={foodItem?.offerPrice}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="Enter Offer Price"
@@ -230,7 +229,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <label className="font-semibold">Item Description</label>
                         <textarea
                             name="description"
-                            value={foodItem.description}
+                            value={foodItem?.description}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="Enter item description"
@@ -251,7 +250,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                                         type="radio"
                                         name="foodType"
                                         value={type.value}
-                                        checked={foodItem.foodType === type.value}
+                                        checked={foodItem?.foodType === type.value}
                                         onChange={handleChange}
                                     />
                                     {type.name}
@@ -267,7 +266,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                             name="meatType"
                             value={foodItem?.meatType}
                             onChange={handleChange}
-                            disabled={foodItem.foodType !== "NON_VEG"}
+                            disabled={foodItem?.foodType !== "NON_VEG"}
                             className={`w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none`}
                         >
                             <option value={null} disabled hidden>Select</option>
@@ -282,7 +281,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <label className="font-semibold block mb-1">Menu Category <span className="text-red-600">*</span></label>
                         <select
                             name="category"
-                            value={foodItem.category?.id || ""}
+                            value={foodItem?.category?.id || ""}
                             onChange={(e) => {
                                 const category = categories.find(cat => cat.id === e.target.value);
                                 setSelectedCategory(category);
@@ -308,7 +307,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <label className="font-semibold block mb-1">Sub-Category</label>
                         <select
                             name="subCategory"
-                            value={foodItem.subCategory?.id || ""}
+                            value={foodItem?.subCategory?.id || ""}
                             onChange={(e) => {
                                 const selectedSub = subCategories?.find(
                                     sub => sub.id === e.target.value
@@ -335,7 +334,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <label className="font-semibold block mb-1">Serving Info</label>
                         <select
                             name="servingInfo"
-                            value={foodItem.servingInfo}
+                            value={foodItem?.servingInfo}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                         >
@@ -380,7 +379,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                                         type="checkbox"
                                         name="tag"
                                         value={tag}
-                                        checked={foodItem.tag?.includes(tag)}
+                                        checked={foodItem?.tag?.includes(tag)}
                                         onChange={handleChange}
                                         className="accent-purple-600 size-4"
                                     />
@@ -394,7 +393,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                     <div className="col-span-2 md:col-span-3">
                         <label className="font-semibold block mb-1">Nutritional Info (per serving)</label>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {Object.keys(foodItem.nutritionInfo)
+                            {Object.keys(foodItem?.nutritionInfo)
                                 .map((nutrient) => (
                                     <div key={nutrient}>
                                         <label className="text-sm text-gray-700 block mb-1 capitalize">
@@ -404,13 +403,13 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                                             <input
                                                 type="number"
                                                 name={`nutritionInfo.${nutrient}.value`}
-                                                value={foodItem.nutritionInfo[nutrient]?.value}
+                                                value={foodItem?.nutritionInfo[nutrient]?.value}
                                                 onChange={handleNutritionChange}
                                                 className="w-full p-2 outline-none"
                                             />
                                             <select
                                                 name={`nutritionInfo.${nutrient}.unit`}
-                                                value={foodItem.nutritionInfo[nutrient]?.unit}
+                                                value={foodItem?.nutritionInfo[nutrient]?.unit}
                                                 onChange={handleNutritionChange}
                                                 className="absolute right-0 bg-transparent px-2 text-gray-700 cursor-pointer focus:outline-none"
                                             >
