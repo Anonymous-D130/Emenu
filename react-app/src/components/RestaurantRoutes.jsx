@@ -22,41 +22,28 @@ const RestaurantRoutes = () => {
     const location = useLocation();
 
     useEffect(() => {
-        const fetchSubscription = async () => {
+        const fetchSubscriptionStatus = async () => {
             try {
-                const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`}});
-                if (!response.data) navigate("/restaurant/expired");
-            } catch (error) {
-                console.error("Error while fetching: ", error);
-            }
-        };
-        fetchSubscription().then(r => r);
-    }, [token, navigate]);
-
-    useEffect(() => {
-
-        const fetchSubscription = async () => {
-            try {
-                const response = await axios.get(FETCH_USER_SUBSCRIPTION, {headers: {Authorization: `Bearer ${token}`}});
-                console.log(
-                    response.data
-                )
-                if (response.status === 200 && location.pathname === "/restaurant") {
+                const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`},});
+                const status = response.data;
+                if (status === "NEW") {
+                    navigate("/restaurant");
+                } else if (status === "ACTIVE" && location.pathname === "/restaurant") {
                     navigate("/restaurant/dashboard");
+                } else if (status === "EXPIRED") {
+                    navigate("/restaurant/expired");
+                } else {
+                    console.warn("Unexpected status:", status);
                 }
             } catch (error) {
-                console.error("Error while fetching: ", error);
-                if(error.response.status === 500) {
-                    navigate("/restaurant/expired");
-                }
+                console.error("Error while fetching subscription status:", error);
             }
         };
-
-        fetchSubscription().then(r => r);
+        fetchSubscriptionStatus().then(s => s);
     }, [token, navigate, location.pathname]);
 
     return (
-        <div className="flex min-h-screen bg-gray-100 justify-between">
+        <div className="flex min-h-screen bg-gray-100 justify-center">
             <Sidebar />
             <Header />
             <Routes>

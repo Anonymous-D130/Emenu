@@ -3,6 +3,7 @@ package com.trulydesignfirm.emenu.service.impl;
 import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.dto.OrderStatusUpdate;
 import com.trulydesignfirm.emenu.enums.OrderStatus;
+import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
 import com.trulydesignfirm.emenu.model.*;
 import com.trulydesignfirm.emenu.repository.*;
 import com.trulydesignfirm.emenu.service.QrCodeService;
@@ -49,8 +50,13 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public boolean isSubscritptionActive(String token) {
-        return !utility.getUserFromToken(token).getSubscription().isExpired();
+    public SubscriptionStatus getSubscriptionStatus(String token) {
+        LoginUser user = utility.getUserFromToken(token);
+        Subscription subscription = user.getSubscription();
+        if (subscription == null) {
+            return SubscriptionStatus.NEW;
+        }
+        return subscription.isExpired() ? SubscriptionStatus.EXPIRED : SubscriptionStatus.ACTIVE;
     }
 
     @Override

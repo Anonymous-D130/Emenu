@@ -43,7 +43,7 @@ export const GENERATE_QR = (tables) => `${BACKEND_URL}/api/restaurants/generate-
 export const FETCH_ORDERS = `${BACKEND_URL}/api/restaurants/orders`;
 export const UPDATE_ORDER_STATUS = (orderId, orderStatus) => `${BACKEND_URL}/api/restaurants/order/${orderId}?orderStatus=${orderStatus}`;
 export const CANCEL_ORDER = (orderId) => `${BACKEND_URL}/api/restaurants/order/${orderId}`;
-export const IS_SUBSCRIPTION_ACTIVE = `${BACKEND_URL}/api/restaurants/active-subscription`;
+export const IS_SUBSCRIPTION_ACTIVE = `${BACKEND_URL}/api/restaurants/subscription-status`;
 
 //Payment Routes
 export const FETCH_PLANS = `${BACKEND_URL}/api/restaurants/plans`;

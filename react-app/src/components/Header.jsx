@@ -35,11 +35,14 @@ const Header = () => {
     
     const toggleRestaurant = async () => {
         setLoading(true);
+        const prevState = isOnline;
+        const newState = !isOnline;
+        setIsOnline(newState);
         try {
             const response = await axios.put(TOGGLE_RESTAURANT, {}, {headers: {Authorization: `Bearer ${token}`}});
             setToast({message: response?.data.message, type: "success"});
-            fetchRestaurant().then(r => r);
         } catch (error) {
+            setIsOnline(prevState);
             console.error("Error updating restaurant status :", error);
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
         } finally {
@@ -73,15 +76,26 @@ const Header = () => {
                     <button
                         disabled={loading}
                         onClick={toggleRestaurant}
-                        className={`relative w-11 h-6 flex items-center rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
-                            isOnline ? (loading ? "bg-green-300" : "bg-green-500 shadow-green-300") : (loading ? "bg-red-300" : "bg-red-500 shadow-red-300")
+                        className={`relative w-11 h-6 flex items-center justify-start rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
+                            isOnline
+                                ? loading
+                                    ? "bg-green-300"
+                                    : "bg-green-500 shadow-green-300"
+                                : loading
+                                    ? "bg-red-300"
+                                    : "bg-red-500 shadow-red-300"
                         }`}
                     >
-                      <span
-                          className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 ease-in-out ${
-                              isOnline ? "translate-x-5" : "translate-x-0"
-                          }`}
-                      />
+                        {loading && (
+                            <span className="absolute left-1/2 top-1/2 w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin transform -translate-x-1/2 -translate-y-1/2 z-10" />
+                        )}
+                        {!loading && (
+                            <span
+                                className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 ease-in-out ${
+                                    isOnline ? "translate-x-5" : "translate-x-0"
+                                }`}
+                            />
+                        )}
                     </button>
 
                 </div>

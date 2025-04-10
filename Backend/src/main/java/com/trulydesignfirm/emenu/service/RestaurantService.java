@@ -2,6 +2,7 @@ package com.trulydesignfirm.emenu.service;
 
 import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.enums.OrderStatus;
+import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
 import com.trulydesignfirm.emenu.model.*;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Service
 public interface RestaurantService {
     Restaurant getRestaurant(String token);
-    boolean isSubscritptionActive(String token);
+    SubscriptionStatus getSubscriptionStatus(String token);
     Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest);
     Restaurant getRestaurantById(UUID id);
     List<Category> getRestaurantCategories(String token);

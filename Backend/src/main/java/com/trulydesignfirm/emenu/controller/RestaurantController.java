@@ -2,6 +2,7 @@ package com.trulydesignfirm.emenu.controller;
 
 import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.enums.OrderStatus;
+import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
 import com.trulydesignfirm.emenu.model.*;
 import com.trulydesignfirm.emenu.service.RestaurantService;
 import com.trulydesignfirm.emenu.service.SubscriptionService;
@@ -42,9 +43,9 @@ public class RestaurantController {
         return new ResponseEntity<>(res, res.getStatus());
     }
 
-    @GetMapping("/active-subscription")
-    public ResponseEntity<Boolean> isSubscriptionActive(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(restaurantService.isSubscritptionActive(token));
+    @GetMapping("/subscription-status")
+    public ResponseEntity<SubscriptionStatus> isSubscriptionActive(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(restaurantService.getSubscriptionStatus(token));
     }
 
     @GetMapping("/get")
