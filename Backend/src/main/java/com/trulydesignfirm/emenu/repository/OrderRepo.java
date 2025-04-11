@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +18,7 @@ public interface OrderRepo extends JpaRepository<Order, UUID> {
     List<Order> findByRestaurantAndTableNumber(Restaurant restaurant, int tableNumber);
     List<Order> findByCustomer(Customer customer);
     Optional<Order> findByRestaurantAndId(Restaurant restaurant, UUID id);
-    List<Order> findOrdersByRestaurantAndCustomer(Restaurant restaurant, Customer customer);
+
     List<Order> findByRestaurantOrderByCreatedAtDesc(Restaurant restaurantByToken);
     long countByRestaurant(Restaurant restaurant);
     long countByRestaurantAndStatus(Restaurant restaurant, OrderStatus status);

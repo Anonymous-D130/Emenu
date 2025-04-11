@@ -63,6 +63,9 @@ public class RestaurantServiceImpl implements RestaurantService {
     public Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest) {
         LoginUser owner = utility.getUserFromToken(token);
         Restaurant restaurant = restaurantRepo.getRestaurantByOwner(owner).orElse(null);
+        if(restaurantRepo.existsByPageName(restaurantRequest.getPageName())){
+            throw new IllegalArgumentException("Page name already taken. Please choose another one.");
+        }
         if (restaurant == null) {
             restaurantRequest.setOwner(owner);
             restaurantRepo.save(restaurantRequest);
@@ -428,6 +431,15 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public List<Order> getOrdersByTable(String  token, int tableNumber) {
         return orderRepo.findByRestaurantAndTableNumber(getRestaurantByToken(token), tableNumber);
+    }
+
+    @Override
+    public boolean checkPageName(String token, String pageName) {
+        LoginUser owner = utility.getUserFromToken(token);
+        Optional<Restaurant> optionalRestaurant = restaurantRepo.getRestaurantByOwner(owner);
+        if (optionalRestaurant.isEmpty()) return restaurantRepo.existsByPageName(pageName);
+        Restaurant restaurant = optionalRestaurant.get();
+        return restaurantRepo.existsByPageName(pageName) && !pageName.equals(restaurant.getPageName());
     }
 
     private Restaurant getRestaurantByToken(String token) {

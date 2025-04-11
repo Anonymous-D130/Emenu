@@ -11,6 +11,7 @@ import Logout from "./auth/Logout.jsx";
 import "./App.css";
 import CustomerRoutes from "./customer/components/CustomerRoutes.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import ComingSoon from "./pages/ComingSoon.jsx";
 
 function App() {
     return (
@@ -32,6 +33,7 @@ function App() {
                         </PrivateRoute>
                     }
                 />
+                <Route path="/restaurants/*" element={<ComingSoon />} />
                 <Route path="/logout" element={<Logout/>} />
                 <Route path="/*" element={<NotFound />} />
             </Routes>

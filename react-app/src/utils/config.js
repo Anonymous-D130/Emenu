@@ -32,6 +32,7 @@ export const FETCH_USER_SUBSCRIPTION = `${BACKEND_URL}/api/user/subscription`;
 export const SEND_EVENT_DETAILS = (restaurantId) => `${BACKEND_URL}/api/user/event-details/${restaurantId}`;
 export const FETCH_RESTAURANT = `${BACKEND_URL}/api/restaurants/get`;
 export const TOGGLE_RESTAURANT = `${BACKEND_URL}/api/restaurants/toggle`;
+export const CHECK_PAGE_NAME = `${BACKEND_URL}/api/restaurants/check-page-name`;
 export const REGISTER_RESTAURANT = `${BACKEND_URL}/api/restaurants/register`;
 export const FETCH_DASHBOARD = `${BACKEND_URL}/api/restaurants/dashboard`;
 export const FETCH_CATEGORIES = `${BACKEND_URL}/api/restaurants/categories`;

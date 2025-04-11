@@ -22,7 +22,7 @@ public class Restaurant {
     @Column(nullable = false)
     private String mobile;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String pageName;
 
     @Column(nullable = false)

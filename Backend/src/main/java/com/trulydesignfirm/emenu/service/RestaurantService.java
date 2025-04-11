@@ -39,4 +39,5 @@ public interface RestaurantService {
     Response updateOrderStatus(String token, UUID orderId, OrderStatus orderStatus);
     Response cancelOrder(String token, UUID orderId);
     List<Order> getOrdersByTable(String token, int tableNumber);
+    boolean checkPageName(String token, String pageName);
 }

@@ -59,26 +59,30 @@ const CreateRestaurant = () => {
                 headers: {Authorization: `Bearer ${token}`}
             });
             setToast({ message: response.data.message, type: "success" });
+            return true;
         } catch (error) {
             console.error("Error registering restaurant:", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+            return false;
         } finally {
             setLoading(false);
         }
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentStep === 1 && !selectedPlan) {
-            setToast({ message: "Please select a subscription plan before proceeding.", type: "error" });
+            setToast({message: "Please select a subscription plan before proceeding.", type: "error"});
             return;
         }
 
-        if (currentStep === 2){
-            if(!restaurant.name || !restaurant.mobile || !restaurant.pageName || !restaurant.logo || !restaurant.welcomeScreen) {
+        if (currentStep === 2) {
+            if (!restaurant.name || !restaurant.mobile || !restaurant.pageName || !restaurant.logo || !restaurant.welcomeScreen) {
                 setToast({message: "Please fill all required restaurant details before proceeding.", type: "error"});
                 return;
             }
-            registerRestaurant().then(r => r);
+            const success = await registerRestaurant();
+            console.log(success);
+            if (!success) return;
         }
 
         setCurrentStep((prev) => Math.min(prev + 1, 4));

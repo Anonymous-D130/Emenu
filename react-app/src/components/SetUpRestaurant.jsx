@@ -1,7 +1,8 @@
 import React, {useCallback, useEffect, useState} from "react";
 import { FaCheckCircle, FaUpload, FaImage } from "react-icons/fa";
+import { IoIosCloseCircle } from "react-icons/io";
 import example from "../assets/img.png";
-import {CLOUD_NAME, FRONTEND_URL, UPLOAD_PRESET} from "../utils/config.js";
+import {CHECK_PAGE_NAME, CLOUD_NAME, FRONTEND_URL, UPLOAD_PRESET} from "../utils/config.js";
 import axios from "axios";
 
 const PhoneMockup = ({ imageUrl }) => {
@@ -20,7 +21,9 @@ const PhoneMockup = ({ imageUrl }) => {
 };
 
 const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
+    const token = localStorage.getItem("token");
     const [editingSlug, setEditingSlug] = useState(false);
+    const [isSlugTaken, setIsSlugTaken] = useState(false);
     const [uploading, setUploading] = useState({ logo: false, welcomeScreen: false });
 
     const handleChange = (e) => {
@@ -32,6 +35,28 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
         let formattedSlug = e.target.value.toLowerCase().replace(/\s+/g, "-");
         setRestaurant((prev) => ({ ...prev, pageName: formattedSlug }));
     };
+
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            const checkSlug = async () => {
+                try {
+                    const res = await axios.get(CHECK_PAGE_NAME, {
+                        headers: {Authorization: `Bearer ${token}`},
+                        params: { pageName: restaurant.pageName }
+                    });
+                    setIsSlugTaken(res.data);
+                } catch (error) {
+                    console.error("Error checking slug:", error);
+                }
+            };
+
+            if (restaurant.pageName?.length > 2) {
+                checkSlug().then(r => r);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayDebounce);
+    }, [restaurant.pageName, token]);
 
     useEffect(() => {
         setRestaurant((prev) => ({
@@ -108,26 +133,29 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                     </div>
 
                     {/* Restaurant URL */}
-                    <div className="mt-4 md:w-1/2">
-                        <label className="block text-sm font-medium text-gray-700">Restaurant URL</label>
-                        <div className="flex items-center mt-1 border-b-2 pb-2 mr-4">
-                            <span>{FRONTEND_URL}/</span>
-                            {editingSlug ? (
-                                <input
-                                    type="text"
-                                    name="pageName"
-                                    value={restaurant.pageName}
-                                    onChange={handleSlugChange}
-                                    onBlur={() => setEditingSlug(false)}
-                                    className="border-none bg-transparent focus:ring-0 w-full px-2"
-                                    autoFocus
-                                />
+                    <div className="flex items-center mt-1 border-b-2 pb-2 mr-4">
+                        <span className="hidden md:inline">{FRONTEND_URL}/restaurants/</span>
+                        {editingSlug ? (
+                            <input
+                                type="text"
+                                name="pageName"
+                                value={restaurant.pageName}
+                                onChange={handleSlugChange}
+                                onBlur={() => setEditingSlug(false)}
+                                className="border-none bg-transparent focus:ring-0 w-full px-2"
+                                autoFocus
+                            />
+                        ) : (
+                            <span className="font-semibold w-full" onClick={() => setEditingSlug(true)}>
+                                {restaurant.pageName}
+                            </span>
+                        )}
+                        <div className="flex justify-end">
+                            {isSlugTaken ? (
+                                <IoIosCloseCircle className="text-red-500 text-2xl"/>
                             ) : (
-                                <span className="font-semibold w-full" onClick={() => setEditingSlug(true)}>{restaurant.pageName}</span>
+                                <FaCheckCircle className="text-green-500 text-2xl" />
                             )}
-                            <div className="flex justify-end">
-                                <FaCheckCircle className="text-green-500 text-xl" />
-                            </div>
                         </div>
                     </div>
 

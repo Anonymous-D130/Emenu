@@ -11,4 +11,5 @@ import java.util.UUID;
 @Repository
 public interface RestaurantRepo extends JpaRepository<Restaurant, UUID> {
     Optional<Restaurant> getRestaurantByOwner(LoginUser owner);
+    boolean existsByPageName(String pageName);
 }

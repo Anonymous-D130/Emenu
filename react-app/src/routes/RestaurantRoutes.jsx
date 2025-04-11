@@ -31,8 +31,6 @@ const RestaurantRoutes = () => {
                     navigate("/restaurant/dashboard");
                 } else if (status === "EXPIRED") {
                     navigate("/restaurant/expired");
-                } else {
-                    console.warn("Unexpected status:", status);
                 }
             } catch (error) {
                 console.error("Error while fetching subscription status:", error);

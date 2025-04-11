@@ -3,7 +3,7 @@ import { FaCheck } from "react-icons/fa6";
 
 const NavigationButtons = ({ onPrevious, onNext, currentStep, handleSubmit, paymentLoading }) => {
     return (
-        <div className="fixed md:bottom-0 bottom-15 left-0 w-full bg-white shadow-md p-4 flex justify-center z-100">
+        <div className="fixed md:bottom-0 bottom-3 left-0 w-full bg-white shadow-md p-4 flex justify-center z-100">
             <div className="flex justify-between w-full md:px-60 mx-auto">
                 {/* Back Button */}
                 <button

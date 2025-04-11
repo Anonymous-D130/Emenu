@@ -63,6 +63,12 @@ public class RestaurantController {
         return new ResponseEntity<>(response, response.getStatus());
     }
 
+    @GetMapping("/check-page-name")
+    public ResponseEntity<Boolean> checkPageName(@RequestHeader("Authorization") String token, @RequestParam String pageName) {
+        boolean exists = restaurantService.checkPageName(token, pageName);
+        return ResponseEntity.ok(exists);
+    }
+
     @PutMapping("/toggle")
     public ResponseEntity<Response> toggleRestaurant(@RequestHeader("Authorization") String token){
         Response response = restaurantService.toggleActive(token);
