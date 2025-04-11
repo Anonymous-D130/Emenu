@@ -14,13 +14,11 @@ const ForgotPassword = () => {
     const [loading, setLoading] = useState(false);
     
     useEffect(() => {
-        if(success){
-            setTimeout(() => {
-                setSuccess(null);
-                navigate("/login");
-            }, 5000);
-        }
-    }, [navigate, setSuccess, success]);
+        setTimeout(() => {
+            setSuccess(null);
+            navigate("/login");
+        }, 10000);
+    }, [navigate, setSuccess]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
