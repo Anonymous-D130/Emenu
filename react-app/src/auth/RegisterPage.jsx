@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { features } from "../utils/features.jsx";
 import axios from "axios";
-import {GET_OTP, OAUTH_URL, REGISTER_URL} from "../utils/config.js";
+import {FETCH_USER_PROFILE, GET_OTP, OAUTH_URL, REGISTER_URL} from "../utils/config.js";
 import Toast from "../utils/Toast.jsx";
 import {Loader} from "lucide-react";
 
@@ -17,6 +17,28 @@ const RegisterPage = () => {
     const [timer, setTimer] = useState(60);
     const navigate = useNavigate();
     const [toast, setToast] = useState({ message: "", type: "" });
+
+    const fetchUserInfo = useCallback(async (token) => {
+        setLoading(true);
+        try {
+            const response = await axios.get(FETCH_USER_PROFILE, {headers: {Authorization: `Bearer ${token}`}});
+            localStorage.setItem("user", JSON.stringify(response.data));
+            navigate("/restaurant");
+        } catch (error) {
+            console.log("Error fetching user profile: ", error);
+            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
+        }
+    }, [navigate]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        const rememberedEmail = localStorage.getItem("rememberedEmail");
+
+        if (rememberedEmail) setEmail(rememberedEmail);
+        if (token) {
+            fetchUserInfo(token).then(user => user);
+        }
+    }, [fetchUserInfo]);
 
     useEffect(() => {
         if (!email) {
