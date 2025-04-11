@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final SubscriptionService subscriptionService;
