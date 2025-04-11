@@ -13,7 +13,7 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
     const [showItemModal, setShowItemModal] = useState(false);
     const [foodItem, setFoodItem] = useState(food);
     const [isToggling, setIsToggling] = useState(false);
-    const [imagePreview, setImagePreview] = useState("");
+    const [imagePreview, setImagePreview] = useState(food?.imageUrl);
     const [buttonLoading, setButtonLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -53,6 +53,7 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
             setToast({ message: response?.data.message, type: "success" });
             fetchFoodItems();
             setImagePreview("");
+            setFoodItem(foodItem);
             closeAddItemModal();
         } catch (error) {
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});

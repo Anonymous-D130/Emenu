@@ -30,15 +30,15 @@ public class Food {
     private String imageUrl;
 
     @Column(nullable = false)
-    private double menuPrice;
+    private Double menuPrice;
 
     @Column(nullable = false)
-    private double offerPrice;
+    private Double offerPrice;
 
     @Column(nullable = false)
-    private boolean available;
+    private boolean available = true;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

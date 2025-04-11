@@ -213,7 +213,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         />
                     </div>
                     <div className="col-span-2 sm:col-span-2 md:col-span-1">
-                        <label className="font-semibold">Offer Price</label>
+                        <label className="font-semibold">Offer Price <span className="text-red-600">*</span></label>
                         <input
                             type="number"
                             name="offerPrice"

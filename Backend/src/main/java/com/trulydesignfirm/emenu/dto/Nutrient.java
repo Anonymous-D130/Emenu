@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Nutrient {
-    private double value;
+    private Double value;
     private String unit;
 }
