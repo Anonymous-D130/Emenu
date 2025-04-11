@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import { features } from "../utils/features.jsx";
@@ -10,8 +10,17 @@ const ForgotPassword = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [toast, setToast] = useState({ message: "", type: "" });
-    const [success, setSuccess] = useState(false);
+    const [success, setSuccess] = useState(null);
     const [loading, setLoading] = useState(false);
+    
+    useEffect(() => {
+        if(success){
+            setTimeout(() => {
+                setSuccess(null);
+                navigate("/login");
+            }, 5000);
+        }
+    }, [navigate, setSuccess, success]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
