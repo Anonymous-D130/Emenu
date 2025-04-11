@@ -14,6 +14,7 @@ const ResetPassword = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isTokenValid, setIsTokenValid] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [load, setLoad] = useState(false);
     const [toast, setToast] = useState({ message: "", type: "" });
     const urlParams = new URLSearchParams(location.search);
     const tokenFromUrl = urlParams.get("token");
@@ -26,6 +27,7 @@ const ResetPassword = () => {
     }, [emailFromUrl, location, tokenFromUrl]);
 
     const verifyToken = async (token, email) => {
+        setLoad(true);
         try {
             await axios.post(`${VERIFY_TOKEN_URL}?token=${token}&email=${email}`);
             setIsTokenValid(true);
@@ -35,6 +37,8 @@ const ResetPassword = () => {
                 : error.message;
             setIsTokenValid(false);
             setToast({ message: `Error verifying token: ${errorMessage}`, type: "error" });
+        } finally {
+            setLoad(false);
         }
     };
     const handlePasswordReset = async (e) => {
@@ -94,6 +98,9 @@ const ResetPassword = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 p-3">
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
+            {load && <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+            </div>}
             <div className="flex flex-col md:flex-row bg-white rounded-xl overflow-hidden w-full max-w-4xl">
                 <div className="w-full md:w-1/2 p-8">
                     <h2 className="text-2xl font-semibold mb-4 text-center">Reset Your Password</h2>
