@@ -12,7 +12,7 @@ const ResetPassword = () => {
 
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [isTokenValid, setIsTokenValid] = useState(false);
+    const [isTokenValid, setIsTokenValid] = useState(true);
     const [loading, setLoading] = useState(false);
     const [load, setLoad] = useState(false);
     const [toast, setToast] = useState({ message: "", type: "" });
