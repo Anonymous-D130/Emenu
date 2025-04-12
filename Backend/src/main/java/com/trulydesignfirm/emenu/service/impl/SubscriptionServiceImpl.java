@@ -13,7 +13,6 @@ import com.trulydesignfirm.emenu.repository.SubscriptionRepo;
 import com.trulydesignfirm.emenu.service.PaymentService;
 import com.trulydesignfirm.emenu.service.SubscriptionService;
 import com.trulydesignfirm.emenu.service.utils.Utility;
-import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
@@ -169,7 +168,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     private void saveSubscriptionPlan(PaymentDetails paymentDetails, LoginUser user, long days) {
-        Subscription subscription = new Subscription();
+        Subscription subscription = subscriptionRepo.getSubscriptionByOwner(user).orElse(new Subscription());
         subscription.setPlan(paymentDetails.getPlan());
         subscription.setOwner(user);
         subscription.setStartDate(LocalDate.now());
