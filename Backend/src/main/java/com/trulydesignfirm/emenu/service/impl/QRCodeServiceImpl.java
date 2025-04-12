@@ -10,10 +10,8 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,16 +42,4 @@ public class QRCodeServiceImpl implements QrCodeService {
         }
     }
 
-    @Override
-    public Optional<String> generateQRCodeBase64(String text) {
-        try {
-            BufferedImage qrImage = generateQRCodeImage(text);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(qrImage, "PNG", outputStream);
-            return Optional.of(Base64.getEncoder().encodeToString(outputStream.toByteArray()));
-        } catch (IOException | WriterException e) {
-            System.out.println("Error: " + e.getMessage());
-            return Optional.empty();
-        }
-    }
 }
