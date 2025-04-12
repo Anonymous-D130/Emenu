@@ -29,9 +29,7 @@ const RestaurantRoutes = () => {
                 navigate("/restaurant", { replace: true });
             } else if (status === "EXPIRED" && currentPath !== "/restaurant/expired") {
                 navigate("/restaurant/expired", { replace: true });
-            } else if (status === "ACTIVE" && currentPath === "/restaurant") {
-                navigate("/restaurant/dashboard", {replace: true});
-            }
+            } 
         } catch (error) {
             console.error("Error while fetching subscription status:", error);
         }
