@@ -25,6 +25,7 @@ const RestaurantRoutes = () => {
             const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`},});
             const status = response.data;
             const currentPath = location.pathname;
+            console.log(status);
             if (status === "NEW" && currentPath !== "/restaurant") {
                 navigate("/restaurant", { replace: true });
             } else if (status === "ACTIVE" && currentPath === "/restaurant") {
