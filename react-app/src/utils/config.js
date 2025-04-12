@@ -1,3 +1,5 @@
+/*************************************   Configuration & Setup  ************************************/
+
 //Backend Configuration
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
@@ -10,7 +12,8 @@ export const COMPANY_NAME = import.meta.env.VITE_COMPANY_NAME;
 
 export const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
-//Unsecured Routes
+/*************************************   Unsecured Routes  ************************************/
+
 //Authentication Routes
 export const LOGIN_URL = `${BACKEND_URL}/api/auth/login`;
 export const FORGOT_PASSWORD_URL = `${BACKEND_URL}/api/user/forgot-password`;
@@ -26,30 +29,48 @@ export const FETCH_MEAT_TYPES = `${BACKEND_URL}/api/public/meat-types`;
 export const FETCH_SERVING_INFO = `${BACKEND_URL}/api/public/serving-info`;
 export const FETCH_ORDER_STATUS = `${BACKEND_URL}/api/public/order-status`;
 
-//Secured Routes
+/*************************************   Secured Routes  ************************************/
+
+//User
 export const FETCH_USER_PROFILE = `${BACKEND_URL}/api/user/profile`;
 export const FETCH_USER_SUBSCRIPTION = `${BACKEND_URL}/api/user/subscription`;
-export const SEND_EVENT_DETAILS = (restaurantId) => `${BACKEND_URL}/api/user/event-details/${restaurantId}`;
+export const IS_SUBSCRIPTION_ACTIVE = `${BACKEND_URL}/api/restaurants/subscription-status`;
+
+//Restaurant
 export const FETCH_RESTAURANT = `${BACKEND_URL}/api/restaurants/get`;
 export const TOGGLE_RESTAURANT = `${BACKEND_URL}/api/restaurants/toggle`;
 export const CHECK_PAGE_NAME = `${BACKEND_URL}/api/restaurants/check-page-name`;
 export const REGISTER_RESTAURANT = `${BACKEND_URL}/api/restaurants/register`;
 export const FETCH_DASHBOARD = `${BACKEND_URL}/api/restaurants/dashboard`;
+export const SEND_EVENT_DETAILS = (restaurantId) => `${BACKEND_URL}/api/user/event-details/${restaurantId}`;
+
+//Categories
 export const FETCH_CATEGORIES = `${BACKEND_URL}/api/restaurants/categories`;
 export const ADD_CATEGORY = `${BACKEND_URL}/api/restaurants/category`;
+export const UPDATE_CATEGORY = (categoryId) => `${BACKEND_URL}/api/restaurants/category/${categoryId}`;
+export const DELETE_CATEGORY = (categoryId) => `${BACKEND_URL}/api/restaurants/category/${categoryId}`;
+
+//SubCategories
 export const FETCH_SUBCATEGORY = (categoryId)=> `${BACKEND_URL}/api/restaurants/sub-categories/${categoryId}`;
 export const ADD_SUBCATEGORY = (categoryId)=>  `${BACKEND_URL}/api/restaurants/sub-category/${categoryId}`;
+export const UPDATE_SUBCATEGORY = (subCategoryId) => `${BACKEND_URL}/api/restaurants/sub-category/${subCategoryId}`;
+export const DELETE_SUBCATEGORY = (subCategoryId) => `${BACKEND_URL}/api/restaurants/sub-category/${subCategoryId}`;
+
+//Food Items
 export const ADD_FOOD_ITEM = (subCategoryId) => `${BACKEND_URL}/api/restaurants/${subCategoryId}/food`;
 export const UPDATE_FOOD_ITEM = (foodId) => `${BACKEND_URL}/api/restaurants/food/${foodId}`;
 export const DELETE_FOOD_ITEM = (foodId) => `${BACKEND_URL}/api/restaurants/food/${foodId}`;
 export const FETCH_SUBCATEGORY_FOOD = (subCategoryId) => `${BACKEND_URL}/api/restaurants/sub-category/${subCategoryId}/foods`
 export const TOGGLE_FOOD_ITEM = (foodId) => `${BACKEND_URL}/api/restaurants/toggle/${foodId}`;
+
+//QR Code
 export const FETCH_QR = `${BACKEND_URL}/api/restaurants/fetch-qr`;
 export const GENERATE_QR = (tables) => `${BACKEND_URL}/api/restaurants/generate-qr/${tables}`;
+
+//Orders
 export const FETCH_ORDERS = `${BACKEND_URL}/api/restaurants/orders`;
 export const UPDATE_ORDER_STATUS = (orderId, orderStatus) => `${BACKEND_URL}/api/restaurants/order/${orderId}?orderStatus=${orderStatus}`;
 export const CANCEL_ORDER = (orderId) => `${BACKEND_URL}/api/restaurants/order/${orderId}`;
-export const IS_SUBSCRIPTION_ACTIVE = `${BACKEND_URL}/api/restaurants/subscription-status`;
 
 //Payment Routes
 export const FETCH_PLANS = `${BACKEND_URL}/api/restaurants/plans`;
@@ -68,4 +89,5 @@ export const INACTIVE_CUSTOMER = (customerId) => `${BACKEND_URL}/api/customers/$
 export const RING_BELL = (customerId, restaurantId) => `${BACKEND_URL}/api/customers/ring/${customerId}/${restaurantId}`;
 export const UPDATE_TABLE = (tableNumber, customerId) => `${BACKEND_URL}/api/customers/table/${tableNumber}/${customerId}`;
 
+//websocket
 export const WEBSOCKET_URL = `${BACKEND_URL}/ws`;

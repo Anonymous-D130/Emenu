@@ -1,10 +1,27 @@
 import React, {useEffect, useState} from "react";
 import FoodItemCard from "./FoodItemCard.jsx";
 import FoodItemCardSkeleton from "../skeleton/FoodItemCardSkeleton.jsx";
+import {initialFoodItem, validateFoodForm} from "../utils/Utility.js";
+import axios from "axios";
+import {ADD_FOOD_ITEM} from "../utils/config.js";
+import AddItemModal from "../modals/AddItemModal.jsx";
 
-const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemModal, setToast, categories, foodItems, fetchFoodItems, loading }) => {
+const CategoryDetails = ({ selectedCategory, selectedSubCategory, setToast, categories, foodItems, setFoodItems, loading, fetchItems }) => {
+    const token = localStorage.getItem("token");
     const [filteredFoodItems, setFilteredFoods] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [buttonLoading, setButtonLoading] = useState(false);
+    const [showItemModal, setShowItemModal] = useState(false);
+    const [foodItem, setFoodItem] = useState(initialFoodItem);
+
+    useEffect(() => {
+        setFoodItem(prev => ({
+            ...prev,
+            category: selectedCategory,
+            subCategory: selectedSubCategory
+        }));
+    }, [selectedCategory, selectedSubCategory]);
+
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -17,6 +34,46 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemMod
             setFilteredFoods(filtered);
         }
     }, [searchQuery, foodItems]);
+
+    const showAddItemModal = () => {
+        setShowItemModal(true);
+    }
+
+    const closeAddItemModal = () => {
+        setFoodItem(prev => ({
+            ...initialFoodItem,
+            category: prev.category,
+            subCategory: prev.subCategory,
+        }));
+        setShowItemModal(false);
+    };
+
+    const handleSubmit = async () => {
+        if(!validateFoodForm(foodItem, setToast)) return;
+        setButtonLoading(true);
+        console.log(foodItem);
+        try {
+            const response = await axios.post(ADD_FOOD_ITEM(foodItem.subCategory?.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
+            setToast({ message: response?.data.message, type: "success" });
+            fetchItems();
+            closeAddItemModal();
+        } catch (error) {
+            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
+            console.log("Error adding food item", error);
+        } finally {
+            setButtonLoading(false);
+        }
+    }
+
+    const handleUpdateOrDelete = (updatedFood, deleted = false) => {
+        setFoodItems(prevList => {
+            if (deleted) {
+                return prevList.filter(item => item.id !== updatedFood.id);
+            } else {
+                return prevList.map(item => item.id === updatedFood.id ? updatedFood : item);
+            }
+        });
+    };
 
     return (
         <div className="w-full p-4">
@@ -58,8 +115,8 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemMod
                                     key={food.id}
                                     food={food}
                                     setToast={setToast}
-                                    fetchFoodItems={fetchFoodItems}
                                     categories={categories}
+                                    onUpdateOrDelete={handleUpdateOrDelete}
                                 />
                             ))
                         ) : (
@@ -72,6 +129,16 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, showAddItemMod
             ) : (
                 <p className="text-gray-500 text-center py-4">Please select a category to view details.</p>
             )}
+            <AddItemModal
+                showItemModal={showItemModal}
+                closeAddItemModal={closeAddItemModal}
+                food={foodItem}
+                setFood={setFoodItem}
+                handleSubmit={handleSubmit}
+                setToast={setToast}
+                categories={categories}
+                buttonLoading={buttonLoading}
+            />
         </div>
     );
 };

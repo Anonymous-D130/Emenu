@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import { Modal } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
 import {FaSpinner, FaUpload} from "react-icons/fa";
@@ -12,11 +12,14 @@ import {
 import axios from "axios";
 import {formatEnumString} from "../utils/Utility.js";
 
-const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem, handleSubmit, setToast, categories, buttonLoading, imagePreview, setImagePreview }) => {
+const AddItemModal = ({ showItemModal, closeAddItemModal, food, setFood, handleSubmit, setToast, categories, buttonLoading }) => {
     const [uploading, setUploading] = useState({ imageUrl: false });
     const [subCategories, setSubCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [meatTypes, setMeatTypes] = useState([]);
+    const [foodItem, setFoodItem] = useState(food);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [shouldSubmit, setShouldSubmit] = useState(false);
     const foodType = [
         {name: "Veg", value: "VEG"},
         {name: "Non-Veg", value: "NON_VEG"},
@@ -24,7 +27,26 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
     ]
     const [tags, setTags] = useState([]);
     const [servingOptions, setServingOptions] = useState([]);
-    
+
+    useEffect(() => {
+        if (!showItemModal) {
+            setImagePreview(food?.imageUrl);
+            setFoodItem(food);
+        }
+    }, [food, showItemModal]);
+
+    useEffect(() => {
+        if(food) setFoodItem(food);
+    }, [food]);
+
+    useEffect(() => {
+        if (shouldSubmit) {
+            handleSubmit();
+            setShouldSubmit(false);
+        }
+    }, [food, handleSubmit, shouldSubmit]);
+
+
     const fetchTags = useCallback(async () => {
         try {
             const response = await axios.get(FETCH_TAGS);
@@ -152,14 +174,18 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-2">Add Item Details</h2>
+                    <h2 className="text-2xl font-semibold text-gray-800 mb-2">Item Details</h2>
                     <IoCloseCircle
                         className="text-2xl text-gray-400 hover:text-gray-600 cursor-pointer"
                         onClick={closeAddItemModal}
                     />
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    setFood(foodItem);
+                    setShouldSubmit(true);
+                }} className="grid grid-cols-2 md:grid-cols-3 gap-4">
 
                     {/* Item Name */}
                     <div className="col-span-2 sm:col-span-2">
@@ -195,7 +221,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                                     <span className="text-blue-600 font-medium">Upload Image</span>
                                 </div>
                             )}
-                            <input type="file" accept="image/jpeg" className="hidden" onChange={(e) => handleFileChange(e, "imageUrl")} />
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "imageUrl")} />
                         </label>
                     </div>
 
@@ -264,12 +290,12 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         <label className="font-semibold block mb-1">Meat Type</label>
                         <select
                             name="meatType"
-                            value={foodItem?.meatType}
+                            value={foodItem?.meatType || ""}
                             onChange={handleChange}
                             disabled={foodItem?.foodType !== "NON_VEG"}
                             className={`w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none`}
                         >
-                            <option value={null} disabled hidden>Select</option>
+                            <option value="" disabled hidden>Select</option>
                             {meatTypes.map((meatType) => (
                                 <option key={meatType} value={meatType}>{formatEnumString(meatType)}</option>
                             ))}
@@ -304,7 +330,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
 
                     {/*SubCategory*/}
                     <div className="col-span-2 md:col-span-1">
-                        <label className="font-semibold block mb-1">Sub-Category</label>
+                        <label className="font-semibold block mb-1">Sub-Category  <span className="text-red-600">*</span></label>
                         <select
                             name="subCategory"
                             value={foodItem?.subCategory?.id || ""}
@@ -331,14 +357,14 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
 
                     {/* Serving Info */}
                     <div className="col-span-2 md:col-span-1">
-                        <label className="font-semibold block mb-1">Serving Info</label>
+                        <label className="font-semibold block mb-1">Serving Info <span className="text-red-600">*</span></label>
                         <select
                             name="servingInfo"
                             value={foodItem?.servingInfo}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                         >
-                            <option value="">Select</option>
+                            <option value="" disabled hidden>Select</option>
                             {servingOptions.map((option) => (
                                 <option key={option} value={option}>
                                     {option}
@@ -347,28 +373,9 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, foodItem, setFoodItem,
                         </select>
                     </div>
 
-                    {/* Offer Zone */}
-                    {/*<div className="col-span-2 md:col-span-3">*/}
-                    {/*    <label className="font-semibold block mb-1">Offer Zone</label>*/}
-                    {/*    <div className="flex gap-4">*/}
-                    {/*        {["10% OFF", "20% OFF", "30% OFF"].map((discount) => (*/}
-                    {/*            <label key={discount} className="flex items-center w-fit gap-2 cursor-pointer border border-gray-300 rounded-md py-2 px-3">*/}
-                    {/*                <input*/}
-                    {/*                    type="checkbox"*/}
-                    {/*                    name="discount"*/}
-                    {/*                    value={discount}*/}
-                    {/*                    onChange={handleChange}*/}
-                    {/*                    className="accent-purple-600 size-4"*/}
-                    {/*                />*/}
-                    {/*                {discount}*/}
-                    {/*            </label>*/}
-                    {/*        ))}*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
-
                     {/* Tag Info */}
                     <div className="col-span-3">
-                        <label className="font-semibold block mb-1">Tag Info</label>
+                        <label className="font-semibold block mb-1">Tag Info <span className="text-red-600">*</span></label>
                         <div className="flex flex-wrap gap-2">
                             {tags.map((tag) => (
                                 <label

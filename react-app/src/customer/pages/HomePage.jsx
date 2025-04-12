@@ -1,10 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import axios from "axios";
-import {FETCH_RESTAURANT_INFO, INACTIVE_CUSTOMER, REGISTER_CUSTOMER} from "../../utils/config.js";
+import {FETCH_RESTAURANT_INFO, REGISTER_CUSTOMER} from "../../utils/config.js";
 import {initialToastState} from "../../utils/Utility.js";
 import Toast from "../../utils/Toast.jsx";
 import ErrorPage from "./ErrorPage.jsx";
+import customerActivity from "../utils/CustomerActivity.js";
 
 const HomePage = () => {
     const [restaurant, setRestaurant] = useState(null);
@@ -16,6 +17,8 @@ const HomePage = () => {
     const [loading, setLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [customer, setCustomer] = useState(null);
+
+    customerActivity(customer);
 
     const registerCustomer = useCallback(async () => {
         setLoading(true);
@@ -31,7 +34,7 @@ const HomePage = () => {
         } finally {
             setLoading(false);
         }
-    }, [restaurantId, tableNumber])
+    }, [restaurantId, tableNumber]);
 
     const fetchRestaurantInfo = useCallback(async () => {
         setLoading(true);
@@ -66,37 +69,6 @@ const HomePage = () => {
     useEffect(() => {
         if(restaurantId) fetchRestaurantInfo().then(r => r);
     }, [fetchRestaurantInfo, restaurantId]);
-
-    const markCustomerLeft = async (customerId) => {
-        try {
-            await axios.put(INACTIVE_CUSTOMER(customerId));
-        } catch (error) {
-            console.error("Failed to mark customer as left", error);
-        }
-    };
-
-    useEffect(() => {
-        let timer;
-        const resetTimer = () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                if (customer?.id) {
-                    markCustomerLeft(customer.id).then(r => r);
-                    window.location.reload();
-                }
-            }, 60 * 60 * 1000);
-        };
-
-        window.addEventListener("mousemove", resetTimer);
-        window.addEventListener("keydown", resetTimer);
-        resetTimer();
-
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener("mousemove", resetTimer);
-            window.removeEventListener("keydown", resetTimer);
-        };
-    }, [customer]);
 
     const showErrorPage = !restaurantId || !tableNumber || hasError;
 

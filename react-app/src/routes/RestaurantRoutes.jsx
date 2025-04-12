@@ -1,5 +1,5 @@
 import {Routes, Route, useNavigate, useLocation} from "react-router-dom";
-import Dashboard from "../components/Dashboard.jsx";
+import Dashboard from "../pages/Dashboard.jsx";
 import Orders from "../pages/Orders.jsx";
 import Menu from "../pages/Menu.jsx";
 import QRCode from "../pages/QRCode.jsx";

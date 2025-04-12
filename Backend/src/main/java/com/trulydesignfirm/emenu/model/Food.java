@@ -35,8 +35,7 @@ public class Food {
     @Column(nullable = false)
     private Double offerPrice;
 
-    @Column(nullable = false)
-    private boolean available = true;
+    private boolean available;
 
     @Column(columnDefinition = "TEXT")
     private String description;

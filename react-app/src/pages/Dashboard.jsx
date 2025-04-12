@@ -1,14 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import axios from "axios";
 import { Check } from "lucide-react";
-import { FETCH_DASHBOARD } from "../utils/config.js";
+import {FETCH_DASHBOARD, FETCH_RESTAURANT, WEBSOCKET_URL} from "../utils/config.js";
 import { initialToastState } from "../utils/Utility.js";
 import Toast from "../utils/Toast.jsx";
+import {MdRoomService} from "react-icons/md";
+import SockJS from "sockjs-client";
+import {over} from "stompjs";
 
 const Dashboard = () => {
     const token = localStorage.getItem("token");
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(initialToastState);
+    const [isRinging, setIsRinging] = useState(false);
+    const [isScaled, setIsScaled] = useState(false);
+    const [tableNumber, setTableNumber] = useState(0);
+    const audioRef = useRef(null);
+    const [restaurantId, setRestaurantId] = useState("");
     const [dashboardData, setDashboardData] = useState({
         totalOrders: 0,
         completedOrders: 0,
@@ -54,6 +62,79 @@ const Dashboard = () => {
         fetchDashboardData().then(d => d);
     }, [fetchDashboardData]);
 
+    const fetchRestaurant = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(FETCH_RESTAURANT, {headers: {Authorization: `Bearer ${token}`}});
+            setRestaurantId(response.data.id);
+        } catch (error) {
+            console.log("Error fetching orders: ", error);
+            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        fetchRestaurant().then(r => r);
+    }, [fetchRestaurant]);
+
+    useEffect(() => {
+        const socket = new SockJS(WEBSOCKET_URL);
+        const stompClient = over(socket);
+
+        stompClient.connect({}, () => {
+            if(restaurantId) {
+                stompClient.subscribe(`/topic/ring-bell/${restaurantId}`, (msg) => {
+                    const table = JSON.parse(msg.body);
+                    setTableNumber(table);
+                    setIsRinging(true);
+                })
+            }
+        });
+
+        return () => {
+            if (stompClient && stompClient.connected) {
+                stompClient.disconnect();
+            }
+        };
+    }, [restaurantId]);
+
+    useEffect(() => {
+        let interval;
+        let timeout;
+
+        if (isRinging) {
+            if (!audioRef.current) {
+                audioRef.current = new Audio("/alert.mp3");
+            }
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
+            interval = setInterval(() => {
+                setIsScaled(prev => !prev);
+            }, 100);
+
+            timeout = setTimeout(() => {
+                setIsRinging(false);
+                setTableNumber(0);
+                clearInterval(interval);
+                setIsScaled(false);
+                if (audioRef.current) {
+                    audioRef.current.pause();
+                    audioRef.current.currentTime = 0;
+                }
+            }, 5000);
+        }
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeout);
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+        };
+    }, [isRinging]);
+
     return (
         <main className="grid gap-6 grid-cols-1 md:grid-cols-4 p-4 md:p-10 lg:p-12 mt-45 md:mt-15 w-full">
             {loading && (
@@ -67,7 +148,7 @@ const Dashboard = () => {
             )}
 
             {/* Tables Card */}
-            <section className="bg-white px-12 py-5 rounded-2xl shadow-md col-span-2 row-span-2">
+            <section className="bg-white p-5 rounded-2xl shadow-md col-span-2 row-span-2">
                 <h2 className="text-3xl font-bold mb-4">Tables</h2>
                 <div className="flex gap-4 text-sm mb-4">
                     <span className="flex items-center gap-2">
@@ -80,15 +161,15 @@ const Dashboard = () => {
                     </span>
                 </div>
 
-                <div className="grid grid-cols-3 p-4 gap-5">
-                    {Array.from({ length: totalTables }, (_, i) => {
+                <div className="flex flex-wrap justify-center gap-5">
+                {Array.from({ length: 15 }, (_, i) => {
                         const tableNum = i + 1;
                         const isFilled = tablesFilled.includes(tableNum);
 
                         return (
                             <div
                                 key={tableNum}
-                                className={`relative flex items-center justify-center h-24 rounded-xl transition-all ${
+                                className={`relative flex items-center justify-center h-24 rounded-xl transition-all w-35 ${
                                     isFilled ? "bg-[#FFC300] border-[3px] border-black" : "bg-[#F5F5F5]"
                                 }`}
                             >
@@ -128,7 +209,7 @@ const Dashboard = () => {
                 <h2 className="text-3xl font-bold mb-4">Orders</h2>
                 <div className="text-4xl font-bold mb-2">{totalOrders}</div>
                 <div className="text-sm text-gray-500 border-b pb-2 mb-4">Total Orders</div>
-                <div className="flex justify-between text-center text-lg px-5">
+                <div className="flex justify-between text-center text-lg mx-2 gap-2">
                     {[
                         { label: "Completed", value: completedOrders, color: "text-green-600" },
                         { label: "Pending", value: pendingOrders, color: "text-yellow-500" },
@@ -144,15 +225,29 @@ const Dashboard = () => {
             </section>
 
             {/* Total Billing Amount */}
-            <section className="bg-white p-5 rounded-2xl shadow-md col-span-2 flex flex-col justify-between">
+            <section className="bg-white p-5 rounded-2xl shadow-md col-span-2 flex flex-col justify-between max-h-100">
                 <h2 className="text-xl font-semibold mb-4">Total Amount</h2>
-                <div className="flex flex-col gap-1 items-center justify-center mb-10">
+                <div className="flex flex-col gap-1 items-center justify-center mb-auto pt-10">
                     <div className="text-4xl font-bold text-green-600 mb-2">
                         ₹ {totalBillingAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </div>
                     <div className="text-sm text-gray-500">Total Billing Amount</div>
                 </div>
             </section>
+            {/* Ringing button */}
+            <div className="relative">
+                <button
+                    onClick={() => setIsRinging(false)}
+                    className={`
+                                  fixed md:bottom-20 bottom-8 md:right-10 right-5 w-18 h-18 rounded-full bg-black border-[6px] border-gray-300 
+                                  flex flex-col items-center justify-center text-yellow-400 z-10
+                                  transform transition-transform duration-300 text-2xl font-extrabold
+                                  ${isScaled ? "scale-150" : "scale-100"}
+                                `}
+                >
+                    {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl" />}
+                </button>
+            </div>
         </main>
     );
 };

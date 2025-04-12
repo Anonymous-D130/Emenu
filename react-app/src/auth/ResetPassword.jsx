@@ -5,6 +5,7 @@ import {OAUTH_URL, RESET_PASSWORD_URL, VERIFY_TOKEN_URL} from "../utils/config.j
 import Toast from "../utils/Toast.jsx";
 import {features} from "../utils/features.jsx";
 import {FcGoogle} from "react-icons/fc";
+import {validatePassword} from "../utils/Utility.js";
 
 const ResetPassword = () => {
     const navigate = useNavigate();
@@ -46,6 +47,13 @@ const ResetPassword = () => {
         setLoading(true);
         if (newPassword !== confirmPassword) {
             setToast({ message: "Passwords do not match", type: "error" });
+            return;
+        }
+        const result = validatePassword(newPassword);
+        if (!result.isValid) {
+            result.errors.forEach(error => {
+                setToast({ message: error, type: "error" });
+            });
             return;
         }
         try {

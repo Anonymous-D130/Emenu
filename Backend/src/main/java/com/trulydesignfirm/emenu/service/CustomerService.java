@@ -20,4 +20,5 @@ public interface CustomerService {
     List<Order> getOrders(UUID customerId, Restaurant restaurant);
     List<Order> getCustomerOrderHistory(UUID customerId);
     Response ringBell(UUID customerId, UUID restaurantId);
+    Response deleteCustomer(UUID customerId);
 }

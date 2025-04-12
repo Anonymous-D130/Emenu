@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,4 +17,7 @@ public interface FoodRepo extends JpaRepository<Food, UUID> {
     List<Food> findAllBySubCategoryIn(Collection<SubCategory> subCategories);
     boolean existsByNameAndRestaurant(String name, Restaurant restaurant);
     List<Food> findAllByRestaurantAndSubCategoryOrderByName(Restaurant restaurant, SubCategory subCategory);
+    Optional<Food> findByIdAndRestaurant(UUID id, Restaurant restaurant);
+
+    List<Food> findAllBySubCategory(SubCategory subCategory);
 }

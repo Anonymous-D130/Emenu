@@ -1,3 +1,28 @@
+export function validatePassword(password) {
+    const errors = [];
+
+    if (password.length < 8) {
+        errors.push("Password must be at least 8 characters long.");
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push("Password must contain at least one uppercase letter.");
+    }
+    if (!/[a-z]/.test(password)) {
+        errors.push("Password must contain at least one lowercase letter.");
+    }
+    if (!/[0-9]/.test(password)) {
+        errors.push("Password must contain at least one number.");
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.push("Password must contain at least one special character.");
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+
 export const formatEnumString = (enumString) => {
     if (!enumString) return "";
     return enumString
@@ -9,6 +34,29 @@ export const formatEnumString = (enumString) => {
 export const initialToastState = {
     message: "",
     type: "",
+};
+
+export const initialFoodItem = {
+    name: "",
+    imageUrl: "",
+    menuPrice: "",
+    offerPrice: "",
+    available: false,
+    description: "",
+    foodType: "",
+    meatType: null,
+    servingInfo: "",
+    tag: [],
+    nutritionInfo: {
+        calories: { value: "", unit: "grams" },
+        protein: { value: "", unit: "grams" },
+        carbohydrates: { value: "", unit: "grams" },
+        fats: { value: "", unit: "grams" },
+        fiber: { value: "", unit: "grams" },
+        sugar: { value: "", unit: "grams" },
+    },
+    category: null,
+    subCategory: null,
 };
 
 export const isToday = (dateString) => {

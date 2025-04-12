@@ -6,14 +6,14 @@ import React, {useState} from "react";
 import axios from "axios";
 import {DELETE_FOOD_ITEM, TOGGLE_FOOD_ITEM, UPDATE_FOOD_ITEM} from "../utils/config.js";
 import {validateFoodForm} from "../utils/Utility.js";
+import Swal from 'sweetalert2';
 
-const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
+const FoodItemCard = ({ food, setToast, categories, onUpdateOrDelete }) => {
     const token = localStorage.getItem("token");
     const [isAvailable, setIsAvailable] = useState(food?.available);
     const [showItemModal, setShowItemModal] = useState(false);
     const [foodItem, setFoodItem] = useState(food);
     const [isToggling, setIsToggling] = useState(false);
-    const [imagePreview, setImagePreview] = useState(food?.imageUrl);
     const [buttonLoading, setButtonLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -44,16 +44,13 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         if(!validateFoodForm(foodItem, setToast)) return;
         setButtonLoading(true);
         try {
-            const response = await axios.put(UPDATE_FOOD_ITEM(foodItem.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
+            const response = await axios.put(UPDATE_FOOD_ITEM(food.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
             setToast({ message: response?.data.message, type: "success" });
-            fetchFoodItems();
-            setImagePreview("");
-            setFoodItem(foodItem);
+            onUpdateOrDelete(foodItem, false);
             closeAddItemModal();
         } catch (error) {
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
@@ -64,17 +61,32 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
     }
 
     async function handleDelete() {
-        const confirmDelete = window.confirm("Are you sure you want to delete this food item?");
-        if (!confirmDelete) return;
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete this food item?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (!result.isConfirmed) return;
+
         setDeleteLoading(true);
         try {
-            const response = await axios.delete(DELETE_FOOD_ITEM(foodItem.id), { headers: { Authorization: `Bearer ${token}` }});
-            fetchFoodItems();
-            setToast({ message: response?.data.message, type: "success" });
+            const response = await axios.delete(DELETE_FOOD_ITEM(food.id), {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setToast({ message: response?.data.message, type: 'success' });
+            onUpdateOrDelete(foodItem, true);
             closeAddItemModal();
         } catch (error) {
-            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
-            console.error("Error deleting food item", error);
+            setToast({
+                message: error.response ? error.response.data.message : error.message,
+                type: 'error',
+            });
+            console.error('Error deleting food item', error);
         } finally {
             setDeleteLoading(false);
         }
@@ -83,24 +95,24 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
     return (
         <div className="flex items-center flex-wrap md:flex-nowrap p-3 my-4 md:mx-2 border-b-2 border-gray-200">
             {/* Food Image */}
-            <img src={food.imageUrl} alt={food.name} className="w-18 h-18 md:h-16 rounded-md object-cover my-2" />
+            <img src={foodItem.imageUrl} alt={foodItem.name} className="w-18 h-18 md:h-16 rounded-md object-cover my-2" />
 
             {/* Food Details */}
             <div className="md:flex-1 ml-3 block text-left">
                 <div className="flex items-center space-x-2">
                     {/* Veg/Non-Veg Icon */}
                     <img
-                        src={`${food.veg ? veg : nonVeg}`}
-                        alt={food.veg ? "Vegetarian" : "Non-Vegetarian"}
+                        src={`${foodItem.veg ? veg : nonVeg}`}
+                        alt={foodItem.veg ? "Vegetarian" : "Non-Vegetarian"}
                         className="w-4 h-4"
                     />
                     {/* Food Name */}
-                    <h3 className="text-md font-semibold">{food.name}</h3>
+                    <h3 className="text-md font-semibold">{foodItem.name}</h3>
                 </div>
 
                 {/* Price Details */}
                 <p className="text-sm text-gray-500">
-                    <span className="line-through text-gray-400">₹{food.menuPrice}</span> ₹{food.offerPrice}
+                    <span className="line-through text-gray-400">₹{foodItem.menuPrice}</span> ₹{foodItem.offerPrice}
                 </p>
             </div>
 
@@ -109,7 +121,7 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
             <div className="flex items-center space-x-2 w-1/2 md:w-auto">
                 {/* Toggle Button */}
                 <button
-                    onClick={() => toggleAvailability(food.id)}
+                    onClick={() => toggleAvailability(foodItem.id)}
                     aria-pressed={isAvailable}
                     className={`relative w-11 h-6 flex items-center justify-start rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
                         isAvailable
@@ -172,14 +184,12 @@ const FoodItemCard = ({ food, setToast, fetchFoodItems, categories }) => {
             <AddItemModal
                 showItemModal={showItemModal}
                 closeAddItemModal={closeAddItemModal}
-                foodItem={foodItem}
-                setFoodItem={setFoodItem}
+                food={foodItem}
+                setFood={setFoodItem}
                 handleSubmit={handleSubmit}
                 setToast={setToast}
                 categories={categories}
                 buttonLoading={buttonLoading}
-                imagePreview={imagePreview}
-                setImagePreview={setImagePreview}
             />
         </div>
     );

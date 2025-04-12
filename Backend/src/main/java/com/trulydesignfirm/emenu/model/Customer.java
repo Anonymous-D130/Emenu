@@ -1,7 +1,6 @@
 package com.trulydesignfirm.emenu.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.trulydesignfirm.emenu.dto.Cart;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,5 +42,10 @@ public class Customer {
 
     public UUID getRestaurantId() {
         return restaurant.getId();
+    }
+
+    @PrePersist
+    public void onPrePersist() {
+        if (this.leftAt == null) this.leftAt = LocalDateTime.now();
     }
 }

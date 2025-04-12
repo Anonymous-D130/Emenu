@@ -1,72 +1,67 @@
 import React, { useEffect, useState } from 'react';
 
-const Toast = ({ message, type, onClose }) => {
+const Toast = ({ message, type = 'success', title, onClose }) => {
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsVisible(false);
         }, 3000);
-
-        return () => clearTimeout(timer); // Cleanup timer
+        return () => clearTimeout(timer);
     }, [message]);
 
     useEffect(() => {
         if (!isVisible) {
-            onClose(); // Close the toast after it's hidden
+            const timeout = setTimeout(onClose, 500); // delay to allow fade-out animation
+            return () => clearTimeout(timeout);
         }
     }, [isVisible, onClose]);
 
+    const icon =
+        type === 'success' ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        );
+
     return (
-        isVisible && (
-            <div
-                className={`fixed z-100000 top-4 left-1/2 transform -translate-x-1/2 p-4 max-w-xs sm:max-w-md w-full rounded-lg shadow-lg text-white transition-all duration-500 ease-in-out ${
-                    type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                } ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-            >
-                <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                        {/* Add an icon based on the type */}
-                        {type === 'success' ? (
-                            <svg
-                                className="w-6 h-6 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        ) : (
-                            <svg
-                                className="w-6 h-6 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="ml-3 flex-1">
+        <div
+            className={`fixed top-6 left-1/2 transform -translate-x-1/2 px-5 py-4 rounded-xl shadow-lg text-white max-w-sm w-full z-[10000] transition-all duration-500 ease-in-out
+                ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}
+                ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5'}
+            `}
+            role="alert"
+            aria-live="assertive"
+        >
+            <div className="flex items-start space-x-3">
+                <div className="mt-1">{icon}</div>
+                <div className="flex-1">
+                    {title && <p className="font-bold text-sm mb-1">{title}</p>}
+                    {Array.isArray(message) ? (
+                        <ul className="text-sm list-disc list-inside space-y-1">
+                            {message.map((msg, idx) => (
+                                <li key={idx}>{msg}</li>
+                            ))}
+                        </ul>
+                    ) : (
                         <p className="text-sm">{message}</p>
-                    </div>
+                    )}
                 </div>
+                <button
+                    className="ml-3 text-white hover:text-gray-200 focus:outline-none"
+                    onClick={() => setIsVisible(false)}
+                    aria-label="Close toast"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-        )
+        </div>
     );
 };
 

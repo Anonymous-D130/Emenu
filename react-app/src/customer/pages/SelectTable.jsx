@@ -74,14 +74,14 @@ const SelectTable = () => {
             </div>
 
             {/* Grid of Tables */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="flex justify-around items-center gap-4 flex-wrap">
                 {Array.from({ length: totalTables }, (_, i) => (i + 1).toString()).map((tableNum) => {
                     const isSelected = selectedTable === tableNum;
                     return (
                         <button
                             key={`${tableNum}`}
                             onClick={() => handleTableSelect(tableNum)}
-                            className={`relative cursor-pointer flex items-center justify-center h-24 rounded-xl transition-all
+                            className={`relative cursor-pointer flex items-center justify-center h-24 rounded-xl transition-all w-35
                                 ${isSelected ? "bg-[#FFC300] border-[3px] border-black" : "bg-[#F5F5F5]"}`}
                         >
                             {/* Table Icon */}
@@ -95,8 +95,8 @@ const SelectTable = () => {
                                 {/* Mini seats around (optional, basic shape) */}
                                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
                                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
-                                <div className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
+                                <div className="absolute left-7 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
+                                <div className="absolute right-7 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-gray-600 rounded-sm"></div>
                             </div>
 
                             {/* Checkmark */}

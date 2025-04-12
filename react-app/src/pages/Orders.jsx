@@ -39,7 +39,7 @@ const Orders = () => {
     const [isScaled, setIsScaled] = useState(false);
     const [tableNumber, setTableNumber] = useState(0);
     const audioRef = useRef(null);
-    const [restaurantId, setRestaurantId] = useState(null);
+    const [restaurantId, setRestaurantId] = useState("");
     const [orderStatuses, setOrderStatuses] = useState({});
 
     const fetchOrderStatuses = async () => {
@@ -294,127 +294,150 @@ const Orders = () => {
                         </div>
                     )}
                 </div>
-                {orderLoading ? <OrdersSkeleton/> : (<div className="w-full overflow-x-auto">
-                    <table className="min-w-full text-sm border border-gray-200">
-                        <thead className="bg-gray-100 text-left text-gray-700 whitespace-nowrap">
-                        <tr>
-                            <th className="p-3">#</th>
-                            <th className="p-3">Table No</th>
-                            <th className="p-3">Order Info</th>
-                            <th className="p-3">{filters.showOldOrders ? "Date" : "Time"}</th>
-                            <th className="p-3">Bill Amount</th>
-                            <th className="p-3">Status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {orders.filter(order => {
-                            const todayOrder = isToday(order?.createdAt) || filters.showOldOrders;
-                            const statusMatch = filters.status ? order.status === filters.status : true;
-                            const tableMatch = filters.table ? order.tableNumber?.toString().includes(filters.table) : true;
-                            return statusMatch && tableMatch && todayOrder;
-                        })
-                            .sort((a, b) => {
-                                const {sortBy, sortOrder} = filters;
-                                if (!sortBy) return 0;
+                {orderLoading ? (
+                    <OrdersSkeleton />
+                ) : (
+                    <div className="w-full overflow-x-auto">
+                        <table className="min-w-full text-sm border border-gray-200">
+                            <thead className="bg-gray-100 text-left text-gray-700 whitespace-nowrap">
+                            <tr>
+                                <th className="p-3">#</th>
+                                <th className="p-3">Table No</th>
+                                <th className="p-3">Order Info</th>
+                                <th className="p-3">{filters.showOldOrders ? "Date" : "Time"}</th>
+                                <th className="p-3">Bill Amount</th>
+                                <th className="p-3">Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {orders.filter(order => {
+                                const todayOrder = isToday(order?.createdAt) || filters.showOldOrders;
+                                const statusMatch = filters.status ? order.status === filters.status : true;
+                                const tableMatch = filters.table ? order.tableNumber?.toString().includes(filters.table) : true;
+                                return statusMatch && tableMatch && todayOrder;
+                            })
+                                .sort((a, b) => {
+                                    const { sortBy, sortOrder } = filters;
+                                    if (!sortBy) return 0;
 
-                                let aValue = a[sortBy];
-                                let bValue = b[sortBy];
+                                    let aValue = a[sortBy];
+                                    let bValue = b[sortBy];
 
-                                // Special handling for date sorting
-                                if (sortBy === "createdAt") {
-                                    aValue = new Date(aValue);
-                                    bValue = new Date(bValue);
-                                }
+                                    if (sortBy === "createdAt") {
+                                        aValue = new Date(aValue);
+                                        bValue = new Date(bValue);
+                                    }
 
-                                if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-                                if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-                                return 0;
-                            }).map((order, index) => (
-                                <tr key={order.id} className="border-t border-gray-200">
-                                    <td className="p-3">{index + 1}</td>
-                                    <td className="p-3">
-                                        <div
-                                            className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-semibold text-sm text-gray-800 shadow-sm">
-                                            {order.tableNumber}
-                                        </div>
-                                    </td>
-                                    <td className="p-3 text-gray-700 cursor-pointer"
-                                        onClick={() => viewTableOrder(order.tableNumber, order)}>
-                                        {order?.orderItems.map((item, index) =>
-                                            `${item.food.name}${index !== order?.orderItems.length - 1 ? ', ' : ''}`
-                                        )}
-                                        {order.status === "PENDING" && (
-                                            <span
-                                                className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full font-bold">
-                                        NEW
-                                    </span>
-                                        )}
-                                    </td>
-                                    <td className="p-3">{filters.showOldOrders ? getDate(order?.createdAt) : getTime(order?.createdAt)}</td>
-                                    <td className="p-3">{order.totalAmount}</td>
-                                    <td className="p-3">
-                                        {order.status === "PENDING" ? (
-                                            <div className="flex gap-2">
-                                                <button
-                                                    disabled={cancelLoading !== null || updateLoading !== null}
-                                                    onClick={() => cancelOrder(order.id)}
-                                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-md"
-                                                >
-                                                    {cancelLoading === order?.id ? "Rejecting..." : "Reject"}
-                                                </button>
-                                                <button
-                                                    disabled={cancelLoading !== null || updateLoading !== null}
-                                                    onClick={() => updateOrderStatus(order.id, "ACCEPTED")}
-                                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded-md"
-                                                >
-                                                    {updateLoading === order.id ? "Accepting..." : "Accept"}
-                                                </button>
+                                    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+                                    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+                                    return 0;
+                                })
+                                .map((order, index) => (
+                                    <tr key={order.id} className="border-t border-gray-200">
+                                        <td className="p-3">{index + 1}</td>
+                                        <td className="p-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-semibold text-sm text-gray-800 shadow-sm">
+                                                {order.tableNumber}
                                             </div>
-                                        ) : (
-                                            <select
-                                                value={order.status}
-                                                disabled={
-                                                    order.status === "REJECTED" ||
-                                                    order.status === "COMPLETED" ||
-                                                    updateLoading === order.id
+                                        </td>
+                                        <td
+                                            className="p-3 text-gray-700 cursor-pointer"
+                                            onClick={() => viewTableOrder(order.tableNumber, order)}
+                                        >
+                                            {order.orderItems.length > 0 ? order?.orderItems.map((item, i) => {
+                                                    `${item.food.name}${i !== order?.orderItems.length - 1 ? ', ' : ''}`
                                                 }
-                                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                                className={`w-full p-2 border rounded-md outline-none ${
-                                                    order.status === "REJECTED" ||
-                                                    order.status === "COMPLETED"
-                                                        ? "bg-gray-200 cursor-not-allowed text-gray-500"
-                                                        : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-                                                } ${updateLoading === order.id ? "opacity-50 cursor-wait" : ""}`}
-                                            >
-                                                {orderStatuses
-                                                    .filter((status) => orderStatuses.indexOf(status) >= orderStatuses.indexOf(order.status))
-                                                    .map((item, index) => (
-                                                        <option key={index} value={item}>
-                                                            {formatEnumString(item)}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        )}
+                                            ) : <p>No Info Available</p>}
+                                            {order.status === "PENDING" && (
+                                                <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full font-bold">
+                                                  NEW
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="p-3">
+                                            {filters.showOldOrders ? getDate(order?.createdAt) : getTime(order?.createdAt)}
+                                        </td>
+                                        <td className="p-3">{order.totalAmount}</td>
+                                        <td className="p-3">
+                                            {order.status === "PENDING" ? (
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        disabled={cancelLoading !== null || updateLoading !== null}
+                                                        onClick={() => cancelOrder(order.id)}
+                                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-md"
+                                                    >
+                                                        {cancelLoading === order?.id ? "Rejecting..." : "Reject"}
+                                                    </button>
+                                                    <button
+                                                        disabled={cancelLoading !== null || updateLoading !== null}
+                                                        onClick={() => updateOrderStatus(order.id, "ACCEPTED")}
+                                                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded-md"
+                                                    >
+                                                        {updateLoading === order.id ? "Accepting..." : "Accept"}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <select
+                                                    value={order.status}
+                                                    disabled={
+                                                        order.status === "REJECTED" ||
+                                                        order.status === "COMPLETED" ||
+                                                        updateLoading === order.id
+                                                    }
+                                                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                    className={`w-full p-2 border rounded-md outline-none ${
+                                                        order.status === "REJECTED" || order.status === "COMPLETED"
+                                                            ? "bg-gray-200 cursor-not-allowed text-gray-500"
+                                                            : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                                    } ${updateLoading === order.id ? "opacity-50 cursor-wait" : ""}`}
+                                                >
+                                                    {orderStatuses
+                                                        .filter(
+                                                            (status) =>
+                                                                orderStatuses.indexOf(status) >= orderStatuses.indexOf(order.status)
+                                                        )
+                                                        .map((item, index) => (
+                                                            <option key={index} value={item}>
+                                                                {formatEnumString(item)}
+                                                            </option>
+                                                        ))}
+                                                </select>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            {/* 🔻 No Orders Available Fallback */}
+                            {orders.filter(order => {
+                                const todayOrder = isToday(order?.createdAt) || filters.showOldOrders;
+                                const statusMatch = filters.status ? order.status === filters.status : true;
+                                const tableMatch = filters.table ? order.tableNumber?.toString().includes(filters.table) : true;
+                                return statusMatch && tableMatch && todayOrder;
+                            }).length === 0 && (
+                                <tr>
+                                    <td colSpan="6" className="text-center text-gray-500 py-6 text-lg">
+                                        No orders available.
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsRinging(false)}
-                            className={`
-                              fixed md:bottom-20 bottom-8 md:right-10 right-5 w-18 h-18 rounded-full bg-black border-[6px] border-gray-300 
-                              flex flex-col items-center justify-center text-yellow-400 z-10
-                              transform transition-transform duration-300 text-2xl font-extrabold
-                              ${isScaled ? "scale-150" : "scale-100"}
-                            `}
-                        >
-                            {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl"/>}
-                        </button>
+                            )}
+                            </tbody>
+                        </table>
+
+                        {/* Ringing button */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsRinging(false)}
+                                className={`
+                                  fixed md:bottom-20 bottom-8 md:right-10 right-5 w-18 h-18 rounded-full bg-black border-[6px] border-gray-300 
+                                  flex flex-col items-center justify-center text-yellow-400 z-10
+                                  transform transition-transform duration-300 text-2xl font-extrabold
+                                  ${isScaled ? "scale-150" : "scale-100"}
+                                `}
+                            >
+                                {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl" />}
+                            </button>
+                        </div>
                     </div>
-                </div>)
-                }
+                )}
             </div>
             <OrderModal
                 isOpen={isModalOpen}

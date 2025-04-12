@@ -124,7 +124,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public List<Category> getRestaurantCategories(String token) {
-        return getRestaurantByToken(token).getCategories();
+        return categoryRepo.findAllByRestaurantOrderByName(getRestaurantByToken(token));
     }
 
     @Override
@@ -178,10 +178,10 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant restaurant = getRestaurantByToken(token);
         boolean removed = restaurant.getCategories().removeIf(category -> category.getId().equals(categoryId));
         if (!removed)
-            throw new RuntimeException("SubCategory not found");
+            throw new RuntimeException("Category not found");
         restaurantRepo.save(restaurant);
         Response response = new Response();
-        response.setMessage("SubCategory removed successfully");
+        response.setMessage("Category removed successfully");
         response.setStatus(HttpStatus.OK);
         return response;
     }
@@ -192,7 +192,9 @@ public class RestaurantServiceImpl implements RestaurantService {
         Category category = restaurant.getCategories().stream()
                 .filter(c -> c.getId().equals(categoryId))
                 .findFirst().orElseThrow(() -> new RuntimeException("Category not found"));
-        return category.getSubCategories();
+        List<SubCategory> subCategories = category.getSubCategories();
+        subCategories.sort(Comparator.comparing(SubCategory::getName));
+        return subCategories;
     }
 
     @Override
@@ -282,12 +284,13 @@ public class RestaurantServiceImpl implements RestaurantService {
             return response;
         }
         SubCategory subCategory = subCategoryRepo.findById(subCategoryId)
-                        .orElseThrow(() -> new RuntimeException("SubCategory not found"));
+                .orElseThrow(() -> new RuntimeException("SubCategory not found"));
         if(food.getMenuPrice() <= 0 || food.getOfferPrice() <= 0){
             throw new RuntimeException("Price must be greater than 0");
         }
         food.setSubCategory(subCategory);
         food.setRestaurant(restaurant);
+        food.setAvailable(true);
         foodRepo.save(food);
         response.setMessage("Food added successfully");
         response.setStatus(HttpStatus.CREATED);

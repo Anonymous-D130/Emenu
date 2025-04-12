@@ -79,6 +79,12 @@ public class CustomerController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Response> deleteCustomer(@PathVariable UUID id) {
+        Response response = customerService.deleteCustomer(id);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     private Restaurant hasActiveSubscription(UUID restaurantId) {
         Restaurant restaurant = customerService.findRestaurantById(restaurantId);
         if(restaurant.getOwner().getSubscription() == null || restaurant.getOwner().getSubscription().isExpired())

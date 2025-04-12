@@ -8,7 +8,7 @@ import axios from "axios";
 const PhoneMockup = ({ imageUrl }) => {
     return (
         <div className="flex justify-center items-start bg-transparent">
-            <div className="relative w-[250px] h-[180px] overflow-hidden rounded-t-[40px] shadow-2xl border-[6px] border-gray-700 bg-black">
+            <div className="relative w-[250px] h-[180px] overflow-hidden rounded-t-[40px] shadow-2xl border-[6px] border-gray-700 bg-gray-200">
                 <div className="w-full bg-white text-black flex flex-col items-center rounded-b-3xl z-5">
                     <h2 className="text-sm font-semibold mt-2 p-1">Welcome to</h2>
                     <div className="bg-yellow-400 px-4 w-full flex items-center justify-center rounded-b-3xl">
@@ -109,7 +109,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                     <div className="grid md:grid-cols-2 gap-6 mt-4">
                         {/* Restaurant Name */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Restaurant Name</label>
+                            <label className="block text-sm font-medium text-gray-700">Restaurant Name <span className="text-red-600">*</span></label>
                             <input
                                 type="text"
                                 name="name"
@@ -121,7 +121,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
 
                         {/* Contact Number */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+                            <label className="block text-sm font-medium text-gray-700">Contact Number <span className="text-red-600">*</span></label>
                             <input
                                 type="text"
                                 name="mobile"
@@ -164,7 +164,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                 {/* Logo Upload */}
                 <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 md:mb-15">Restaurant Logo</label>
+                        <label className="block text-sm font-medium text-gray-700 md:mb-15">Restaurant Logo <span className="text-red-600">*</span></label>
                         <label className="mt-2 border-dashed border-2 border-gray-300 p-8 flex flex-col items-center justify-center rounded-lg cursor-pointer hover:bg-gray-100 transition">
                             {uploading.logo ? (
                                 <span className="flex items-center gap-2 text-sm text-gray-600 italic">
@@ -180,7 +180,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                                     <span className="text-blue-600 font-medium">Upload Logo</span>
                                 </>
                             )}
-                            <input type="file" accept="image/jpeg" className="hidden" onChange={(e) => handleFileChange(e, "logo")} />
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "logo")} />
                         </label>
                     </div>
 
@@ -197,49 +197,9 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                     </div>
                 </div>
 
-                {/* Color Theme Selection */}
-                {/*<div className="mt-6">*/}
-                {/*    <h3 className="text-lg font-semibold text-gray-800">Select Theme Colors</h3>*/}
-                {/*    <div className="grid md:grid-cols-2 gap-6 mt-2">*/}
-                {/*        /!* Primary Color *!/*/}
-                {/*        <div className="w-fit">*/}
-                {/*            <label className="block text-sm font-medium text-gray-800">Primary Color</label>*/}
-                {/*            <div className="flex items-center gap-3 mt-1 justify-start">*/}
-                {/*                <input*/}
-                {/*                    type="color"*/}
-                {/*                    name="color1"*/}
-                {/*                    value={restaurant.color1}*/}
-                {/*                    onChange={handleChange}*/}
-                {/*                    className="w-12 h-12 cursor-pointer"*/}
-                {/*                />*/}
-                {/*                <span className="text-md font-mono p-2">*/}
-                {/*                    {restaurant.color1}*/}
-                {/*                </span>*/}
-                {/*            </div>*/}
-                {/*        </div>*/}
-
-                {/*        /!* Text Color *!/*/}
-                {/*        <div className="w-fit">*/}
-                {/*            <label className="block text-sm font-medium text-gray-800">Text Color</label>*/}
-                {/*            <div className="flex items-center gap-3 mt-1 justify-start">*/}
-                {/*                <input*/}
-                {/*                    type="color"*/}
-                {/*                    name="color2"*/}
-                {/*                    value={restaurant.color2}*/}
-                {/*                    onChange={handleChange}*/}
-                {/*                    className="w-12 h-12 cursor-pointer"*/}
-                {/*                />*/}
-                {/*                <span className="text-md font-mono p-2">*/}
-                {/*                    {restaurant.color2}*/}
-                {/*                </span>*/}
-                {/*            </div>*/}
-                {/*        </div>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
-
                 {/* Welcome Screen Upload */}
                 <div className="mt-6">
-                    <h3 className="text-lg font-semibold text-gray-700">Welcome Screen Image</h3>
+                    <h3 className="text-lg font-semibold text-gray-700">Welcome Screen Image <span className="text-red-600">*</span></h3>
                     <div className="flex items-center md:flex-row flex-col gap-6 mt-2">
                         {/* Upload Box */}
                         <label className="border-dashed border-2 border-gray-300 p-6 flex flex-col items-center justify-center rounded-lg cursor-pointer hover:bg-gray-100 transition w-60 h-50">
@@ -257,7 +217,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                                     <span className="text-blue-600 font-medium">Upload Image</span>
                                 </>
                             )}
-                            <input type="file" accept="image/jpeg" className="hidden" onChange={(e) => handleFileChange(e, "welcomeScreen")} />
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "welcomeScreen")} />
                         </label>
 
                         {/* Side-by-side Preview */}

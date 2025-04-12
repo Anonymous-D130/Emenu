@@ -6,6 +6,7 @@ import axios from "axios";
 import {FETCH_USER_PROFILE, GET_OTP, OAUTH_URL, REGISTER_URL} from "../utils/config.js";
 import Toast from "../utils/Toast.jsx";
 import {Loader} from "lucide-react";
+import {validatePassword} from "../utils/Utility.js";
 
 const RegisterPage = () => {
     const [name, setName] = useState("");
@@ -59,6 +60,13 @@ const RegisterPage = () => {
 
     const handleOtpGenerate = async (e) => {
         e.preventDefault();
+        const result = validatePassword(password);
+        if (!result.isValid) {
+            result.errors.forEach(error => {
+                setToast({ message: error, type: "error" });
+            });
+            return;
+        }
         setLoading(true);
         try {
             const response = await axios.post(GET_OTP, { name, email, password });
@@ -79,6 +87,13 @@ const RegisterPage = () => {
     };
 
     const handleRegister = async (e) => {
+        const result = validatePassword(password);
+        if (!result.isValid) {
+            result.errors.forEach(error => {
+                setToast({ message: error, type: "error" });
+            });
+            return;
+        }
         e.preventDefault();
         try {
             const response = await axios.post(`${REGISTER_URL}?otp=${otp}`, { name, email, password });

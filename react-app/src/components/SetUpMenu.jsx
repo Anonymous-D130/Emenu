@@ -1,42 +1,13 @@
 import React, {useCallback, useEffect, useState} from "react";
 import CategoryList from "./CategoryList";
 import CategoryDetails from "./CategoryDetails";
-import AddCategoryModal from "../modals/AddCategoryModal.jsx";
-import AddSubCategoryModal from "../modals/AddSubCategoryModal.jsx";
-import AddItemModal from "../modals/AddItemModal.jsx";
 import axios from "axios";
 import {
     ADD_CATEGORY,
     FETCH_CATEGORIES,
-    ADD_SUBCATEGORY,
-    ADD_FOOD_ITEM,
     FETCH_SUBCATEGORY_FOOD
 } from "../utils/config.js";
-import {validateFoodForm} from "../utils/Utility.js";
-
-const initialState = {
-    id: "",
-    name: "",
-    imageUrl: "",
-    menuPrice: "",
-    offerPrice: "",
-    available: false,
-    description: "",
-    foodType: "",
-    meatType: null,
-    servingInfo: "",
-    tag: [],
-    nutritionInfo: {
-        calories: { value: "", unit: "grams" },
-        protein: { value: "", unit: "grams" },
-        carbohydrates: { value: "", unit: "grams" },
-        fats: { value: "", unit: "grams" },
-        fiber: { value: "", unit: "grams" },
-        sugar: { value: "", unit: "grams" },
-    },
-    subCategory: null,
-    category: null
-}
+import AddCategoryModal from "../modals/AddCategoryModal.jsx";
 
 const SetUpMenu = ({ setToast }) => {
     const token = localStorage.getItem("token");
@@ -44,20 +15,11 @@ const SetUpMenu = ({ setToast }) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSubCategory, setSelectedSubCategory] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [showSubCategoryModal, setShowSubCategoryModal] = useState(false);
-    const [showItemModal, setShowItemModal] = useState(false);
-    const [categoryName, setCategoryName] = useState("");
-    const [subCategory, setSubCategory] = useState("");
     const [loading, setLoading] = useState(false);
     const [foodLoading, setFoodLoading] = useState(false);
-    const [buttonLoading, setButtonLoading] = useState(false);
-    const [imagePreview, setImagePreview] = useState("");
     const [foodItems, setFoodItems] = useState([]);
-    const [subCategoryParent, setSubCategoryParent] = useState({
-        name: "",
-        subCategories: []
-    });
-    const [foodItem, setFoodItem] = useState(initialState);
+    const [categoryName, setCategoryName] = useState("");
+    const [buttonLoading, setButtonLoading] = useState(false);
 
     const fetchCategories = useCallback(async () => {
         setLoading(true);
@@ -106,25 +68,6 @@ const SetUpMenu = ({ setToast }) => {
         setCategoryName("");
     };
 
-    const openSubCategoryModal = (category) => {
-        setSubCategoryParent(category);
-        setShowSubCategoryModal(true);
-    };
-
-    const closeSubCategoryModal = () => {
-        setShowSubCategoryModal(false);
-        setSubCategory("");
-    };
-
-    const showAddItemModal = () => {
-        setShowItemModal(true);
-    }
-
-    const closeAddItemModal = () => {
-        setShowItemModal(false);
-    };
-
-    // Add Category
     const handleAddCategory = async (e) => {
         e.preventDefault();
         setButtonLoading(true);
@@ -133,7 +76,7 @@ const SetUpMenu = ({ setToast }) => {
             try {
                 const response = await axios.post(ADD_CATEGORY, newCategory, { headers: { Authorization: `Bearer ${token}` }});
                 setToast({ message: response?.data.message, type: "success" });
-                fetchCategories().then(r => r);
+                await fetchCategories();
                 closeModal();
             } catch (error) {
                 console.error("Error adding category:", error);
@@ -143,44 +86,6 @@ const SetUpMenu = ({ setToast }) => {
             }
         }
     };
-
-    // Add Subcategory
-    const handleAddSubCategory = async (e) => {
-        e.preventDefault();
-        if (subCategory.trim() && subCategoryParent?.id) {
-            setButtonLoading(true);
-            try {
-                const payload = {name: subCategory, categoryId: subCategoryParent.id};
-                const response = await axios.post(ADD_SUBCATEGORY(subCategoryParent.id), payload, {headers: { Authorization: `Bearer ${token}` }});
-                setToast({ message: response?.data.message || "Subcategory added successfully", type: "success" });
-                fetchCategories().then(r => r);
-                closeSubCategoryModal();
-            } catch (error) {
-                setToast({message: error.response ? error.response.data : error.message, type: "error"});
-            } finally {
-                setButtonLoading(false);
-            }
-        }
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if(!validateFoodForm(foodItem, setToast)) return;
-        setButtonLoading(true);
-        try {
-            const response = await axios.post(ADD_FOOD_ITEM(foodItem.subCategory?.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
-            setToast({ message: response?.data.message, type: "success" });
-            fetchFoodItems().then(f => f);
-            setFoodItem(initialState);
-            setImagePreview("");
-            closeAddItemModal();
-        } catch (error) {
-            setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
-            console.log("Error adding food item", error);
-        } finally {
-            setButtonLoading(false);
-        }
-    }
 
     return (
         <div className="w-full bg-white p-5 md:p-8 rounded-2xl">
@@ -195,7 +100,7 @@ const SetUpMenu = ({ setToast }) => {
                 <div className="flex flex-col items-start justify-center gap-4 mb-6">
                     <h2 className="text-xl font-semibold text-gray-700">Categories</h2>
                     <button
-                        className="bg-purple-600 text-white font-sans rounded-md py-3 p-5 w-full md:w-auto"
+                        className="bg-purple-600 cursor-pointer text-white font-sans rounded-md py-3 p-5 w-full md:w-auto hover:bg-purple-800"
                         onClick={openModal}
                     >
                         + ADD CATEGORY
@@ -207,10 +112,15 @@ const SetUpMenu = ({ setToast }) => {
                         categories={categories}
                         setSelectedCategory={setSelectedCategory}
                         selectedCategory={selectedCategory}
-                        openSubCategoryModal={openSubCategoryModal}
                         selectedSubCategory={selectedSubCategory}
                         setSelectedSubCategory={setSelectedSubCategory}
                         openModal={openModal}
+                        closeModal={closeModal}
+                        showModal={showModal}
+                        categoryName={categoryName}
+                        setCategoryName={setCategoryName}
+                        setToast={setToast}
+                        fetchCategories={fetchCategories}
                     />
 
                     {/* Divider */}
@@ -219,12 +129,12 @@ const SetUpMenu = ({ setToast }) => {
                     <CategoryDetails
                         selectedCategory={selectedCategory}
                         selectedSubCategory={selectedSubCategory}
-                        showAddItemModal={showAddItemModal}
                         setToast={setToast}
                         categories={categories}
-                        fetchFoodItems={fetchFoodItems}
                         foodItems={foodItems}
+                        setFoodItems={setFoodItems}
                         loading={foodLoading}
+                        fetchItems={fetchFoodItems}
                     />
                 </div>
 
@@ -237,29 +147,6 @@ const SetUpMenu = ({ setToast }) => {
                 categoryName={categoryName}
                 setCategoryName={setCategoryName}
                 handleAddCategory={handleAddCategory}
-            />
-
-            <AddSubCategoryModal
-                buttonLoading={buttonLoading}
-                showSubCategoryModal={showSubCategoryModal}
-                closeSubCategoryModal={closeSubCategoryModal}
-                subCategory={subCategory}
-                setSubCategory={setSubCategory}
-                subCategoryParent={subCategoryParent}
-                handleAddSubCategory={handleAddSubCategory}
-            />
-
-            <AddItemModal
-                showItemModal={showItemModal}
-                closeAddItemModal={closeAddItemModal}
-                foodItem={foodItem}
-                setFoodItem={setFoodItem}
-                handleSubmit={handleSubmit}
-                setToast={setToast}
-                categories={categories}
-                buttonLoading={buttonLoading}
-                imagePreview={imagePreview}
-                setImagePreview={setImagePreview}
             />
         </div>
     );

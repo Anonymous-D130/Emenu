@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Home from "./pages/Home";
 import LoginPage from "./auth/LoginPage.jsx";
 import RegisterPage from "./auth/RegisterPage.jsx";
@@ -12,8 +12,12 @@ import "./App.css";
 import CustomerRoutes from "./customer/components/CustomerRoutes.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ComingSoon from "./pages/ComingSoon.jsx";
+import verifyJWT from "./utils/VerifyJWT.js";
 
 function App() {
+
+    verifyJWT();
+
     return (
         <Router>
             {/*<Navbar/>*/}

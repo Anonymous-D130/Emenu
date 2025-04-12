@@ -12,7 +12,7 @@ public class SubscriptionScheduler {
 
     private final SubscriptionRepo subscriptionRepo;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0,12 * * ?")
     public void checkAndExpireSubscriptions() {
         deactivateExpiredSubscriptions();
     }

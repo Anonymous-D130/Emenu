@@ -17,6 +17,7 @@ import ErrorPage from "./ErrorPage.jsx";
 import Toast from "../../utils/Toast.jsx";
 import OrderPlacedModal from "../components/OrderPlacedModal.jsx";
 import ContactModal from "../components/ContactModal.jsx";
+import customerActivity from "../utils/CustomerActivity.js";
 
 const filterOptions = [
     { label: "Veg", icon: <img src={`${Veg}`} alt="veg" className="w-4 h-4 bg-white" />, value: "VEG" },
@@ -49,6 +50,8 @@ const Food = () => {
         items: [],
         totalAmount: 0,
     });
+
+    customerActivity(customer);
     
     const updateTable = useCallback(async () => {
         try {

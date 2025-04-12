@@ -121,6 +121,15 @@ public class CustomerServiceImpl implements CustomerService {
         return response;
     }
 
+    @Override
+    public Response deleteCustomer(UUID customerId) {
+        Response response = new Response();
+        customerRepo.delete(getCustomerById(customerId));
+        response.setMessage("Customer has been deleted.");
+        response.setStatus(HttpStatus.OK);
+        return response;
+    }
+
     private OrderItem mapOrderItem(CartItem cartItem) {
         OrderItem orderItem = new OrderItem();
         orderItem.setFood(cartItem.getFood());
