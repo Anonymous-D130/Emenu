@@ -16,6 +16,7 @@ const ExpiredSubscription = () => {
     const token = localStorage.getItem("token");
     const [toast, setToast] = useState(initialToastState);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const user = JSON.parse(localStorage.getItem("user"));
     const [selectedPlan, setSelectedPlan] = useState(null);
 
@@ -75,23 +76,23 @@ const ExpiredSubscription = () => {
             setToast({ message: "Failed to load Razorpay SDK. Check your internet connection.", type: "error" });
             return;
         }
-
+        setLoading(true);
         try {
             const { data } = await axios.post(INITIATE_PAYMENT(selectedPlan), {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
             const order = data?.data;
             if (!order?.razorpay_order_id || !order?.amount) {
                 throw new Error("Invalid Razorpay order response.");
             }
-
             const razorpayOptions = createRazorpayOptions(order.razorpay_order_id, order.amount);
             const rzp = new window.Razorpay(razorpayOptions);
             rzp.open();
         } catch (error) {
             console.error("Subscription/payment initiation failed:", error);
             setToast({message: error.response ? error.response.data.message : error.message || "Failed to initiate payment", type: "error",});
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -102,6 +103,11 @@ const ExpiredSubscription = () => {
     return (
         <main className="w-full p-4 md:p-10 lg:p-12 mt-45 md:mt-15">
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
+            {loading && (
+                <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            )}
             <div>
                 <div className="p-4">
                     <h2 className="text-3xl font-bold text-center text-gray-800">
