@@ -9,7 +9,7 @@ import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
 import CreateRestaurant from "../pages/CreateRestaurant.jsx";
 import Subscription from "../pages/Subscription.jsx";
-import {useEffect} from "react";
+import {useCallback, useEffect} from "react";
 import axios from "axios";
 import {IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
 import OfferZone from "../pages/OfferZone.jsx";
@@ -20,25 +20,26 @@ const RestaurantRoutes = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useEffect(() => {
-        const fetchSubscriptionStatus = async () => {
-            try {
-                const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`},});
-                const status = response.data;
-                const currentPath = location.pathname;
-                if (status === "NEW" && currentPath !== "/restaurant") {
-                    navigate("/restaurant", { replace: true });
-                } else if (status === "ACTIVE" && currentPath === "/restaurant") {
-                    navigate("/restaurant/dashboard", { replace: true });
-                } else if (status === "EXPIRED" && currentPath !== "/restaurant/expired") {
-                    navigate("/restaurant/expired", { replace: true });
-                }
-            } catch (error) {
-                console.error("Error while fetching subscription status:", error);
+    const fetchSubscriptionStatus = useCallback(async () => {
+        try {
+            const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`},});
+            const status = response.data;
+            const currentPath = location.pathname;
+            if (status === "NEW" && currentPath !== "/restaurant") {
+                navigate("/restaurant", { replace: true });
+            } else if (status === "ACTIVE" && currentPath === "/restaurant") {
+                navigate("/restaurant/dashboard", { replace: true });
+            } else if (status === "EXPIRED" && currentPath !== "/restaurant/expired") {
+                navigate("/restaurant/expired", { replace: true });
             }
-        };
+        } catch (error) {
+            console.error("Error while fetching subscription status:", error);
+        }
+    }, [location.pathname, navigate, token]);
+
+    useEffect(() => {
         fetchSubscriptionStatus().then(s => s);
-    }, [token, navigate, location.pathname]);
+    }, [fetchSubscriptionStatus]);
 
     return (
         <div className="flex min-h-screen bg-gray-100 justify-center">
