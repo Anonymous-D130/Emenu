@@ -52,11 +52,8 @@ public class AuthController {
         if(!isEmailOtpValid){
             throw new BadCredentialsException("Email OTP is not valid");
         }
-        authService.register(user);
-        Response response = new Response();
-        response.setStatus(HttpStatus.CREATED);
-        response.setMessage("User registered successfully");
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        Response response = authService.register(user);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 

@@ -16,7 +16,6 @@ public class Utility {
     public LoginUser getUserFromToken(String token) {
         token = token.replace("Bearer ", "");
         String email = jwtUtils.parseToken(token).getSubject();
-        return userRepo.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("User Not Found"));
+        return userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User Not Found"));
     }
 }

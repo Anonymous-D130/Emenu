@@ -35,6 +35,7 @@ import java.util.UUID;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final Utility utility;
+
     @Value("${razorpay.key_secret}")
     private String razorpaySecret;
 
