@@ -4,7 +4,6 @@ import axios from "axios";
 import {
     COMPANY_NAME,
     INITIATE_PAYMENT,
-    IS_SUBSCRIPTION_ACTIVE,
     RAZORPAY_CURRENCY,
     RAZORPAY_KEY,
     VERIFY_PAYMENT
@@ -19,18 +18,6 @@ const ExpiredSubscription = () => {
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("user"));
     const [selectedPlan, setSelectedPlan] = useState(null);
-
-    useEffect(() => {
-        const fetchSubscription = async () => {
-            try {
-                const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`}});
-                if (response.data) navigate("/restaurant/dashboard");
-            } catch (error) {
-                console.error("Error while fetching: ", error);
-            }
-        };
-        fetchSubscription().then(r => r);
-    }, [token, navigate]);
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {
