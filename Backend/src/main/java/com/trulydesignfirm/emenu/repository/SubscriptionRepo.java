@@ -10,6 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface SubscriptionRepo extends JpaRepository<Subscription, UUID> {
-
     Optional<Subscription> getSubscriptionByOwner(LoginUser owner);
 }

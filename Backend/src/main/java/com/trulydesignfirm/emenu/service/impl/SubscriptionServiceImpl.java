@@ -13,12 +13,14 @@ import com.trulydesignfirm.emenu.repository.SubscriptionRepo;
 import com.trulydesignfirm.emenu.service.PaymentService;
 import com.trulydesignfirm.emenu.service.SubscriptionService;
 import com.trulydesignfirm.emenu.service.utils.Utility;
+import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -43,6 +45,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final PaymentRepo paymentRepo;
 
     @Override
+    @Transactional
     public Response initiateSubscription(String token, UUID subscriptionID) {
         SubscriptionPlan subscriptionPlan = subscriptionPlanRepo.findById(subscriptionID).
                 orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
@@ -68,6 +71,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional
     public Response verifyPayment(String token, String paymentId, String orderId, String signature) {
         LoginUser user = utility.getUserFromToken(token);
         Response response = new Response();

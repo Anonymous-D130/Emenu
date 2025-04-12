@@ -28,7 +28,7 @@ public class RestaurantController {
     }
 
     @PostMapping("/subscribe/{planId}")
-    public ResponseEntity<Response> subscribeToTrial(@RequestHeader("Authorization") String token, @PathVariable UUID planId) {
+    public ResponseEntity<Response> subscribe(@RequestHeader("Authorization") String token, @PathVariable UUID planId) {
         Response response = subscriptionService.initiateSubscription(token, planId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
