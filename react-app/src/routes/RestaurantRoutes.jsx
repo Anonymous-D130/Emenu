@@ -25,11 +25,12 @@ const RestaurantRoutes = () => {
             try {
                 const response = await axios.get(IS_SUBSCRIPTION_ACTIVE, {headers: {Authorization: `Bearer ${token}`},});
                 const status = response.data;
-                if (status === "NEW") {
+                const currentPath = location.pathname;
+                if (status === "NEW" && currentPath !== "/restaurant") {
                     navigate("/restaurant");
-                } else if (status === "ACTIVE" && location.pathname === "/restaurant") {
+                } else if (status === "ACTIVE" && currentPath === "/restaurant") {
                     navigate("/restaurant/dashboard");
-                } else if (status === "EXPIRED" && location.pathname !== "/restaurant/expired") {
+                } else if (status === "EXPIRED" && currentPath !== "/restaurant/expired") {
                     navigate("/restaurant/expired");
                 }
             } catch (error) {
