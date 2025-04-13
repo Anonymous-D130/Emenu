@@ -46,4 +46,11 @@ public class Order {
     @JsonIgnore
     @ManyToOne
     private Restaurant restaurant;
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+        if (status == OrderStatus.COMPLETED && this.completedAt == null) {
+            this.completedAt = LocalDateTime.now();
+        }
+    }
 }
