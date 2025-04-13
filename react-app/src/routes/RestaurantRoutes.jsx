@@ -29,7 +29,7 @@ const RestaurantRoutes = () => {
                 navigate("/restaurant", { replace: true });
             } else if (status === "EXPIRED" && currentPath !== "/restaurant/expired") {
                 navigate("/restaurant/expired", { replace: true });
-            } else if (status === "ACTIVE" && currentPath === "/restaurant") {
+            } else if (status === "ACTIVE" && (currentPath === "/restaurant" || currentPath === "/restaurant/expired" || currentPath === "/restaurant/")) {
                 navigate("/restaurant/dashboard", {replace: true});
             }
         } catch (error) {
