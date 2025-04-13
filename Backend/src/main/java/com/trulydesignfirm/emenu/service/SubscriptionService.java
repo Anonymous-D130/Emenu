@@ -13,6 +13,7 @@ public interface SubscriptionService {
     Response verifyPayment(String token, String paymentId, String orderId, String signature);
     List<SubscriptionPlan> getAllSubscriptionPlans();
     Response createSubscriptionPlan(SubscriptionPlan subscriptionPlan);
+    Response createSubscriptionPlans(List<SubscriptionPlan> subscriptionPlans);
     Response updateSubscriptionPlan(UUID planID, SubscriptionPlan subscriptionPlan);
     Response deleteSubscriptionPlan(UUID planID);
 }

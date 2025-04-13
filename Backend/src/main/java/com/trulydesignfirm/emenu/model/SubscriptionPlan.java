@@ -33,6 +33,10 @@ public class SubscriptionPlan {
     @Column(nullable = false)
     private String description;
 
+    private Integer menuCount;
+    private Integer qrCount;
+    private boolean ringBellIncluded;
+
     @ElementCollection
     private List<String> features;
 }

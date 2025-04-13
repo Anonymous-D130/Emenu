@@ -36,7 +36,7 @@ public class AuthController {
         Response response = new Response();
         authService.exitsUser(user);
         otpService.generateAndSendOtp(user.getEmail(), "OTP to register in %s".formatted(companyName));
-        response.setMessage("OTP sent successfully to email. Please verify OTP to complete registration.");
+        response.setMessage("OTP successfully sent to email. Please verify OTP to complete registration.");
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

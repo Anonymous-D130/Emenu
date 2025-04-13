@@ -21,7 +21,7 @@ const CustomerActivity = (customer) => {
                     localStorage.removeItem("customer");
                     window.location.href = "/";
                 }
-            }, 60 * 1000);
+            }, 2 * 60 * 60 * 1000); // 2hours
         };
 
         window.addEventListener("mousemove", resetTimer);

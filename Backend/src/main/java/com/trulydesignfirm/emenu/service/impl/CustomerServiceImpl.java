@@ -114,6 +114,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Response ringBell(UUID customerId, UUID restaurantId) {
+        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+        LoginUser owner = restaurant.getOwner();
+        if (owner.getSubscription() == null || owner.getSubscription().isExpired()) {
+            throw new RuntimeException("%s's subscription is expired or not active.".formatted(restaurant.getName()));
+        }
+        if (!owner.getSubscription().getPlan().isRingBellIncluded()) {
+            throw new RuntimeException("This restaurant does not have the ring bell feature included in its subscription.");
+        }
         Response response = new Response();
         sendRingBell(getCustomerById(customerId).getTableNumber(), restaurantId);
         response.setMessage("Restaurant has been notified.");
@@ -132,7 +140,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     private OrderItem mapOrderItem(CartItem cartItem) {
         OrderItem orderItem = new OrderItem();
-        orderItem.setFood(cartItem.getFood());
+        Food food = foodRepo.findById(cartItem.getFood().getId())
+                .orElseThrow(() -> new RuntimeException("Food item not found"));
+        orderItem.setFood(food);
+        orderItem.setFoodName(food.getName());
         orderItem.setQuantity(cartItem.getQuantity());
         orderItem.setAmount(cartItem.getAmount());
         return orderItem;

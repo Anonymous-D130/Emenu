@@ -17,6 +17,12 @@ public class AdminController {
 
     private final SubscriptionService subscriptionService;
 
+    @PostMapping("/plans")
+    public ResponseEntity<Response> createSubscriptionPlans(@RequestBody List<SubscriptionPlan> subscriptionPlans) {
+        Response response = subscriptionService.createSubscriptionPlans(subscriptionPlans);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @PostMapping("/plan")
     public ResponseEntity<Response> createSubscriptionPlan(@RequestBody SubscriptionPlan subscriptionPlan) {
         Response response = subscriptionService.createSubscriptionPlan(subscriptionPlan);

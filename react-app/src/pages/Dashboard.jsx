@@ -149,8 +149,8 @@ const Dashboard = () => {
 
             {/* Tables Card */}
             <section className="bg-white p-5 rounded-2xl shadow-md col-span-2 row-span-2">
-                <h2 className="text-3xl font-bold mb-4">Tables</h2>
-                <div className="flex gap-4 text-sm mb-4">
+                <h2 className="text-3xl font-bold mb-4 p-3">Tables</h2>
+                <div className="flex gap-4 text-sm mb-4 p-3">
                     <span className="flex items-center gap-2">
                         <span className="h-3 w-3 bg-yellow-400 rounded-full" />
                         Tables Filled ({tablesFilled.length})
@@ -162,7 +162,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-5">
-                {Array.from({ length: 15 }, (_, i) => {
+                {Array.from({ length: totalTables }, (_, i) => {
                         const tableNum = i + 1;
                         const isFilled = tablesFilled.includes(tableNum);
 

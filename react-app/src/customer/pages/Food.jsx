@@ -166,7 +166,7 @@ const Food = () => {
             </div>}
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast(initialToastState)} />}
             <div className="bg-yellow-400 px-4 py-3 flex items-center justify-between rounded-b-3xl">
-                <img src={logo} alt="logo" className="h-35 max-w-screen" />
+                <img src={logo} alt="logo" className="h-35 max-w-2/3" />
                 <button className="border px-3 py-1 rounded-xl text-lg font-bold flex items-center gap-2">
                     <SiGoogletranslate/> English
                 </button>

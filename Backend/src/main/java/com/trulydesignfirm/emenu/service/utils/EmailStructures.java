@@ -1,5 +1,6 @@
 package com.trulydesignfirm.emenu.service.utils;
 
+import com.trulydesignfirm.emenu.model.SubscriptionPlan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -130,5 +131,82 @@ public class EmailStructures {
            </body>
        </html>
     """.formatted(name, email, mobile, eventDetails, companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl);
+    }
+
+    public String generateRestaurantRegistrationEmail(String restaurantName) {
+        return """
+        <html>
+           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+               <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; text-align: center;">
+                   <h2 style="color: #28a745;">🎉 Congratulations on Your Successful Registration!</h2>
+
+                   <p>Dear %s Team,</p>
+                   <p>We are excited to inform you that your restaurant, <b>%s</b>, has been successfully registered with <b>%s</b>!</p>
+
+                   <p>We believe that this marks the beginning of a fruitful partnership, and we are thrilled to have you on board. You can now start managing your menu, receiving orders, and providing your customers with an enhanced dining experience!</p>
+
+                   <p>If you need any assistance or have questions, feel free to reach out to our support team. We’re always here to help!</p>
+
+                   <hr style="margin-top: 40px;">
+
+                   <p style="text-align: center; font-size: 14px; color: #555;">
+                       <b>The %s Team</b> <br>
+                       📧 Email: <a href="mailto:%s" style="color: #007bff;">%s</a> <br>
+                       📞 Phone: %s <br>
+                       🌐 Website: <a href="%s" style="color: #007bff;">%s</a>
+                   </p>
+               </div>
+           </body>
+       </html>
+    """.formatted(restaurantName, restaurantName, companyName, companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl);
+    }
+
+    public String generateSubscriptionSuccessEmail(String owner, SubscriptionPlan plan) {
+        StringBuilder featuresList = new StringBuilder();
+        if (plan.getFeatures() != null && !plan.getFeatures().isEmpty()) {
+            featuresList.append("<li><strong>Features Included:</strong><ul>");
+            for (String feature : plan.getFeatures()) {
+                featuresList.append("<li>").append(feature).append("</li>");
+            }
+            featuresList.append("</ul></li>");
+        }
+
+        return """
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #4CAF50;">🎉 Subscription Purchased Successfully!</h2>
+            <p>Dear %s,</p>
+            <p>Thank you for subscribing to our <strong>%s</strong> plan.</p>
+            <p>Here are the details of your subscription:</p>
+            <ul>
+                <li><strong>Plan Name:</strong> %s</li>
+                <li><strong>Price:</strong> ₹%s</li>
+                <li><strong>Duration:</strong> %d day(s)</li>
+                %s
+                <li><strong>Description:</strong> %s</li>
+            </ul>
+            <p>We’re excited to have you on board. Enjoy the premium features and feel free to reach out if you have any questions.</p>
+            <hr style="margin-top: 40px;">
+
+               <p style="text-align: center; font-size: 14px; color: #555;">
+                   <b>The %s Team</b> <br>
+                   📧 Email: <a href="mailto:%s" style="color: #007bff;">%s</a> <br>
+                   📞 Phone: %s <br>
+                   🌐 Website: <a href="%s" style="color: #007bff;">%s</a>
+               </p>
+        </div>
+    </body>
+    </html>
+    """.formatted(
+            owner,
+            plan.getTitle(),
+            plan.getTitle(),
+            plan.getPrice().toPlainString(),
+            plan.getDuration(),
+            featuresList.toString(),
+            plan.getDescription(),
+            companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl
+        );
     }
 }

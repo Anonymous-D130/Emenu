@@ -84,7 +84,7 @@ const Subscription = () => {
         const remaining = end - now;
 
         const percentage = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-        const daysRemaining = Math.max(0, Math.ceil(remaining / (1000 * 60 * 60 * 24)));
+        const daysRemaining = Math.max(0, Math.floor(remaining / (1000 * 60 * 60 * 24)));
 
         return { percentage, daysRemaining };
     };

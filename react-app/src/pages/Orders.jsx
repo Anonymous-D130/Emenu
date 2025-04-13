@@ -344,9 +344,13 @@ const Orders = () => {
                                             className="p-3 text-gray-700 cursor-pointer"
                                             onClick={() => viewTableOrder(order.tableNumber, order)}
                                         >
-                                            {order.orderItems.length > 0 ? order?.orderItems.map((item, i) => {
-                                                    `${item.food.name}${i !== order?.orderItems.length - 1 ? ', ' : ''}`
-                                                }
+                                            {order?.orderItems.length > 0 ? (
+                                                order?.orderItems.map((item, i) => (
+                                                <>
+                                                    {item?.foodName}
+                                                    {i !== order?.orderItems.length - 1 ? ', ' : ''}
+                                                </>
+                                                ))
                                             ) : <p>No Info Available</p>}
                                             {order.status === "PENDING" && (
                                                 <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full font-bold">

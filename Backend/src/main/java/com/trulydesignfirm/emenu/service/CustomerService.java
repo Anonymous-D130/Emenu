@@ -4,11 +4,13 @@ import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.dto.Cart;
 import com.trulydesignfirm.emenu.enums.Tag;
 import com.trulydesignfirm.emenu.model.*;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Service
 public interface CustomerService {
     Restaurant findRestaurantById(UUID id);
     Map<Tag, List<Food>> getFoodsByTag(Restaurant restaurant);

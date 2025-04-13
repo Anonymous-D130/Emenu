@@ -12,6 +12,8 @@ import com.trulydesignfirm.emenu.repository.SubscriptionPlanRepo;
 import com.trulydesignfirm.emenu.repository.SubscriptionRepo;
 import com.trulydesignfirm.emenu.service.PaymentService;
 import com.trulydesignfirm.emenu.service.SubscriptionService;
+import com.trulydesignfirm.emenu.service.utils.EmailService;
+import com.trulydesignfirm.emenu.service.utils.EmailStructures;
 import com.trulydesignfirm.emenu.service.utils.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,8 @@ import java.util.UUID;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final Utility utility;
+    private final EmailStructures emailStructures;
+    private final EmailService emailService;
 
     @Value("${razorpay.key_secret}")
     private String razorpaySecret;
@@ -92,6 +96,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             paymentDetails.setPaymentId(paymentId);
             paymentRepo.save(paymentDetails);
             saveSubscriptionPlan(paymentDetails, user, paymentDetails.getDuration());
+            String body = emailStructures.generateSubscriptionSuccessEmail(user.getName(), paymentDetails.getPlan());
+            emailService.sendEmail(user.getEmail(), "🥳 Congrats! You’ve Subscribed", body);
             response.setMessage("Subscription purchased successfully.");
             response.setStatus(HttpStatus.OK);
         } catch (Exception e) {
@@ -121,6 +127,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         subscriptionPlanRepo.save(subscriptionPlan);
         response.setMessage("Subscription plan created.");
+        response.setStatus(HttpStatus.CREATED);
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public Response createSubscriptionPlans(List<SubscriptionPlan> subscriptionPlans) {
+        Response response = new Response();
+        List<SubscriptionPlan> newPlans = subscriptionPlans.stream()
+                .filter(plan -> !subscriptionPlanRepo.existsByTitleAndPriceAndDescription(
+                        plan.getTitle(), plan.getPrice(), plan.getDescription()))
+                .toList();
+        subscriptionPlanRepo.saveAll(newPlans);
+        response.setMessage("Subscription plans created.");
         response.setStatus(HttpStatus.CREATED);
         return response;
     }

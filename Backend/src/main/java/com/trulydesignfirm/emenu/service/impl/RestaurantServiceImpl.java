@@ -9,6 +9,8 @@ import com.trulydesignfirm.emenu.repository.*;
 import com.trulydesignfirm.emenu.service.QrCodeService;
 import com.trulydesignfirm.emenu.service.RestaurantService;
 import com.trulydesignfirm.emenu.service.utils.CloudinaryService;
+import com.trulydesignfirm.emenu.service.utils.EmailService;
+import com.trulydesignfirm.emenu.service.utils.EmailStructures;
 import com.trulydesignfirm.emenu.service.utils.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,9 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final CategoryRepo categoryRepo;
     private final OrderRepo orderRepo;
     private final SimpMessagingTemplate messagingTemplate;
+    private final EmailService emailService;
+    private final EmailStructures emailStructures;
+    private final OrderItemRepo orderItemRepo;
 
     @Value("${menu.website.url}")
     private String websiteUrl;
@@ -63,15 +68,18 @@ public class RestaurantServiceImpl implements RestaurantService {
     public Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest) {
         LoginUser owner = utility.getUserFromToken(token);
         Restaurant restaurant = restaurantRepo.getRestaurantByOwner(owner).orElse(null);
-        if(restaurantRepo.existsByPageName(restaurantRequest.getPageName())){
+        if(checkPageName(token, restaurantRequest.getPageName())) {
             throw new IllegalArgumentException("Page name already taken. Please choose another one.");
         }
         if (restaurant == null) {
             restaurantRequest.setOwner(owner);
-            restaurantRepo.save(restaurantRequest);
+            Restaurant savedRestro = restaurantRepo.save(restaurantRequest);
             Response response = new Response();
             response.setMessage("Restaurant created successfully.");
             response.setStatus(HttpStatus.CREATED);
+            String body = emailStructures.generateRestaurantRegistrationEmail(savedRestro.getName());
+            String subject = "Congratulations on Your Successful Registration!";
+            emailService.sendEmail(savedRestro.getOwner().getEmail(), subject, body);
             return response;
         } else {
             restaurant.setName(restaurantRequest.getName());
@@ -176,9 +184,18 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public Response deleteRestaurantCategory(String token, UUID categoryId) {
         Restaurant restaurant = getRestaurantByToken(token);
-        boolean removed = restaurant.getCategories().removeIf(category -> category.getId().equals(categoryId));
-        if (!removed)
-            throw new RuntimeException("Category not found");
+        Category category = restaurant.getCategories().stream()
+                .filter(cat -> cat.getId().equals(categoryId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        category.getSubCategories()
+                .forEach(subCategory -> subCategory.getFoods()
+                        .forEach(food -> orderItemRepo.findByFood(food)
+                                .forEach(item -> item.setFood(null))));
+
+        restaurant.getCategories().remove(category);
+        categoryRepo.delete(category);
         restaurantRepo.save(restaurant);
         Response response = new Response();
         response.setMessage("Category removed successfully");
@@ -244,7 +261,9 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .orElseThrow(() -> new RuntimeException("SubCategory not found"));
         if (!subCategory.getCategory().getRestaurant().equals(restaurant)) {
             throw new RuntimeException("SubCategory not found");
-        } subCategoryRepo.delete(subCategory);
+        }
+        subCategory.getFoods().forEach(food -> orderItemRepo.findByFood(food).forEach(item -> item.setFood(null)));
+        subCategoryRepo.delete(subCategory);
         response.setMessage("SubCategory removed successfully");
         response.setStatus(HttpStatus.OK);
         return response;
@@ -276,6 +295,43 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public Response addRestaurantFood(String token, Food food, UUID subCategoryId) {
         Response response = new Response();
+        LoginUser user = utility.getUserFromToken(token);
+        if (user.getSubscription() == null) {
+            if (getRestaurantFoods(token).size() >= 3) {
+                throw new RuntimeException("Please complete the process to add more food items.");
+            }
+            SubCategory subCategory = subCategoryRepo.findById(subCategoryId)
+                    .orElseThrow(() -> new RuntimeException("SubCategory not found"));
+
+            if(food.getMenuPrice() <= 0 || food.getOfferPrice() <= 0){
+                throw new RuntimeException("Price must be greater than 0");
+            }
+
+            Restaurant restaurant = getRestaurantByToken(token);
+            boolean exists = foodRepo.existsByNameAndRestaurant(food.getName(), restaurant);
+            if (exists) {
+                response.setMessage("Food already exists");
+                response.setStatus(HttpStatus.CONFLICT);
+                return response;
+            }
+
+            food.setSubCategory(subCategory);
+            food.setRestaurant(restaurant);
+            food.setAvailable(true);
+            foodRepo.save(food);
+            response.setMessage("Food added successfully");
+            response.setStatus(HttpStatus.CREATED);
+            return response;
+        }
+        if (user.getSubscription().isExpired()) {
+            throw new RuntimeException("Your subscription is not active.");
+        }
+        Integer menuLimit = user.getSubscription().getPlan().getMenuCount();
+        if (menuLimit != null && getRestaurantFoods(token).size() >= menuLimit) {
+            response.setMessage("Your subscription plan allows only " + menuLimit + " menu items.");
+            response.setStatus(HttpStatus.FORBIDDEN);
+            return response;
+        }
         Restaurant restaurant = getRestaurantByToken(token);
         boolean exists = foodRepo.existsByNameAndRestaurant(food.getName(), restaurant);
         if (exists) {
@@ -349,6 +405,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         if(!existingFood.getRestaurant().equals(restaurant)){
             throw new RuntimeException("Food Item not found");
         }
+        orderItemRepo.findByFood(existingFood).forEach(orderItem -> orderItem.setFood(null));
         foodRepo.delete(existingFood);
         response.setMessage("Food item deleted successfully");
         response.setStatus(HttpStatus.OK);
@@ -362,32 +419,22 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public Response generateTableQRCodes(String token, int tables) {
-        Response response = new Response();
-        Restaurant restaurant = getRestaurantByToken(token);
-        List<String> qrCodePaths = new ArrayList<>();
-        for (int tableNumber = 1; tableNumber <= tables; tableNumber++) {
-            String qrText = "%s/%s/?restaurantId=%s&tableNumber=%d".formatted(websiteUrl, customerRoute, restaurant.getId(), tableNumber);
-            Path localPath = Paths.get("qr-codes");
-            qrCodeService.saveQRCodeToFile(qrText, localPath).ifPresent(path -> {
-                try {
-                    String cloudinaryUrl = cloudinaryService.uploadFile(path.toFile());
-                    qrCodePaths.add(cloudinaryUrl);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to upload QR to Cloudinary");
-                } finally {
-                    try {
-                        Files.deleteIfExists(path);
-                    } catch (IOException e) {
-                        System.err.println("Failed to delete local QR file: " + path);
-                    }
-                }
-            });
+        LoginUser user = utility.getUserFromToken(token);
+        if (user.getSubscription() == null){
+            if (tables > 3) {
+                throw new RuntimeException("Please try less with 3 or less.");
+            }
+            return saveQrCode(token, tables);
         }
-        restaurant.setQrCodes(qrCodePaths);
-        restaurantRepo.save(restaurant);
-        response.setMessage("QR code generated successfully");
-        response.setStatus(HttpStatus.CREATED);
-        return response;
+
+        if(user.getSubscription().isExpired()) {
+            throw new RuntimeException("Your subscription is not active.");
+        }
+        Integer allowedQrs = user.getSubscription().getPlan().getQrCount();
+        if (allowedQrs != null && tables > allowedQrs) {
+            throw new RuntimeException("Your plan allows a maximum of " + allowedQrs + " tables.");
+        }
+        return saveQrCode(token, tables);
     }
 
     @Override
@@ -453,6 +500,35 @@ public class RestaurantServiceImpl implements RestaurantService {
     private void updateOrderStatus(UUID orderId, OrderStatus status) {
         OrderStatusUpdate update = new OrderStatusUpdate(orderId, status);
         messagingTemplate.convertAndSend("/topic/order-status", update);
+    }
+
+    private Response saveQrCode(String token, int tables) {
+        Response response = new Response();
+        Restaurant restaurant = getRestaurantByToken(token);
+        List<String> qrCodePaths = new ArrayList<>();
+        for (int tableNumber = 1; tableNumber <= tables; tableNumber++) {
+            String qrText = "%s/%s/?restaurantId=%s&tableNumber=%d".formatted(websiteUrl, customerRoute, restaurant.getId(), tableNumber);
+            Path localPath = Paths.get("qr-codes");
+            qrCodeService.saveQRCodeToFile(qrText, localPath).ifPresent(path -> {
+                try {
+                    String cloudinaryUrl = cloudinaryService.uploadFile(path.toFile());
+                    qrCodePaths.add(cloudinaryUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to upload QR to Cloudinary");
+                } finally {
+                    try {
+                        Files.deleteIfExists(path);
+                    } catch (IOException e) {
+                        System.err.println("Failed to delete local QR file: " + path);
+                    }
+                }
+            });
+        }
+        restaurant.setQrCodes(qrCodePaths);
+        restaurantRepo.save(restaurant);
+        response.setMessage("QR code generated successfully");
+        response.setStatus(HttpStatus.CREATED);
+        return response;
     }
 
 }

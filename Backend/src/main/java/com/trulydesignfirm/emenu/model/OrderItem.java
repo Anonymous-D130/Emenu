@@ -16,8 +16,10 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Food food;
+
+    private String foodName;
 
     private int quantity;
     private double amount;
