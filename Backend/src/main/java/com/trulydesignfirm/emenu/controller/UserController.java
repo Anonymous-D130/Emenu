@@ -35,9 +35,8 @@ public class UserController {
     }
 
     @PostMapping("/verify-token")
-    public ResponseEntity<?> verifyToken(@RequestParam String token, @RequestParam String email) {
-        userService.isTokenValid(token, email);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Boolean> verifyToken(@RequestParam String token, @RequestParam String email) {
+        return ResponseEntity.ok().body(userService.isTokenValid(token, email));
     }
 
     @PutMapping("/reset-password")

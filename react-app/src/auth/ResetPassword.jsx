@@ -21,30 +21,31 @@ const ResetPassword = () => {
     const tokenFromUrl = urlParams.get("token");
     const emailFromUrl = urlParams.get("email");
 
+    const verifyToken = async (token, email) => {
+        setLoad(true);
+        try {
+            const response = await axios.post(`${VERIFY_TOKEN_URL}?token=${token}&email=${email}`);
+            console.log(response.data);
+            setIsTokenValid(response.data);
+        } catch (error) {
+            const errorMessage = error.response
+                ? error.response.data.message || error.message
+                : error.message;
+            setIsTokenValid(false);
+            setToast({ message: `Error verifying link: ${errorMessage}`, type: "error" });
+        } finally {
+            setLoad(false);
+        }
+    };
+
     useEffect(() => {
         if (tokenFromUrl) {
             verifyToken(tokenFromUrl, emailFromUrl).then(r => r);
         }
     }, [emailFromUrl, location, tokenFromUrl]);
 
-    const verifyToken = async (token, email) => {
-        setLoad(true);
-        try {
-            await axios.post(`${VERIFY_TOKEN_URL}?token=${token}&email=${email}`);
-            setIsTokenValid(true);
-        } catch (error) {
-            const errorMessage = error.response
-                ? error.response.data.message || error.message
-                : error.message;
-            setIsTokenValid(false);
-            setToast({ message: `Error verifying token: ${errorMessage}`, type: "error" });
-        } finally {
-            setLoad(false);
-        }
-    };
     const handlePasswordReset = async (e) => {
         e.preventDefault();
-        setLoading(true);
         if (newPassword !== confirmPassword) {
             setToast({ message: "Passwords do not match", type: "error" });
             return;
@@ -56,6 +57,7 @@ const ResetPassword = () => {
             });
             return;
         }
+        setLoading(true);
         try {
             const response = await axios.put(`${RESET_PASSWORD_URL}?password=${newPassword}&email=${emailFromUrl}&token=${tokenFromUrl}`);
             if (response.data && response.data.message) {

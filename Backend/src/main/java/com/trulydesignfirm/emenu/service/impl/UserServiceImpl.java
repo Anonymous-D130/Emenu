@@ -91,13 +91,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void isTokenValid(String token, String email) {
+    public boolean isTokenValid(String token, String email) {
         if ((email == null || email.isEmpty())) {
             throw new IllegalArgumentException("Please provide email.");
         }
-        boolean isEmailOtpValid = token != null && !token.isEmpty() && otpService.isTokenValid(email, token);
-        if (isEmailOtpValid)
-            userRepo.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found."));
+        return token != null && !token.isEmpty() && otpService.isTokenValid(email, token);
     }
 
 }

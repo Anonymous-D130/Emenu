@@ -13,7 +13,7 @@ public interface UserService {
     LoginUser getUserProfile(String token);
     Subscription getUserSubscription(String token);
     Response sendForgotPasswordLink(String email);
-    void isTokenValid(String token, String email);
+    boolean isTokenValid(String token, String email);
     Response verifyForgotPasswordOtp( String password, String email, String emailOtp);
     Response getEventDetails(EventDetails event, UUID restaurantId);
 }
