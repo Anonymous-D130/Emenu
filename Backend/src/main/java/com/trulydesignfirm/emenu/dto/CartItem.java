@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class CartItem {
-
     private int quantity;
     private Food food;
     private double amount;
