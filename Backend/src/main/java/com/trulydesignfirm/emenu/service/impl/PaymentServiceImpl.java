@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -46,6 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public String createOrder(SubscriptionPlan plan, LoginUser user) throws RazorpayException {
         System.out.println(user.getSubscription());
         if (user.getSubscription() != null && !user.getSubscription().isExpired()) {

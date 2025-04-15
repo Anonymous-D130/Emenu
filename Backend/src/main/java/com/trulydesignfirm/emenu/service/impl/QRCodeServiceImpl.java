@@ -6,6 +6,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.trulydesignfirm.emenu.service.QrCodeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class QRCodeServiceImpl implements QrCodeService {
 
     private static final int DEFAULT_WIDTH = 300;
@@ -34,10 +36,14 @@ public class QRCodeServiceImpl implements QrCodeService {
             Files.createDirectories(directoryPath);
             String fileName = UUID.randomUUID() + ".png";
             Path qrFilePath = directoryPath.resolve(fileName);
+            while (Files.exists(qrFilePath)) {
+                fileName = UUID.randomUUID() + ".png";
+                qrFilePath = directoryPath.resolve(fileName);
+            }
             ImageIO.write(qrImage, "PNG", qrFilePath.toFile());
             return Optional.of(qrFilePath);
         } catch (IOException | WriterException e) {
-            System.out.println("Error while saving QR Code: " + e.getMessage());
+            log.error("Error while saving QR Code: {}", e.getMessage(), e);
             return Optional.empty();
         }
     }

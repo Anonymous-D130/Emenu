@@ -505,8 +505,20 @@ public class RestaurantServiceImpl implements RestaurantService {
     private Response saveQrCode(String token, int tables) {
         Response response = new Response();
         Restaurant restaurant = getRestaurantByToken(token);
-        List<String> qrCodePaths = new ArrayList<>();
-        for (int tableNumber = 1; tableNumber <= tables; tableNumber++) {
+        List<String> qrCodePaths = new ArrayList<>(restaurant.getQrCodes() != null ? restaurant.getQrCodes() : new ArrayList<>());
+        if (qrCodePaths.size() > tables) {
+            int excessCount = qrCodePaths.size() - tables;
+            for (int i = 0; i < excessCount; i++) {
+                String excessQrCode = qrCodePaths.get(qrCodePaths.size() - 1 - i);
+                try {
+                    cloudinaryService.deleteFile(excessQrCode);
+                } catch (IOException e) {
+                    System.err.println("Failed to delete excess QR code from Cloudinary: " + excessQrCode);
+                }
+            }
+            qrCodePaths.subList(tables, qrCodePaths.size()).clear();
+        }
+        for (int tableNumber = qrCodePaths.size() + 1; tableNumber <= tables; tableNumber++) {
             String qrText = "%s/%s/?restaurantId=%s&tableNumber=%d".formatted(websiteUrl, customerRoute, restaurant.getId(), tableNumber);
             Path localPath = Paths.get("qr-codes");
             qrCodeService.saveQRCodeToFile(qrText, localPath).ifPresent(path -> {

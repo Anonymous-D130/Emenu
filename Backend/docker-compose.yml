@@ -1,0 +1,59 @@
+services:
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: emenu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - backend
+    restart: always
+
+
+  # Your Application (Backend)
+  emenu-backend:
+    image: dhruvgupta130/emenu:latest
+    container_name: emenu-backend
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/emenu
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: root
+      FRONTEND_URL: ${FRONTEND_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      WEBSITE_DOMAIN: ${WEBSITE_DOMAIN}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_PORT: ${MAIL_PORT}
+      EMAIL_FROM: ${EMAIL_FROM}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL}
+      SUPPORT_MOBILE: ${SUPPORT_MOBILE}
+      COMPANY_NAME: ${COMPANY_NAME}
+      CUSTOMER_ROUTE: ${CUSTOMER_ROUTE}
+      RAZORPAY_CURRENCY: ${RAZORPAY_CURRENCY}
+      RAZORPAY_KEY: ${RAZORPAY_KEY}
+      RAZORPAY_SECRET: ${RAZORPAY_SECRET}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      CLOUD_NAME: ${CLOUD_NAME}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-db
+    networks:
+      - backend
+    restart: always
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
