@@ -69,6 +69,7 @@ export const GENERATE_QR = (tables) => `${BACKEND_URL}/api/restaurants/generate-
 
 //Orders
 export const FETCH_ORDERS = `${BACKEND_URL}/api/restaurants/orders`;
+export const FETCH_TODAY_ORDERS = `${BACKEND_URL}/api/restaurants/today-orders`;
 export const UPDATE_ORDER_STATUS = (orderId, orderStatus) => `${BACKEND_URL}/api/restaurants/order/${orderId}?orderStatus=${orderStatus}`;
 export const CANCEL_ORDER = (orderId) => `${BACKEND_URL}/api/restaurants/order/${orderId}`;
 

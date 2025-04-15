@@ -59,16 +59,6 @@ export const initialFoodItem = {
     subCategory: null,
 };
 
-export const isToday = (dateString) => {
-    const orderDate = new Date(dateString);
-    const today = new Date();
-    return (
-        orderDate.getDate() === today.getDate() &&
-        orderDate.getMonth() === today.getMonth() &&
-        orderDate.getFullYear() === today.getFullYear()
-    );
-};
-
 export const getDate = (dateString) => {
     const options = {
         day: '2-digit',

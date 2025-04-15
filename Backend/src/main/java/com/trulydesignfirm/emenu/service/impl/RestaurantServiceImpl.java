@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -440,6 +441,15 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public List<Order> getOrdersByRestaurant(String token) {
         return orderRepo.findByRestaurantOrderByCreatedAtDesc(getRestaurantByToken(token));
+    }
+
+    @Override
+    public List<Order> getRestaurantTodayOrders(String token) {
+        return orderRepo.findByRestaurantAndCreatedAtBetweenOrderByCreatedAtDesc(
+                getRestaurant(token),
+                LocalDate.now().atStartOfDay(),
+                LocalDate.now().atTime(23, 59, 59)
+        );
     }
 
     @Override

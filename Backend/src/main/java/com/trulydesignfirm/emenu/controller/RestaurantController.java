@@ -189,6 +189,11 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.getOrdersByRestaurant(token));
     }
 
+    @GetMapping("/today-orders")
+    public ResponseEntity<List<Order>> getTodayOrders(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(restaurantService.getRestaurantTodayOrders(token));
+    }
+
     @PutMapping("/order/{orderId}")
     public ResponseEntity<Response> updateOrder(@RequestHeader("Authorization") String token, @PathVariable UUID orderId, @RequestParam OrderStatus orderStatus) {
         Response response = restaurantService.updateOrderStatus(token, orderId, orderStatus);

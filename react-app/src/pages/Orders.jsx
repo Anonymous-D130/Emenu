@@ -5,11 +5,11 @@ import {
     CANCEL_ORDER,
     FETCH_ORDER_STATUS,
     FETCH_ORDERS,
-    FETCH_RESTAURANT,
+    FETCH_RESTAURANT, FETCH_TODAY_ORDERS,
     UPDATE_ORDER_STATUS,
     WEBSOCKET_URL
 } from "../utils/config.js";
-import {formatEnumString, getDate, getTime, initialToastState, isToday} from "../utils/Utility.js";
+import {formatEnumString, getDate, getTime, initialToastState} from "../utils/Utility.js";
 import Toast from "../utils/Toast.jsx";
 import SockJS from "sockjs-client";
 import {over} from "stompjs";
@@ -149,9 +149,26 @@ const Orders = () => {
         }
     }, [token]);
 
+    const fetchTodayOrders = useCallback(async () => {
+        setOrderLoading(true);
+        try {
+            const response = await axios.get(FETCH_TODAY_ORDERS, {headers: {Authorization: `Bearer ${token}`}});
+            setOrders(response.data);
+        } catch (error) {
+            console.log("Error fetching orders: ", error);
+            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+        } finally {
+            setOrderLoading(false);
+        }
+    }, [token]);
+    
     useEffect(() => {
-        fetchOrders().then(o => o);
-    }, [fetchOrders]);
+        if (filters.showOldOrders) {
+            fetchOrders().then(o => o);
+        } else {
+            fetchTodayOrders().then(o => o);
+        }
+    }, [fetchOrders, fetchTodayOrders, filters.showOldOrders]);
 
     const viewTableOrder = (table, order) => {
         setIsModalOpen(true);
@@ -311,10 +328,9 @@ const Orders = () => {
                             </thead>
                             <tbody>
                             {orders.filter(order => {
-                                const todayOrder = isToday(order?.createdAt) || filters.showOldOrders;
                                 const statusMatch = filters.status ? order.status === filters.status : true;
                                 const tableMatch = filters.table ? order.tableNumber?.toString().includes(filters.table) : true;
-                                return statusMatch && tableMatch && todayOrder;
+                                return statusMatch && tableMatch;
                             })
                                 .sort((a, b) => {
                                     const { sortBy, sortOrder } = filters;
@@ -412,10 +428,9 @@ const Orders = () => {
                                 ))}
                             {/* 🔻 No Orders Available Fallback */}
                             {orders.filter(order => {
-                                const todayOrder = isToday(order?.createdAt) || filters.showOldOrders;
                                 const statusMatch = filters.status ? order.status === filters.status : true;
                                 const tableMatch = filters.table ? order.tableNumber?.toString().includes(filters.table) : true;
-                                return statusMatch && tableMatch && todayOrder;
+                                return statusMatch && tableMatch;
                             }).length === 0 && (
                                 <tr>
                                     <td colSpan="6" className="text-center text-gray-500 py-6 text-lg">
