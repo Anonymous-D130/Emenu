@@ -1,5 +1,6 @@
 package com.trulydesignfirm.emenu.controller;
 
+import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.enums.MeatType;
 import com.trulydesignfirm.emenu.enums.OrderStatus;
 import com.trulydesignfirm.emenu.enums.ServingInfo;
@@ -8,9 +9,7 @@ import com.trulydesignfirm.emenu.model.SubscriptionPlan;
 import com.trulydesignfirm.emenu.service.SubscriptionService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +20,14 @@ import java.util.List;
 public class PublicController {
 
     private final SubscriptionService subscriptionService;
+
+    @PostMapping("/webhook")
+    public ResponseEntity<Response> handleWebhook(
+            @RequestBody String payload,
+            @RequestHeader("X-Razorpay-Signature") String razorpaySignature) {
+        Response response = subscriptionService.verifyWebhook(payload, razorpaySignature);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
     @GetMapping("/plans")
     public ResponseEntity<List<SubscriptionPlan>> getAllPlans() {

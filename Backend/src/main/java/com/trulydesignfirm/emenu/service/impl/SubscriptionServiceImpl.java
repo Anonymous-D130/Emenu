@@ -1,5 +1,8 @@
 package com.trulydesignfirm.emenu.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.razorpay.RazorpayException;
 import com.trulydesignfirm.emenu.actions.PaymentResponse;
 import com.trulydesignfirm.emenu.actions.Response;
 import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
@@ -17,32 +20,33 @@ import com.trulydesignfirm.emenu.service.utils.EmailStructures;
 import com.trulydesignfirm.emenu.service.utils.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.razorpay.Utils.verifySignature;
+import static com.razorpay.Utils.verifyWebhookSignature;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriptionServiceImpl implements SubscriptionService {
 
-    private final Utility utility;
-    private final EmailStructures emailStructures;
-    private final EmailService emailService;
-
     @Value("${razorpay.key_secret}")
     private String razorpaySecret;
 
+    @Value("${razorpay.webhook_secret}")
+    private String webhookSecret;
+
+    private final Utility utility;
+    private final EmailStructures emailStructures;
+    private final EmailService emailService;
     private final PaymentService paymentService;
     private final SubscriptionRepo subscriptionRepo;
     private final SubscriptionPlanRepo subscriptionPlanRepo;
@@ -81,9 +85,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Response response = new Response();
         try {
             String payload = orderId + "|" + paymentId;
-
-            String expectedSignature = hmacSHA256(payload, razorpaySecret);
-            if (!expectedSignature.equalsIgnoreCase(signature)) {
+            if(!verifySignature(payload, signature, razorpaySecret)) {
                 response.setStatus(HttpStatus.UNAUTHORIZED);
                 response.setMessage("Payment verification failed. Invalid signature.");
                 return response;
@@ -91,18 +93,51 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             log.info("Verifying payment for Order ID: {}", orderId);
             PaymentDetails paymentDetails = paymentRepo.findByOrderId(orderId)
                     .orElseThrow(() -> new RuntimeException("Invalid orderId: " + orderId));
-            log.info("Payment ID: {}", paymentId);
-            paymentDetails.setOrderStatus("PAID");
-            paymentDetails.setPaymentId(paymentId);
-            paymentRepo.save(paymentDetails);
-            saveSubscriptionPlan(paymentDetails, user, paymentDetails.getDuration());
-            String body = emailStructures.generateSubscriptionSuccessEmail(user.getName(), paymentDetails.getPlan());
-            emailService.sendEmail(user.getEmail(), "🥳 Congrats! You’ve Subscribed", body);
-            response.setMessage("Subscription purchased successfully.");
-            response.setStatus(HttpStatus.OK);
+            manageVerifiedPayment(response, paymentId, paymentDetails, user, orderId);
+        } catch (RazorpayException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setMessage("Payment verification failed. Invalid signature.");
         } catch (Exception e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             response.setMessage(e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public Response verifyWebhook(String payload, String razorpaySignature) {
+        Response response = new Response();
+        try {
+            if(!verifyWebhookSignature(payload, razorpaySignature, webhookSecret)) {
+                response.setStatus(HttpStatus.UNAUTHORIZED);
+                response.setMessage("Payment verification failed. Invalid signature.");
+                return response;
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(payload);
+            String eventType = rootNode.path("event").asText();
+            JsonNode paymentEntity = rootNode.path("payload").path("payment").path("entity");
+            String orderId = paymentEntity.path("order_id").asText();
+            String paymentId = paymentEntity.path("id").asText();
+            int amount = paymentEntity.path("amount").asInt();
+            if ("payment.captured".equals(eventType)) {
+                log.info("Payment captured! OrderId: {}, PaymentId: {}, Amount: {}", orderId, paymentId, amount);
+                PaymentDetails paymentDetails = paymentRepo.findByOrderId(orderId)
+                        .orElseThrow(() -> new RuntimeException("Invalid orderId: " + orderId));
+                LoginUser user = paymentDetails.getUser();
+                manageVerifiedPayment(response, paymentId, paymentDetails, user, orderId);
+            } else {
+                response.setStatus(HttpStatus.OK);
+                response.setMessage("Event received but not handled: " + eventType);
+            }
+        } catch (RazorpayException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setMessage("Payment verification failed. Invalid signature.");
+        } catch (Exception e) {
+            log.error("Webhook processing failed", e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMessage("Internal error occurred while processing the webhook.");
         }
         return response;
     }
@@ -181,11 +216,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-    private String hmacSHA256(String data, String key) throws Exception {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        mac.init(secretKey);
-        return Hex.encodeHexString(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+    private void manageVerifiedPayment(Response response, String paymentId, PaymentDetails paymentDetails, LoginUser user, String orderId) {
+        if ("PAID".equalsIgnoreCase(paymentDetails.getOrderStatus())) {
+            log.info("Order {} already processed. Skipping duplicate handling.", orderId);
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Order already processed.");
+            return;
+        }
+        log.info("Payment ID: {}", paymentId);
+        paymentDetails.setOrderStatus("PAID");
+        paymentDetails.setPaymentId(paymentId);
+        paymentRepo.save(paymentDetails);
+        saveSubscriptionPlan(paymentDetails, user, paymentDetails.getDuration());
+        String body = emailStructures.generateSubscriptionSuccessEmail(user.getName(), paymentDetails.getPlan());
+        emailService.sendEmail(user.getEmail(), "🥳 Congrats! You’ve Subscribed", body);
+        response.setMessage("Subscription purchased successfully.");
+        response.setStatus(HttpStatus.OK);
     }
 
     private void saveSubscriptionPlan(PaymentDetails paymentDetails, LoginUser user, long days) {

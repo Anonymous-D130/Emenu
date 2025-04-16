@@ -160,6 +160,7 @@ const CreateRestaurant = () => {
             const razorpayOptions = createRazorpayOptions(order.razorpay_order_id, order.amount);
             const rzp = new window.Razorpay(razorpayOptions);
             rzp.open();
+            setPaymentLoading(false);
         } catch (error) {
             console.error("Subscription/payment initiation failed:", error);
             setToast({message: error.response ? error.response.data.message : error.message || "Failed to initiate payment", type: "error",});

@@ -15,22 +15,22 @@ const InfoCard = ({ icon, label, value, color = "text-gray-800" }) => (
 );
 
 const initialSubscriptionState = {
-        subscription: {
+    subscription: {
+        id: "",
+        startDate: "",
+        "endDate": "",
+        status: null,
+        expired: false,
+        plan: {
             id: "",
-            startDate: "",
-            "endDate": "",
-            status: null,
-            expired: false,
-            plan: {
-                id: "",
-                title: "",
-                price: 0,
-                duration: 6,
-                description: "",
-                features: []
-            }
+            title: "",
+            price: 0,
+            duration: 6,
+            description: "",
+            features: []
         }
-    };
+    }
+};
 
 const Subscription = () => {
     const token = localStorage.getItem("token");
@@ -90,7 +90,6 @@ const Subscription = () => {
     };
 
     const { percentage, daysRemaining } = getSubscriptionProgress();
-
 
     return (
         <div className="flex flex-col gap-4">

@@ -20,10 +20,10 @@ const NavigationButtons = ({ onPrevious, onNext, currentStep, handleSubmit, paym
 
                 {/* Next Button */}
                 <button
-                    disabled={paymentLoading}
+                    disabled={paymentLoading && currentStep === 4}
                     onClick={currentStep === 4 ? handleSubmit : onNext}
                     className={`text-white px-10 py-3 rounded-lg text-md font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2
-                    ${paymentLoading ? "bg-indigo-400" : "bg-indigo-600"}`}
+                    ${paymentLoading && currentStep === 4? "bg-indigo-400" : "bg-indigo-600"}`}
                 >
                     {currentStep === 4 ? (
                         <>
