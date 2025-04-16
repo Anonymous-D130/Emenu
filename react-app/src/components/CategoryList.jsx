@@ -272,7 +272,7 @@ const CategoryList = ({categories, setSelectedCategory, selectedCategory, select
                                                 onChange={(e) => setEditName(e.target.value)}
                                             />
                                         ) : (
-                                            <span className="font-medium text-white flex items-center">↳ {sub.name}</span>
+                                            <span className="font-medium flex items-center">↳ {sub.name}</span>
                                         )}
                                         {(editMode.type === "subCategory" && editMode.id === sub.id) ?
                                             <button

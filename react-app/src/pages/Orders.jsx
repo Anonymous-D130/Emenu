@@ -292,7 +292,7 @@ const Orders = () => {
                                     checked={filters.showOldOrders}
                                     onChange={(e) => setFilters(prev => ({ ...prev, showOldOrders: e.target.checked }))}
                                 />
-                                Show Old Orders
+                                Show All Orders
                             </label>
 
                             {/* Clear Filters Button */}

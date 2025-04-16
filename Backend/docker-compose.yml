@@ -14,8 +14,6 @@ services:
       - backend
     restart: always
 
-
-  # Your Application (Backend)
   emenu-backend:
     image: dhruvgupta130/emenu:latest
     container_name: emenu-backend
@@ -49,6 +47,16 @@ services:
     networks:
       - backend
     restart: always
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 30
+    networks:
+      - backend
 
 networks:
   backend:
