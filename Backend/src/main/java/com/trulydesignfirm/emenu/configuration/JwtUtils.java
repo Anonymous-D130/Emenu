@@ -21,10 +21,9 @@ public class JwtUtils {
 
     public JwtUtils() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-//        String secretKey = Base64.getEncoder().encodeToString(keyGen.generateKey().getEncoded());
-        String secretKey = "eajsdhfoes;adfjmacjfosdhtgoivhgpi;sjporjkasptrjeroijdhioyhjnrt";
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        String secretKey = Base64.getEncoder().encodeToString(keyGen.generateKey().getEncoded());
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
     public String generateToken(UserDetails userDetails) {
         String roles = userDetails.getAuthorities().toString();
