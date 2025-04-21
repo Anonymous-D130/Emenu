@@ -210,6 +210,7 @@ const Subscription = () => {
                                     </ul>
                                 </div>
                                 <button
+                                    onClick={() => alert("Plan Upgrade will be enabled soon!")}
                                     className="mt-6 py-2 w-full bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition"
                                 >
                                     Subscribe

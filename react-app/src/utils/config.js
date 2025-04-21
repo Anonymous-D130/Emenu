@@ -5,6 +5,8 @@ export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
 export const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET;
 
+export const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
 //Payment Configuration
 export const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
 export const RAZORPAY_CURRENCY = "INR";

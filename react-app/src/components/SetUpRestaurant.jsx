@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import { FaCheckCircle, FaUpload, FaImage } from "react-icons/fa";
 import { IoIosCloseCircle } from "react-icons/io";
 import example from "../assets/img.png";
-import {CHECK_PAGE_NAME, CLOUD_NAME, FRONTEND_URL, UPLOAD_PRESET} from "../utils/config.js";
+import {CHECK_PAGE_NAME, CLOUDINARY_URL, FRONTEND_URL, UPLOAD_PRESET} from "../utils/config.js";
 import axios from "axios";
 
 const PhoneMockup = ({ imageUrl }) => {
@@ -83,7 +83,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
         formData.append("file", file);
         formData.append("upload_preset", UPLOAD_PRESET);
         try {
-            const { data } = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, formData);
+            const { data } = await axios.create().post(CLOUDINARY_URL, formData);
             if (data?.secure_url) {
                 setRestaurant((prev) => ({ ...prev, [key]: data.secure_url }));
             } else {

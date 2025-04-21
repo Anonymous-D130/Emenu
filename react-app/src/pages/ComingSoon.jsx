@@ -6,7 +6,7 @@ const ComingSoon = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-100 px-6 text-center">
+        <div className="flex flex-col items-center justify-center px-6 md:mt-20 mt-5 text-center">
             <div className="bg-white shadow-lg rounded-xl p-8 md:p-12">
                 <div className="flex justify-center mb-6">
                     <FaClock className="text-purple-600 text-5xl animate-pulse" />

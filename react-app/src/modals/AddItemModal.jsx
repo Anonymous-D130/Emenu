@@ -3,7 +3,7 @@ import { Modal } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
 import {FaSpinner, FaUpload} from "react-icons/fa";
 import {
-    CLOUD_NAME,
+    CLOUDINARY_URL,
     FETCH_MEAT_TYPES,
     FETCH_SERVING_INFO,
     FETCH_TAGS,
@@ -148,10 +148,7 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, food, setFood, handleS
         formData.append("file", file);
         formData.append("upload_preset", UPLOAD_PRESET);
         try {
-            const response = await axios.post(
-                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-                formData
-            );
+            const response = await axios.create().post(CLOUDINARY_URL, formData);
             const data = response.data;
             if (data?.secure_url) {
                 setFoodItem((prev) => ({ ...prev, [key]: data.secure_url }));
