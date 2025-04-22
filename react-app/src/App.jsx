@@ -13,7 +13,6 @@ import CustomerRoutes from "./customer/components/CustomerRoutes.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ComingSoon from "./pages/ComingSoon.jsx";
 import verifyJWT from "./utils/VerifyJWT.js";
-import "./utils/axiosInterceptor.js";
 
 function App() {
 

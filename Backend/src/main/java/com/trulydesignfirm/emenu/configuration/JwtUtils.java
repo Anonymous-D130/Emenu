@@ -17,14 +17,19 @@ import java.util.Date;
 public class JwtUtils {
 
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
-    private final SecretKey key;
+    private static final SecretKey key;
 
-    public JwtUtils() throws NoSuchAlgorithmException {
-        KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA512");
-        String secretKey = Base64.getEncoder().encodeToString(keyGen.generateKey().getEncoded());
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+    static {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA512");
+            String secretKey = Base64.getEncoder().encodeToString(keyGen.generateKey().getEncoded());
+            byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+            key = Keys.hmacShaKeyFor(keyBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Error initializing JWT key", e);
+        }
     }
+
     public String generateToken(UserDetails userDetails) {
         String roles = userDetails.getAuthorities().toString();
         roles = roles.replace("[", "").replace("]", "");
