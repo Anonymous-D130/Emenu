@@ -106,7 +106,6 @@ const HomePage = () => {
 
                 <div className="z-10 flex flex-col items-center mb-30">
                     <button
-                        onClick={() => window.open('https://pexels.com')}
                         className="bg-white rounded-full p-4 shadow-lg"
                     >
                         <svg
