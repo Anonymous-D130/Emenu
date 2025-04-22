@@ -39,6 +39,7 @@ axios.interceptors.response.use(
             const isTokenError =
                 (status === 401 && ['Token expired', 'JWT signature does not match locally computed signature'].includes(message)||
                     status === 500 && message?.includes('JWT'));
+            console.log(isTokenError);
             if (isTokenError && !isRedirecting) {
                 isRedirecting = true;
                 alert('Your session has expired or is invalid. Please log in again.');
