@@ -34,11 +34,9 @@ axios.interceptors.response.use(
         }
         if (error.response) {
             const { status, data } = error.response;
-            console.error('API Error:', data, status);
+            console.error('API Error:', data);
             const message = data?.message;
             const isTokenError = status === 401 && (message.includes('Token expired') || message.includes('JWT signature does not match'));
-            console.log(isTokenError);
-            console.log(status === 401);
             if (isTokenError && !isRedirecting) {
                 isRedirecting = true;
                 alert('Your session has expired or is invalid. Please log in again.');
