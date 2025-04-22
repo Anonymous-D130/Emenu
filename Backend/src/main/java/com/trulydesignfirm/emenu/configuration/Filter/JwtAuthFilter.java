@@ -28,27 +28,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) {
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
         final String jwtToken;
         final String userName;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.replace("Bearer ", "");
-            Claims claims = jwtUtils.parseToken(jwtToken);
-            userName = claims.getSubject();
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
-            if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (jwtUtils.validateToken(jwtToken, userDetails)) {
-                    Authentication auth = new UsernamePasswordAuthenticationToken(userName, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+            try {
+                Claims claims = jwtUtils.parseToken(jwtToken);
+                userName = claims.getSubject();
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+                if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    if (jwtUtils.validateToken(jwtToken, userDetails)) {
+                        Authentication auth = new UsernamePasswordAuthenticationToken(userName, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
                 }
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"" + e.getMessage() + "\", \"status\": 401}");
+                return;
             }
         }
-        try {
-            filterChain.doFilter(request, response);
-        } catch (IOException | ServletException e) {
-            throw new RuntimeException(e);
-        }
+        filterChain.doFilter(request, response);
     }
 }
