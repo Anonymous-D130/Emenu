@@ -107,7 +107,7 @@ const Orders = () => {
                     audioRef.current.pause();
                     audioRef.current.currentTime = 0;
                 }
-            }, 5000);
+            }, 10000);
         }
         return () => {
             clearInterval(interval);

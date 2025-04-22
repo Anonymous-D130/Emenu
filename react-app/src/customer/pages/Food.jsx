@@ -122,7 +122,7 @@ const Food = () => {
                 setToast({ message: error.response ? error.response?.data?.message : error?.message, type: "error" });
                 console.error("Error ringing bell: ", error);
             } finally {
-                setTimeout(() => setBellLoading(false), 5000)
+                setTimeout(() => setBellLoading(false), 15000)
             }
         }
     }
