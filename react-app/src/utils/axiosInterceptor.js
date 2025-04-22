@@ -36,9 +36,7 @@ axios.interceptors.response.use(
             const { status, data } = error.response;
             console.error('API Error:', data, status);
             const message = data?.message;
-            const isTokenError =
-                (status === 401 && ['Token expired', 'JJWT signature does not match locally computed signature.'].includes(message)||
-                    status === 500 && message?.includes('JWT'));
+            const isTokenError = status === 401 && (message.includes('Token expired') || message.includes('JWT signature does not match'));
             console.log(isTokenError);
             console.log(status === 401);
             if (isTokenError && !isRedirecting) {
