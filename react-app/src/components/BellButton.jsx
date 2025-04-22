@@ -25,7 +25,6 @@ const BellButton = () => {
             setRestaurantId(response.data.id);
         } catch (error) {
             console.log("Error fetching orders: ", error);
-            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setLoading(false);
         }
@@ -92,12 +91,14 @@ const BellButton = () => {
     }, [isRinging]);
 
     const stopRinging = () => {
-        setIsRinging(false);
-        setIsScaled(true);
-        setTimeout(() => {
-            setTableNumber(0);
-            setIsScaled(false);
-        }, 2000);
+        if(isRinging){
+            setIsRinging(false);
+            setIsScaled(true);
+            setTimeout(() => {
+                setTableNumber(0);
+                setIsScaled(false);
+            }, 2000);
+        }
     }
 
     return (
@@ -107,7 +108,7 @@ const BellButton = () => {
             </div>}
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
 
-            <button
+            {restaurantId && <button
                 onClick={stopRinging}
                 className={`
                               fixed md:bottom-20 bottom-8 md:right-10 right-5 w-18 h-18 rounded-full bg-black border-[6px] border-gray-300 
@@ -116,8 +117,8 @@ const BellButton = () => {
                               ${isScaled ? "scale-150" : "scale-100"}
                             `}
             >
-                {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl" />}
-            </button>
+                {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl"/>}
+            </button>}
         </main>
     )
 }
