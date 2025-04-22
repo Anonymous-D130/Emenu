@@ -20,7 +20,7 @@ public class JwtUtils {
     private final SecretKey key;
 
     public JwtUtils() throws NoSuchAlgorithmException {
-        KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+        KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA512");
         String secretKey = Base64.getEncoder().encodeToString(keyGen.generateKey().getEncoded());
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
