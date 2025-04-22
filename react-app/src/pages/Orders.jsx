@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import OrderModal from "../modals/OrderModal.jsx";
 import axios from "axios";
 import {
@@ -13,7 +13,6 @@ import {formatEnumString, getDate, getTime, initialToastState} from "../utils/Ut
 import Toast from "../utils/Toast.jsx";
 import SockJS from "sockjs-client";
 import {over} from "stompjs";
-import {MdRoomService} from "react-icons/md";
 import OrdersSkeleton from "../skeleton/OrdersSkeleton.jsx";
 
 const Orders = () => {
@@ -35,10 +34,6 @@ const Orders = () => {
         sortBy: "",
         sortOrder: "asc",
     });
-    const [isRinging, setIsRinging] = useState(false);
-    const [isScaled, setIsScaled] = useState(false);
-    const [tableNumber, setTableNumber] = useState(0);
-    const audioRef = useRef(null);
     const [restaurantId, setRestaurantId] = useState("");
     const [orderStatuses, setOrderStatuses] = useState({});
 
@@ -68,13 +63,6 @@ const Orders = () => {
                 const newOrder = JSON.parse(msg.body);
                 setOrders(prev => [newOrder, ...prev]);
             });
-            if(restaurantId) {
-                stompClient.subscribe(`/topic/ring-bell/${restaurantId}`, (msg) => {
-                    const table = JSON.parse(msg.body);
-                    setTableNumber(table);
-                    setIsRinging(true);
-                })
-            }
         });
 
         return () => {
@@ -83,41 +71,6 @@ const Orders = () => {
             }
         };
     }, [restaurantId]);
-
-    useEffect(() => {
-        let interval;
-        let timeout;
-
-        if (isRinging) {
-            if (!audioRef.current) {
-                audioRef.current = new Audio("/alert.mp3");
-            }
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
-            interval = setInterval(() => {
-                setIsScaled(prev => !prev);
-            }, 100);
-
-            timeout = setTimeout(() => {
-                setIsRinging(false);
-                setTableNumber(0);
-                clearInterval(interval);
-                setIsScaled(false);
-                if (audioRef.current) {
-                    audioRef.current.pause();
-                    audioRef.current.currentTime = 0;
-                }
-            }, 10000);
-        }
-        return () => {
-            clearInterval(interval);
-            clearTimeout(timeout);
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
-            }
-        };
-    }, [isRinging]);
 
     const fetchRestaurant = useCallback(async () => {
         setLoading(true);
@@ -440,21 +393,6 @@ const Orders = () => {
                             )}
                             </tbody>
                         </table>
-
-                        {/* Ringing button */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsRinging(false)}
-                                className={`
-                                  fixed md:bottom-20 bottom-8 md:right-10 right-5 w-18 h-18 rounded-full bg-black border-[6px] border-gray-300 
-                                  flex flex-col items-center justify-center text-yellow-400 z-10
-                                  transform transition-transform duration-300 text-2xl font-extrabold
-                                  ${isScaled ? "scale-150" : "scale-100"}
-                                `}
-                            >
-                                {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl" />}
-                            </button>
-                        </div>
                     </div>
                 )}
             </div>

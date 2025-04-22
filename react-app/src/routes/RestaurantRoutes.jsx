@@ -14,6 +14,7 @@ import axios from "axios";
 import {IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
 import OfferZone from "../pages/OfferZone.jsx";
 import ExpiredSubscription from "../components/ExpiredSubscription.jsx";
+import BellButton from "../components/BellButton.jsx";
 
 const RestaurantRoutes = () => {
     const token = localStorage.getItem("token");
@@ -45,6 +46,7 @@ const RestaurantRoutes = () => {
         <div className="flex min-h-screen bg-gray-100 justify-center">
             <Sidebar />
             <Header />
+            <BellButton/>
             <Routes>
                 <Route path="/" element={<CreateRestaurant/>} />
                 <Route path="/dashboard" element={<Dashboard />} />
