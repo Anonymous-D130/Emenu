@@ -125,7 +125,7 @@ const HomePage = () => {
                     </button>
                     <button
                         onClick={() => navigate(`/customer/order/restaurant/tables?restaurantId=${restaurantId}&tableNumber=${tableNumber}&logo=${restaurant?.logo}`)}
-                        className="mt-4 text-lg text-white font-bold"
+                        className="mt-4 text-lg font-bold cursor-pointer text-gray-100"
                     >Skip Intro</button>
                 </div>
             </div>

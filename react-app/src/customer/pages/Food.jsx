@@ -121,6 +121,7 @@ const Food = () => {
             } catch (error) {
                 setToast({ message: error.response ? error.response?.data?.message : error?.message, type: "error" });
                 console.error("Error ringing bell: ", error);
+                setBellLoading(false);
             } finally {
                 setTimeout(() => setBellLoading(false), 15000)
             }
@@ -183,10 +184,10 @@ const Food = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-2 p-2 overflow-x-auto w-full">
+            <div className="flex items-center gap-3 px-2 py-2 overflow-x-auto w-full scrollbar-hide">
                 <button
                     key="Filter"
-                    className="flex items-center gap-2 px-4 py-1 text-sm font-medium rounded-lg bg-white whitespace-nowrap transition border border-gray-300 hover:bg-gray-100"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-white whitespace-nowrap transition border border-gray-300 hover:bg-gray-100 flex-shrink-0"
                 >
                     <IoMdOptions />
                     Filter
@@ -195,8 +196,8 @@ const Food = () => {
                     <button
                         key={filter.label}
                         onClick={() => handleApplyFilter(filter.value)}
-                        className={`flex items-center gap-2 px-4 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition border border-gray-300 hover:bg-gray-100
-                        ${selectedFilter === filter.value ? "bg-gray-800 text-white" : "bg-white"}`}
+                        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition border border-gray-300 flex-shrink-0
+                        ${selectedFilter === filter.value ? "bg-gray-800 text-white" : "bg-white hover:bg-gray-100"}`}
                     >
                         {filter.icon}
                         {filter.label}
@@ -205,7 +206,7 @@ const Food = () => {
             </div>
 
             {/* Recommended Section */}
-            {Object.entries(taggedFoods).map(([tag, items]) => {
+            {Object.entries(taggedFoods).map(([tag, items], sectionIndex) => {
                 const sectionKey = formatEnumString(tag);
                 const filteredItems = items.filter(
                     item =>
@@ -217,7 +218,7 @@ const Food = () => {
                     <Section
                         key={sectionKey}
                         title={`${sectionKey} (${filteredItems.length})`}
-                        expanded={expanded[sectionKey] ?? false}
+                        expanded={expanded[sectionKey] ?? sectionIndex === 0}
                         onToggle={() => toggleSection(sectionKey)}
                     >
                         {filteredItems.map((foodItem, idx) => (
@@ -305,7 +306,7 @@ const Food = () => {
             <footer className="flex items-center justify-between relative">
                 {cart?.items?.length > 0 ? <button
                     onClick={() => setIsModalOpen(true)}
-                    className="fixed bottom-10 flex items-center justify-between w-9/10 md:w-6/7 bg-black p-6 mx-5 rounded-xl z-10"
+                    className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md bg-black p-4 md:p-5 lg:p-6 rounded-xl z-10"
                 >
                     <span className="text-md text-white">{cart.items.reduce((sum, item) => sum + item.quantity, 0)} Items Added</span>
                     <div
@@ -315,7 +316,7 @@ const Food = () => {
                     </div>
                 </button> : orders?.length > 0 && <button
                     onClick={() => setShowModal(true)}
-                    className="fixed bottom-10 flex items-center justify-between w-9/10 md:w-6/7 bg-black p-6 mx-5 rounded-xl z-10"
+                    className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md bg-black p-4 md:p-5 lg:p-6 rounded-xl z-10"
                 >
                     <span className="text-md text-white">{orders.length} Orders placed</span>
                     <div

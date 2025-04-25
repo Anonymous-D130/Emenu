@@ -8,7 +8,7 @@ import {MdRoomService} from "react-icons/md";
 import Toast from "../utils/Toast.jsx";
 
 const BellButton = () => {
-    const token = localStorage.getItem("token");
+
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(initialToastState);
 
@@ -19,6 +19,7 @@ const BellButton = () => {
     const [restaurantId, setRestaurantId] = useState("");
 
     const fetchRestaurant = useCallback(async () => {
+        const token = localStorage.getItem("token");
         setLoading(true);
         try {
             const response = await axios.get(FETCH_RESTAURANT, {headers: {Authorization: `Bearer ${token}`}});
@@ -28,7 +29,7 @@ const BellButton = () => {
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, []);
 
     useEffect(() => {
         fetchRestaurant().then(r => r);

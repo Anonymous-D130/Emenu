@@ -69,7 +69,7 @@ const FoodItemModal = ({ open, handleClose, food, cart, setCart, tableNumber, re
 
     return (
         <Modal open={open} onClose={handleClose}>
-            <main className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/3 bg-white rounded-2xl w-full p-4 pb-25 shadow-lg sm:p-6 sm:w-[90%] sm:rounded-xl">
+            <main className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/3 bg-white rounded-2xl w-full p-4 pb-25 shadow-lg sm:p-6 sm:w-[90%] sm:rounded-xl md:max-w-md">
                 {/* Close Button */}
                 <button
                     onClick={handleClose}
