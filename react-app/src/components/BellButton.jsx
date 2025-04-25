@@ -109,7 +109,7 @@ const BellButton = () => {
             </div>}
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
 
-            {restaurantId && <button
+            <button
                 onClick={stopRinging}
                 className={`
                               fixed md:bottom-20 bottom-8 md:right-10 right-5 w-18 h-18 rounded-full bg-black border-[6px] border-gray-300 
@@ -119,7 +119,7 @@ const BellButton = () => {
                             `}
             >
                 {tableNumber > 0 ? tableNumber : <MdRoomService className="text-2xl"/>}
-            </button>}
+            </button>
         </main>
     )
 }

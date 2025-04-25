@@ -46,7 +46,7 @@ const RestaurantRoutes = () => {
         <div className="flex min-h-screen bg-gray-100 justify-center">
             <Sidebar />
             <Header />
-            <BellButton/>
+            {(location.pathname !== "/restaurant" && location.pathname !== "/restaurant/expired") && <BellButton/>}
             <Routes>
                 <Route path="/" element={<CreateRestaurant/>} />
                 <Route path="/dashboard" element={<Dashboard />} />
