@@ -43,7 +43,7 @@ const Home = () => {
             <nav className="flex justify-between items-center py-4 px-6 shadow-sm relative">
                 {/* Logo */}
                 <a href="/" className="cursor-pointer text-2xl font-bold text-purple-700 flex items-center space-x-2">
-                    <img src={logo} alt="logo" />
+                    <img src={`${logo}`} alt="logo" />
                 </a>
 
                 {/* Desktop Nav Links */}

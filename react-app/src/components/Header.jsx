@@ -51,7 +51,7 @@ const Header = () => {
     }
 
     return (
-        <header className="bg-white shadow-md rounded-lg p-4 flex flex-col md:flex-row items-center justify-between w-full fixed top-0 left-0 right-0 z-50">
+        <header className="bg-white shadow-md rounded-lg p-4 flex flex-col md:flex-row items-center justify-between w-full fixed top-0 left-0 right-0 z-45">
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
 
             <a href="/" className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-left w-full md:w-auto md:mx-20"

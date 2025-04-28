@@ -54,7 +54,7 @@ const Sidebar = () => {
             {/* Mobile Sidebar Toggle Button */}
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="md:hidden fixed top-5 right-4 z-100 p-2 bg-purple-500 text-white rounded-xl shadow-lg"
+                className="md:hidden fixed top-5 right-4 z-49 p-2 bg-purple-500 text-white rounded-xl shadow-lg"
             >
                 {isSidebarOpen ? <IoClose size={30} /> : <IoOptions size={30} />}
             </button>
