@@ -9,7 +9,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5432:5432"
     networks:
       - backend
     restart: always
@@ -38,11 +38,10 @@ services:
       RAZORPAY_KEY: ${RAZORPAY_KEY}
       RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
       RAZORPAY_SECRET: ${RAZORPAY_SECRET}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
-      CLOUD_NAME: ${CLOUD_NAME}
     ports:
       - "8080:8080"
+    volumes:
+      - backend_uploads:/uploads
     depends_on:
       - postgres-db
     networks:
@@ -65,4 +64,6 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
+  backend_uploads:
     driver: local
