@@ -1,5 +1,6 @@
-package com.trulydesignfirm.emenu.configuration;
+package com.trulydesignfirm.emenu.configuration.oauth2;
 
+import com.trulydesignfirm.emenu.configuration.JwtUtils;
 import com.trulydesignfirm.emenu.enums.Role;
 import com.trulydesignfirm.emenu.model.LoginUser;
 import com.trulydesignfirm.emenu.repository.UserRepo;

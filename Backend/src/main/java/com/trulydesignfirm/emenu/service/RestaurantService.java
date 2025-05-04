@@ -6,6 +6,7 @@ import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
 import com.trulydesignfirm.emenu.model.*;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public interface RestaurantService {
     Response toggleFoodAvailability(String token, UUID foodId);
     Response deleteRestaurantFood(String token, UUID foodId);
     List<String> fetchRestaurantQrCodes(String token);
-    Response generateTableQRCodes(String token, int tables);
+    Response generateTableQRCodes(String token, int tables) throws IOException;
     List<Order> getOrdersByRestaurant(String token);
     List<Order> getRestaurantTodayOrders(String token);
     Response updateOrderStatus(String token, UUID orderId, OrderStatus orderStatus);

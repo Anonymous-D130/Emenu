@@ -98,10 +98,6 @@ export const validateFoodForm = (foodItem, setToast) => {
         setToast({ message: "Image is required", type: "error" });
         return false;
     }
-    if (!/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif)$/i.test(foodItem.imageUrl)) {
-        setToast({ message: "Invalid image URL. Must be a valid image link", type: "error" });
-        return false;
-    }
     if (!foodItem.foodType) {
         setToast({ message: "Food type is required (VEG/NON-VEG)", type: "error" });
         return false;

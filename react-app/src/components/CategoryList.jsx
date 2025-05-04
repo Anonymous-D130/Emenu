@@ -63,7 +63,7 @@ const CategoryList = ({categories, setSelectedCategory, selectedCategory, select
         try {
             const response = await axios.put(UPDATE_CATEGORY(editMode.id), {name: editName}, { headers: { Authorization: `Bearer ${token}` }});
             setToast({ message: response?.data.message, type: "success" });
-            fetchCategories();
+            await fetchCategories();
             setEditMode({ type: "", id: null });
             setEditName("");
         } catch (error) {
@@ -79,7 +79,7 @@ const CategoryList = ({categories, setSelectedCategory, selectedCategory, select
         try {
             const response = await axios.put(UPDATE_SUBCATEGORY(editMode.id), {name: editName}, { headers: { Authorization: `Bearer ${token}` }});
             setToast({ message: response?.data.message, type: "success" });
-            fetchCategories();
+            await fetchCategories();
             setEditMode({ type: "", id: null });
             setEditName("");
         } catch (error) {
@@ -161,7 +161,7 @@ const CategoryList = ({categories, setSelectedCategory, selectedCategory, select
                 const payload = {name: subCategory, categoryId: subCategoryParent.id};
                 const response = await axios.post(ADD_SUBCATEGORY(subCategoryParent.id), payload, {headers: { Authorization: `Bearer ${token}` }});
                 setToast({ message: response?.data.message || "Subcategory added successfully", type: "success" });
-                fetchCategories();
+                await fetchCategories();
                 closeSubCategoryModal();
             } catch (error) {
                 setToast({message: error.response ? error.response.data : error.message, type: "error"});

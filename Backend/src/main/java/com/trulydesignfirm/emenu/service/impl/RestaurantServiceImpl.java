@@ -6,9 +6,9 @@ import com.trulydesignfirm.emenu.enums.OrderStatus;
 import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
 import com.trulydesignfirm.emenu.model.*;
 import com.trulydesignfirm.emenu.repository.*;
+import com.trulydesignfirm.emenu.service.FileService;
 import com.trulydesignfirm.emenu.service.QrCodeService;
 import com.trulydesignfirm.emenu.service.RestaurantService;
-import com.trulydesignfirm.emenu.service.utils.CloudinaryService;
 import com.trulydesignfirm.emenu.service.utils.EmailService;
 import com.trulydesignfirm.emenu.service.utils.EmailStructures;
 import com.trulydesignfirm.emenu.service.utils.Utility;
@@ -33,7 +33,6 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantRepo restaurantRepo;
     private final QrCodeService qrCodeService;
-    private final CloudinaryService cloudinaryService;
     private final Utility utility;
     private final FoodRepo foodRepo;
     private final SubCategoryRepo subCategoryRepo;
@@ -43,12 +42,16 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final EmailService emailService;
     private final EmailStructures emailStructures;
     private final OrderItemRepo orderItemRepo;
+    private final FileService fileService;
 
     @Value("${menu.website.url}")
     private String websiteUrl;
 
     @Value("${menu.customer.route}")
     private String customerRoute;
+
+    @Value("${backend_url}")
+    private String baseUrl;
 
     @Override
     public Restaurant getRestaurant(String token) {
@@ -419,7 +422,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public Response generateTableQRCodes(String token, int tables) {
+    public Response generateTableQRCodes(String token, int tables) throws IOException {
         LoginUser user = utility.getUserFromToken(token);
         if (user.getSubscription() == null){
             if (tables > 3) {
@@ -512,43 +515,32 @@ public class RestaurantServiceImpl implements RestaurantService {
         messagingTemplate.convertAndSend("/topic/order-status", update);
     }
 
-    private Response saveQrCode(String token, int tables) {
+    private Response saveQrCode(String token, int tables) throws IOException {
         Response response = new Response();
         Restaurant restaurant = getRestaurantByToken(token);
-        List<String> qrCodePaths = new ArrayList<>(restaurant.getQrCodes() != null ? restaurant.getQrCodes() : new ArrayList<>());
-        if (qrCodePaths.size() > tables) {
-            int excessCount = qrCodePaths.size() - tables;
-            for (int i = 0; i < excessCount; i++) {
-                String excessQrCode = qrCodePaths.get(qrCodePaths.size() - 1 - i);
-                try {
-                    cloudinaryService.deleteFile(excessQrCode);
-                } catch (IOException e) {
-                    System.err.println("Failed to delete excess QR code from Cloudinary: " + excessQrCode);
-                }
+        List<String> qrCodeUrls = new ArrayList<>(restaurant.getQrCodes() != null ? restaurant.getQrCodes() : new ArrayList<>());
+        if (qrCodeUrls.size() > tables) {
+            List<String> excessQrCodes = qrCodeUrls.subList(tables, qrCodeUrls.size());
+            for (String excessQrCode : excessQrCodes) {
+                String fileId = utility.extractIdFromUrl(excessQrCode);
+                String info = fileService.deleteFile(UUID.fromString(fileId));
+                log.info("Successfully deleted QR code: {}", info);
             }
-            qrCodePaths.subList(tables, qrCodePaths.size()).clear();
+            excessQrCodes.clear();
+        } else {
+            for (int tableNumber = qrCodeUrls.size() + 1; tableNumber <= tables; tableNumber++) {
+                String qrText = "%s/%s/?restaurantId=%s&tableNumber=%d".formatted(websiteUrl, customerRoute, restaurant.getId(), tableNumber);
+                Path localPath = Paths.get("qr-codes");
+                Path savedPath = qrCodeService.saveQRCodeToFile(qrText, localPath)
+                        .orElseThrow(() -> new IOException("Failed to save QR code file"));
+                String url = baseUrl + "/api/files/get-image/" + fileService.uploadFile(savedPath).getId();
+                qrCodeUrls.add(url);
+                Files.deleteIfExists(savedPath);
+            }
         }
-        for (int tableNumber = qrCodePaths.size() + 1; tableNumber <= tables; tableNumber++) {
-            String qrText = "%s/%s/?restaurantId=%s&tableNumber=%d".formatted(websiteUrl, customerRoute, restaurant.getId(), tableNumber);
-            Path localPath = Paths.get("qr-codes");
-            qrCodeService.saveQRCodeToFile(qrText, localPath).ifPresent(path -> {
-                try {
-                    String cloudinaryUrl = cloudinaryService.uploadFile(path.toFile());
-                    qrCodePaths.add(cloudinaryUrl);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to upload QR to Cloudinary");
-                } finally {
-                    try {
-                        Files.deleteIfExists(path);
-                    } catch (IOException e) {
-                        System.err.println("Failed to delete local QR file: " + path);
-                    }
-                }
-            });
-        }
-        restaurant.setQrCodes(qrCodePaths);
+        restaurant.setQrCodes(qrCodeUrls);
         restaurantRepo.save(restaurant);
-        response.setMessage("QR code generated successfully");
+        response.setMessage("QR code(s) generated successfully");
         response.setStatus(HttpStatus.CREATED);
         return response;
     }

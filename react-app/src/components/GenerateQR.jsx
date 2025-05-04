@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import QR from "../assets/qr-code.png";
 import axios from "axios";
-import { FETCH_QR, GENERATE_QR } from "../utils/config.js";
+import {FETCH_QR, GENERATE_QR} from "../utils/config.js";
 import {FaDownload} from "react-icons/fa6";
 import { toPng } from "html-to-image";
 import { useRef } from "react";
@@ -39,13 +39,9 @@ const GenerateQR = ({ setToast, logo, name }) => {
         }
         setLoading(true);
         try {
-            const response = await axios.post(
-                GENERATE_QR(tables),
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const response = await axios.post(GENERATE_QR(tables), {}, { headers: { Authorization: `Bearer ${token}` } });
             setToast({ message: response.data.message, type: "success" });
-            fetchQR().then(q => q);
+            await fetchQR();
         } catch (error) {
             console.error("Error while generating QR: ", error);
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -179,7 +180,7 @@ public class RestaurantController {
     @PostMapping("/generate-qr/{tables}")
     public ResponseEntity<Response> generateTableQRCodes(
             @RequestHeader("Authorization") String token,
-            @PathVariable int tables) {
+            @PathVariable int tables) throws IOException {
         Response response = restaurantService.generateTableQRCodes(token, tables);
         return ResponseEntity.ok(response);
     }

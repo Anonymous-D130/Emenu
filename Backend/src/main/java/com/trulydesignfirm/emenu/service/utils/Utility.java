@@ -18,4 +18,12 @@ public class Utility {
         String email = jwtUtils.parseToken(token).getSubject();
         return userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User Not Found"));
     }
+
+    public String extractIdFromUrl(String url) {
+        if (url == null || url.isEmpty()) return null;
+        int lastSlashIndex = url.lastIndexOf('/');
+        return (lastSlashIndex != -1 && lastSlashIndex + 1 < url.length())
+                ? url.substring(lastSlashIndex + 1)
+                : null;
+    }
 }

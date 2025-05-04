@@ -55,7 +55,7 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, setToast, cate
         try {
             const response = await axios.post(ADD_FOOD_ITEM(foodItem.subCategory?.id), foodItem, { headers: { Authorization: `Bearer ${token}` }});
             setToast({ message: response?.data.message, type: "success" });
-            fetchItems();
+            await fetchItems();
             closeAddItemModal();
         } catch (error) {
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});

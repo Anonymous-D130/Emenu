@@ -2,13 +2,7 @@ import {useCallback, useEffect, useState} from "react";
 import { Modal } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
 import {FaSpinner, FaUpload} from "react-icons/fa";
-import {
-    CLOUDINARY_URL,
-    FETCH_MEAT_TYPES,
-    FETCH_SERVING_INFO,
-    FETCH_TAGS,
-    UPLOAD_PRESET
-} from "../utils/config.js";
+import {FETCH_MEAT_TYPES, FETCH_SERVING_INFO, FETCH_TAGS, UPLOAD_URL} from "../utils/config.js";
 import axios from "axios";
 import {formatEnumString} from "../utils/Utility.js";
 
@@ -146,13 +140,11 @@ const AddItemModal = ({ showItemModal, closeAddItemModal, food, setFood, handleS
         setUploading((prev) => ({ ...prev, [key]: true }));
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", UPLOAD_PRESET);
         try {
-            const response = await axios.create().post(CLOUDINARY_URL, formData);
-            const data = response.data;
-            if (data?.secure_url) {
-                setFoodItem((prev) => ({ ...prev, [key]: data.secure_url }));
-                setImagePreview(data.secure_url);
+            const { data } = await axios.create().post(UPLOAD_URL, formData);
+            if (data) {
+                setFoodItem((prev) => ({ ...prev, [key]: data}));
+                setImagePreview(data);
             } else {
                 alert("Image upload failed");
             }

@@ -2,7 +2,6 @@ import { Modal} from "@mui/material";
 import { IoChevronForward } from "react-icons/io5";
 import {MdOutlineArrowBackIos, MdRoomService} from "react-icons/md";
 import React, {useEffect, useState} from "react";
-import OrderPlacedModal from "./OrderPlacedModal.jsx";
 import Veg from "../../assets/veg.png";
 import nonVeg from "../../assets/Non-veg.png";
 import { FaPlusCircle } from "react-icons/fa";

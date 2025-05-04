@@ -37,6 +37,8 @@ public class SubscriptionPlan {
     private Integer qrCount;
     private boolean ringBellIncluded;
 
+    private boolean isAvailable = true;
+
     @ElementCollection
     private List<String> features;
 }

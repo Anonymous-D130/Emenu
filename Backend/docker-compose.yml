@@ -8,11 +8,14 @@ services:
       POSTGRES_DB: emenu
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     networks:
       - backend
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   emenu-backend:
     image: dhruvgupta130/emenu:latest
@@ -47,6 +50,9 @@ services:
     networks:
       - backend
     restart: always
+    command: >
+      sh -c "until pg_isready -h postgres-db -p 5432; do echo waiting for postgres; sleep 2; done &&
+             java -jar /app/emenu.jar"
 
   watchtower:
     image: containrrr/watchtower
@@ -64,6 +70,8 @@ networks:
 
 volumes:
   postgres_data:
+    name: postgres_data
     driver: local
   backend_uploads:
+    name: backend_uploads
     driver: local
