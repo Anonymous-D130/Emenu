@@ -77,6 +77,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         }
         if (restaurant == null) {
             restaurantRequest.setOwner(owner);
+            restaurantRequest.setActive(true);
             Restaurant savedRestro = restaurantRepo.save(restaurantRequest);
             Response response = new Response();
             response.setMessage("Restaurant created successfully.");
