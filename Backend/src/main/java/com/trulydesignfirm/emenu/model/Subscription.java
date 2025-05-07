@@ -5,7 +5,7 @@ import com.trulydesignfirm.emenu.enums.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -21,10 +21,10 @@ public class Subscription {
     private UUID id;
 
     @Column(nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,6 +40,6 @@ public class Subscription {
     private LoginUser owner;
 
     public boolean isExpired() {
-        return LocalDate.now().isAfter(endDate);
+        return LocalDateTime.now().isAfter(endDate);
     }
 }

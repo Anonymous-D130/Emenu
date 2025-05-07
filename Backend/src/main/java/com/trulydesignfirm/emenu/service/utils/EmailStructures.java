@@ -137,39 +137,35 @@ public class EmailStructures {
         return """
         <html>
            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-               <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; text-align: center;">
-                   <h2 style="color: #28a745;">🎉 Congratulations on Your Successful Registration!</h2>
+               <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff;">
+                   <h2 style="color: #28a745; text-align: center;">🎉 Welcome to %s!</h2>
 
                    <p>Dear %s Team,</p>
-                   <p>We are excited to inform you that your restaurant, <b>%s</b>, has been successfully registered with <b>%s</b>!</p>
 
-                   <p>We believe that this marks the beginning of a fruitful partnership, and we are thrilled to have you on board. You can now start managing your menu, receiving orders, and providing your customers with an enhanced dining experience!</p>
+                   <p>We are pleased to inform you that your restaurant, <strong>%s</strong>, has been successfully registered with <strong>%s</strong>.</p>
 
-                   <p>If you need any assistance or have questions, feel free to reach out to our support team. We’re always here to help!</p>
+                   <p>We are excited to partner with you and look forward to helping you streamline your operations, manage your menu efficiently, and deliver exceptional service to your customers.</p>
 
-                   <hr style="margin-top: 40px;">
+                   <p>You can now log in to your dashboard to start configuring your offerings, receive orders, and make the most of the features available to our restaurant partners.</p>
+
+                   <p>If you have any questions or require assistance, our support team is here to help at any time.</p>
+
+                   <hr style="margin: 40px 0;">
 
                    <p style="text-align: center; font-size: 14px; color: #555;">
-                       <b>The %s Team</b> <br>
-                       📧 Email: <a href="mailto:%s" style="color: #007bff;">%s</a> <br>
-                       📞 Phone: %s <br>
+                       <strong>The %s Team</strong><br>
+                       📧 Email: <a href="mailto:%s" style="color: #007bff;">%s</a><br>
+                       📞 Phone: %s<br>
                        🌐 Website: <a href="%s" style="color: #007bff;">%s</a>
                    </p>
                </div>
            </body>
-       </html>
-    """.formatted(restaurantName, restaurantName, companyName, companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl);
+        </html>
+        """.formatted(companyName, restaurantName, restaurantName, companyName, companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl);
     }
 
     public String generateSubscriptionSuccessEmail(String owner, SubscriptionPlan plan) {
-        StringBuilder featuresList = new StringBuilder();
-        if (plan.getFeatures() != null && !plan.getFeatures().isEmpty()) {
-            featuresList.append("<li><strong>Features Included:</strong><ul>");
-            for (String feature : plan.getFeatures()) {
-                featuresList.append("<li>").append(feature).append("</li>");
-            }
-            featuresList.append("</ul></li>");
-        }
+        StringBuilder featuresList = details(plan);
 
         return """
     <html>
@@ -207,6 +203,59 @@ public class EmailStructures {
             featuresList.toString(),
             plan.getDescription(),
             companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl
+        );
+    }
+
+    private StringBuilder details(SubscriptionPlan plan) {
+        StringBuilder featuresList = new StringBuilder();
+        if (plan.getFeatures() != null && !plan.getFeatures().isEmpty()) {
+            featuresList.append("<li><strong>Features Included:</strong><ul>");
+            for (String feature : plan.getFeatures()) {
+                featuresList.append("<li>").append(feature).append("</li>");
+            }
+            featuresList.append("</ul></li>");
+        }
+        return featuresList;
+    }
+
+    public String generateTrialSubscriptionEmail(String owner, SubscriptionPlan plan) {
+        StringBuilder featuresList = details(plan);
+
+        return """
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #2196F3;">🚀 Your Free Trial Has Started!</h2>
+            <p>Dear %s,</p>
+            <p>We're thrilled to offer you a <strong>free trial</strong> of our <strong>%s</strong> plan.</p>
+            <p>Here are the details of your trial:</p>
+            <ul>
+                <li><strong>Plan Name:</strong> %s</li>
+                <li><strong>Trial Duration:</strong> %d day(s)</li>
+                %s
+                <li><strong>Description:</strong> %s</li>
+            </ul>
+            <p>Take full advantage of the premium features during your trial period. If you love it, you can upgrade to a full subscription anytime.</p>
+            <p>If you have any questions or need assistance, we’re just a message away!</p>
+            <hr style="margin-top: 40px;">
+
+            <p style="text-align: center; font-size: 14px; color: #555;">
+                <b>The %s Team</b> <br>
+                📧 Email: <a href="mailto:%s" style="color: #007bff;">%s</a> <br>
+                📞 Phone: %s <br>
+                🌐 Website: <a href="%s" style="color: #007bff;">%s</a>
+            </p>
+        </div>
+    </body>
+    </html>
+    """.formatted(
+                owner,
+                plan.getTitle(),
+                plan.getTitle(),
+                plan.getTrialDuration(),
+                featuresList.toString(),
+                plan.getDescription(),
+                companyName, supportEmail, supportEmail, supportPhone, websiteUrl, websiteUrl
         );
     }
 }

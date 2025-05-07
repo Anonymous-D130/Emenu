@@ -25,7 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -57,17 +58,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public Response initiateSubscription(String token, UUID subscriptionID) {
         SubscriptionPlan subscriptionPlan = subscriptionPlanRepo.findById(subscriptionID).
                 orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
+        if(!subscriptionPlan.isAvailable()) {
+            throw new RuntimeException("Subscription plan is not available");
+        }
         LoginUser user = utility.getUserFromToken(token);
         try {
-            String razorpayOrderId;
-            int amount;
-            if(user.getSubscription() == null && subscriptionPlan.getTrialDuration() > 0) {
-                razorpayOrderId = paymentService.createTrial(subscriptionPlan, user);
-                amount = 200;
-            } else {
-                razorpayOrderId = paymentService.createOrder(subscriptionPlan, user);
-                amount = subscriptionPlan.getPrice().intValueExact();
-            }
+            String razorpayOrderId = paymentService.createOrder(subscriptionPlan, user);
+            int amount = subscriptionPlan.getPrice().intValueExact();
             PaymentResponse response = new PaymentResponse();
             response.setMessage("Payment initiated. Complete payment to confirm order.");
             response.setStatus(HttpStatus.OK);
@@ -76,6 +73,40 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage());
         }
+    }
+
+    @Override
+    public Response activateTrial(String token, UUID subscriptionID) {
+        Response response = new Response();
+        LoginUser user = utility.getUserFromToken(token);
+        Subscription subscription = user.getSubscription();
+        if (subscription != null) {
+            throw new RuntimeException("You are not eligible for free trial");
+        }
+        SubscriptionPlan subscriptionPlan = subscriptionPlanRepo.findById(subscriptionID).
+                orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
+        if(subscriptionPlan.getTrialDuration() == 0) {
+            throw new RuntimeException("This plan does not offer any free trial");
+        }
+        if(!subscriptionPlan.isAvailable()) {
+            throw new RuntimeException("Subscription plan is not available");
+        }
+        PaymentDetails details = new PaymentDetails();
+        details.setUser(user);
+        details.setPlan(subscriptionPlan);
+        details.setDuration(subscriptionPlan.getTrialDuration());
+        details.setAmount(new BigDecimal(0));
+        details.setOrderId(null);
+        details.setReceipt(null);
+        details.setOrderStatus("PAID");
+        details.setPaymentId(UUID.randomUUID().toString());
+        paymentRepo.save(details);
+        saveSubscriptionPlan(details, user, details.getDuration());
+        String body = emailStructures.generateTrialSubscriptionEmail(user.getName(), details.getPlan());
+        emailService.sendEmail(user.getEmail(), "🥳 Congrats! Your free trial Activated", body);
+        response.setMessage("Trial activated successfully.");
+        response.setStatus(HttpStatus.OK);
+        return response;
     }
 
     @Override
@@ -143,6 +174,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public List<SubscriptionPlan> getAllAvailableSubscriptionPlans() {
+        return subscriptionPlanRepo.findAllByAvailableTrueOrderByPriceAsc();
+    }
+
+    @Override
     public List<SubscriptionPlan> getAllSubscriptionPlans() {
         return subscriptionPlanRepo.findAllByOrderByPriceAsc();
     }
@@ -181,28 +217,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Response updateSubscriptionPlan(UUID planID, SubscriptionPlan subscriptionPlan) {
-        Response response = new Response();
-        SubscriptionPlan oldSubscriptionPlan = subscriptionPlanRepo.findById(planID)
-                .orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
-        isEmptyPlanBody(subscriptionPlan);
-        oldSubscriptionPlan.setDescription(subscriptionPlan.getDescription());
-        oldSubscriptionPlan.setTitle(subscriptionPlan.getTitle());
-        oldSubscriptionPlan.setPrice(subscriptionPlan.getPrice());
-        oldSubscriptionPlan.setFeatures(subscriptionPlan.getFeatures());
-        subscriptionPlanRepo.save(subscriptionPlan);
-        response.setMessage("Subscription plan created.");
-        response.setStatus(HttpStatus.CREATED);
-        return response;
-    }
-
-    @Override
     public Response deleteSubscriptionPlan(UUID planID) {
         Response response = new Response();
-        subscriptionPlanRepo.findById(planID)
+        SubscriptionPlan plan = subscriptionPlanRepo.findById(planID)
                 .orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
-        subscriptionPlanRepo.deleteById(planID);
-        response.setMessage("Subscription plan removed.");
+        if (!subscriptionRepo.existsByPlanId(planID)) {
+            subscriptionPlanRepo.deleteById(planID);
+            response.setMessage("Subscription plan removed.");
+        } else {
+            plan.setAvailable(false);
+            subscriptionPlanRepo.save(plan);
+            response.setMessage("Subscription plan queued for deletion.");
+        }
         response.setStatus(HttpStatus.OK);
         return response;
     }
@@ -238,8 +264,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Subscription subscription = subscriptionRepo.getSubscriptionByOwner(user).orElse(new Subscription());
         subscription.setPlan(paymentDetails.getPlan());
         subscription.setOwner(user);
-        subscription.setStartDate(LocalDate.now());
-        subscription.setEndDate(LocalDate.now().plusDays(days));
+        subscription.setStartDate(LocalDateTime.now());
+        subscription.setEndDate(LocalDateTime.now().plusDays(days));
         subscription.setStatus(SubscriptionStatus.ACTIVE);
         subscriptionRepo.save(subscription);
     }

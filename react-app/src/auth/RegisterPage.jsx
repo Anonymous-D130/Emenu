@@ -116,7 +116,7 @@ const RegisterPage = () => {
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
             <div className="flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden w-full lg:w-3/4 max-w-4xl">
                 {/* Left Section */}
-                <div className={`w-full lg:w-1/2 p-8 ${otpGenerated ? "lg:border-r" : ""}`}>
+                <div className={`w-full lg:w-1/2 p-8`}>
                     {!otpGenerated ? (
                         <div>
                             <h2 className="text-2xl font-semibold mb-4">Create Account</h2>
@@ -217,14 +217,17 @@ const RegisterPage = () => {
                                 <div className="flex flex-col md:flex-row justify-between items-center mt-2">
                                     <div className="text-gray-600 mb-2 md:mb-0">
                                         OTP sent to
-                                        <span className="flex justify-between gap-4 font-semibold text-gray-800">
-                                            {email}
-                                            <div className="text-purple-600 cursor-pointer" onClick={() => setOtpGenerated(false)}>
-                                                Edit
-                                            </div>
-                                        </span>
+                                        <span className="flex justify-between gap-2 font-semibold text-gray-800">
+                                        {email.length > 25 ? `${email.slice(0, 25)}...` : email}
+                                        <div
+                                            className="text-purple-600 cursor-pointer"
+                                            onClick={() => setOtpGenerated(false)}
+                                        >
+                                            Edit
+                                        </div>
+                                    </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex text-right text-sm">
                                         {timer > 0 ? (
                                             <div className="text-gray-600">Resend OTP in {timer}</div>
                                         ) : (

@@ -4,7 +4,7 @@ import {FETCH_PLANS} from "../utils/config.js";
 import Toast from "../utils/Toast.jsx";
 import {initialToastState} from "../utils/Utility.js";
 
-const SetupSubscription = ({ selectedPlan, setSelectedPlan, includeTrial }) => {
+const SetupSubscription = ({ selectedPlan, setSelectedPlan, setTrialDuration, includeTrial }) => {
     const token = localStorage.getItem("token");
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,8 +27,14 @@ const SetupSubscription = ({ selectedPlan, setSelectedPlan, includeTrial }) => {
         fetchPlans().then(r => r);
     },[fetchPlans])
 
-    const handleSelectPlan = (plan) => {
-        setSelectedPlan(plan);
+    const handleSelectPlan = (plan, trial) => {
+        if(!selectedPlan) {
+            setSelectedPlan(plan);
+            setTrialDuration(trial);
+        } else {
+            setSelectedPlan(null);
+            setTrialDuration(null);
+        }
     };
 
     return (
@@ -44,7 +50,7 @@ const SetupSubscription = ({ selectedPlan, setSelectedPlan, includeTrial }) => {
                         className={`p-5 rounded-2xl shadow-md border-2 transition-all bg-white flex flex-col justify-between hover:shadow-lg cursor-pointer ${
                             selectedPlan === id ? "border-purple-500 shadow-purple-300" : "border-gray-200"
                         }`}
-                        onClick={() => handleSelectPlan(id)}
+                        onClick={() => handleSelectPlan(id, trialDuration)}
                     >
                         <div className="flex flex-col gap-2">
                             <h3 className="text-xl font-bold text-gray-800">{title}</h3>
@@ -69,7 +75,7 @@ const SetupSubscription = ({ selectedPlan, setSelectedPlan, includeTrial }) => {
                             }`}
                             disabled={loading}
                         >
-                            {selectedPlan === title ? "✔ SELECTED" : "CHOOSE PLAN"}
+                            {selectedPlan === id ? "SELECTED" : "CHOOSE PLAN"}
                         </button>
                     </div>
                 ))}

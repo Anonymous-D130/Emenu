@@ -31,7 +31,7 @@ public class PublicController {
 
     @GetMapping("/plans")
     public ResponseEntity<List<SubscriptionPlan>> getAllPlans() {
-        return ResponseEntity.ok(subscriptionService.getAllSubscriptionPlans());
+        return ResponseEntity.ok(subscriptionService.getAllAvailableSubscriptionPlans());
     }
 
     @GetMapping("/tags")

@@ -75,6 +75,7 @@ export const CANCEL_ORDER = (orderId) => `${BACKEND_URL}/api/restaurants/order/$
 
 //Payment Routes
 export const FETCH_PLANS = `${BACKEND_URL}/api/restaurants/plans`;
+export const ACTIVATE_TRIAL = (planId) => `${BACKEND_URL}/api/restaurants/trial/${planId}`;
 export const INITIATE_PAYMENT = (planId) => `${BACKEND_URL}/api/restaurants/subscribe/${planId}`;
 export const VERIFY_PAYMENT = `${BACKEND_URL}/api/restaurants/verify-payment`;
 

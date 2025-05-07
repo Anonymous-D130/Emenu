@@ -7,7 +7,8 @@ import GenerateQR from "../components/GenerateQR.jsx";
 import NavigationButtons from "../components/NavigationButtons.jsx";
 import axios from "axios";
 import {
-    COMPANY_NAME, FETCH_RESTAURANT,
+    ACTIVATE_TRIAL,
+    COMPANY_NAME, FETCH_RESTAURANT, FETCH_USER_SUBSCRIPTION,
     INITIATE_PAYMENT,
     RAZORPAY_CURRENCY,
     RAZORPAY_KEY,
@@ -16,7 +17,7 @@ import {
 } from "../utils/config.js";
 import Toast from "../utils/Toast.jsx";
 import {useNavigate} from "react-router-dom";
-import {initialToastState} from "../utils/Utility.js";
+import {initialToastState, validateRestaurantDetails} from "../utils/Utility.js";
 
 const initialRestaurantState = {
     name: "",
@@ -32,9 +33,12 @@ const CreateRestaurant = () => {
 
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
+    const [isNewUser, setIsNewUser] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
+    const [trialDuration, setTrialDuration] = useState(null);
     const [restaurant, setRestaurant] = useState(initialRestaurantState);
     const [loading, setLoading] = useState(false);
+    const [subscription, setSubscription] = useState(null);
     const [toast, setToast] = useState(initialToastState);
     const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -51,6 +55,26 @@ const CreateRestaurant = () => {
     useEffect(() => {
         fetchRestaurant().then(r => r);
     }, [fetchRestaurant]);
+
+    const fetchSubscription = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(FETCH_USER_SUBSCRIPTION, {headers: { Authorization: `Bearer ${token}` }});
+            setSubscription(response.data);
+        } catch (error) {
+            console.error("Error fetching subscription:", error);
+            if(error.response.data.message === "No Subscription details found"){
+                setSubscription(null);
+                setIsNewUser(true);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        fetchSubscription().then(s => s);
+    }, [fetchSubscription]);
 
     const registerRestaurant = async () => {
         setLoading(true);
@@ -76,8 +100,9 @@ const CreateRestaurant = () => {
         }
 
         if (currentStep === 2) {
-            if (!restaurant.name || !restaurant.mobile || !restaurant.pageName || !restaurant.logo || !restaurant.welcomeScreen) {
-                setToast({message: "Please fill all required restaurant details before proceeding.", type: "error"});
+            const result = validateRestaurantDetails(restaurant);
+            if (!result.valid) {
+                setToast({ message: result.message, type: "error" });
                 return;
             }
             const success = await registerRestaurant();
@@ -141,6 +166,25 @@ const CreateRestaurant = () => {
     const handleSubmit = async () => {
         if (currentStep !== 4) return;
         setPaymentLoading(true);
+        if(isNewUser && !subscription && trialDuration > 0) {
+            try {
+                const { data } = await axios.post(ACTIVATE_TRIAL(selectedPlan), {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                setToast({ message: data?.message, type: "success" });
+                setTimeout(() => navigate("/restaurant/dashboard"), 300);
+            } catch (error) {
+                console.error("Trial activation failed:", error);
+                setToast({
+                    message: error.response ? error.response.data.message : error.message || "Trial activation failed",
+                    type: "error",
+                });
+            } finally {
+                setPaymentLoading(false);
+            }
+            return;
+        }
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded) {
             setToast({ message: "Failed to load Razorpay SDK. Check your internet connection.", type: "error" });
@@ -177,7 +221,7 @@ const CreateRestaurant = () => {
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
             <Steps currentStep={currentStep} />
             <div className="pb-24">
-                {currentStep === 1 && <SetupSubscription selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} includeTrial={true} />}
+                {currentStep === 1 && <SetupSubscription selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} setTrialDuration={setTrialDuration} includeTrial={true} />}
                 {currentStep === 2 && <SetUpRestaurant restaurant={restaurant} setRestaurant={setRestaurant} setToast={setToast} />}
                 {currentStep === 3 && <SetUpMenu setToast={setToast} />}
                 {currentStep === 4 && <GenerateQR setToast={setToast} logo={restaurant.logo} name={restaurant.name}/>}

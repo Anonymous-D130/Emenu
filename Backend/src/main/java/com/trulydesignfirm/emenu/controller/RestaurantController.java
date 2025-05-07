@@ -25,7 +25,13 @@ public class RestaurantController {
 
     @GetMapping("/plans")
     public ResponseEntity<List<SubscriptionPlan>> getAllPlans() {
-        return ResponseEntity.ok(subscriptionService.getAllSubscriptionPlans());
+        return ResponseEntity.ok(subscriptionService.getAllAvailableSubscriptionPlans());
+    }
+
+    @PostMapping("/trial/{planId}")
+    public ResponseEntity<Response> activateTrial(@RequestHeader("Authorization") String token, @PathVariable UUID planId) {
+        Response response = subscriptionService.activateTrial(token, planId);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping("/subscribe/{planId}")

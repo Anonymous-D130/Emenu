@@ -34,12 +34,6 @@ public class AdminController {
         return ResponseEntity.ok(subscriptionService.getAllSubscriptionPlans());
     }
 
-    @PutMapping("/plan/{id}")
-    public ResponseEntity<Response> updateSubscriptionPlan(@PathVariable UUID id, @RequestBody SubscriptionPlan subscriptionPlan) {
-        Response response = subscriptionService.updateSubscriptionPlan(id, subscriptionPlan);
-        return ResponseEntity.status(response.getStatus()).body(response);
-    }
-
     @DeleteMapping("/plan/{id}")
     public ResponseEntity<Response> deleteSubscriptionPlan(@PathVariable UUID id) {
         Response response = subscriptionService.deleteSubscriptionPlan(id);

@@ -10,11 +10,12 @@ import java.util.UUID;
 @Service
 public interface SubscriptionService {
     Response initiateSubscription(String token, UUID subscriptionID);
+    Response activateTrial(String token, UUID subscriptionID);
     Response verifyPayment(String token, String paymentId, String orderId, String signature);
     Response verifyWebhook(String payload, String razorpaySignature);
     List<SubscriptionPlan> getAllSubscriptionPlans();
+    List<SubscriptionPlan> getAllAvailableSubscriptionPlans();
     Response createSubscriptionPlan(SubscriptionPlan subscriptionPlan);
     Response createSubscriptionPlans(List<SubscriptionPlan> subscriptionPlans);
-    Response updateSubscriptionPlan(UUID planID, SubscriptionPlan subscriptionPlan);
     Response deleteSubscriptionPlan(UUID planID);
 }

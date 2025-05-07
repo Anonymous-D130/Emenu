@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface PaymentService {
-    String createTrial(SubscriptionPlan plan, LoginUser user) throws RazorpayException;
     String createOrder(SubscriptionPlan plan, LoginUser user) throws RazorpayException;
     String cancelOrder(String paymentId) throws RazorpayException;
 }

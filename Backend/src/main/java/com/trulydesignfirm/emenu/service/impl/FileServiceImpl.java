@@ -27,16 +27,18 @@ public class FileServiceImpl implements FileService {
     @Override
     public ImageFile saveFile(MultipartFile file) throws IOException {
         ImageFile newFile = new ImageFile();
-        String patientDirPath = storagePath + "/";
-        String filePath = patientDirPath + "/" + file.getOriginalFilename();
-        Path parentDir = Paths.get(patientDirPath);
-        Path dest = Paths.get(filePath);
-        if(Files.notExists(parentDir)) {
+        Path parentDir = Paths.get(storagePath);
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains("."))
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String randomFileName = UUID.randomUUID() + extension;
+        Path dest = parentDir.resolve(randomFileName);
+        if(Files.notExists(parentDir))
             Files.createDirectories(parentDir);
-        }
         file.transferTo(dest);
-        newFile.setFileName(file.getOriginalFilename());
-        newFile.setFilePath(filePath);
+        newFile.setFileName(randomFileName);
+        newFile.setFilePath(dest.toString());
         newFile.setFileSize(file.getSize());
         return fileRepo.save(newFile);
     }
@@ -50,9 +52,7 @@ public class FileServiceImpl implements FileService {
             Files.delete(fileToDelete);
             fileRepo.delete(file);
             return file.getFileName();
-        } else {
-            throw new IOException("File " + file.getFileName() + " does not exist.");
-        }
+        } else throw new IOException("File " + file.getFileName() + " does not exist.");
     }
 
     @Override
@@ -62,9 +62,8 @@ public class FileServiceImpl implements FileService {
         String filePath = patientDirPath + "/" + path.getFileName().toString();
         Path parentDir = Paths.get(patientDirPath);
         Path dest = Paths.get(filePath);
-        if(Files.notExists(parentDir)) {
+        if(Files.notExists(parentDir))
             Files.createDirectories(parentDir);
-        }
         Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING);
         newFile.setFileName(path.getFileName().toString());
         newFile.setFilePath(filePath);

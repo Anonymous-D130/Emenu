@@ -2,6 +2,7 @@ package com.trulydesignfirm.emenu.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,11 +25,12 @@ public class SubscriptionPlan {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @Min(value = 1, message = "Duration must be at least 1 day")
+    @Positive(message = "Duration must be a positive number")
     @Column(nullable = false)
     private Long duration;    //days
 
-    private long trialDuration;    //days
+    @Min(value = 0, message = "Trial duration cannot be negative")
+    private Long trialDuration;    //days
 
     @Column(nullable = false)
     private String description;
@@ -37,7 +39,7 @@ public class SubscriptionPlan {
     private Integer qrCount;
     private boolean ringBellIncluded;
 
-    private boolean isAvailable = true;
+    private boolean available = true;
 
     @ElementCollection
     private List<String> features;

@@ -67,6 +67,8 @@ const Subscription = () => {
         } catch (error) {
             console.error("Error fetching subscription:", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+        } finally {
+            setLoading(false);
         }
     }, [token, setToast]);
 
@@ -75,16 +77,20 @@ const Subscription = () => {
     }, [fetchSubscription]);
 
     const getSubscriptionProgress = () => {
-        const start = new Date(subscription?.startDate);
-        const end = new Date(subscription?.endDate);
+        if (!subscription?.startDate || !subscription?.endDate) {
+            return { percentage: 0, daysRemaining: 0 };
+        }
+
+        const start = new Date(subscription.startDate);
+        const end = new Date(subscription.endDate);
         const now = new Date();
 
-        const totalDuration = end - start;
-        const elapsed = now - start;
-        const remaining = end - now;
+        const totalDuration = end.getTime() - start.getTime();
+        const elapsed = now.getTime() - start.getTime();
+        const remaining = end.getTime() - now.getTime();
 
         const percentage = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-        const daysRemaining = Math.max(0, Math.floor(remaining / (1000 * 60 * 60 * 24)));
+        const daysRemaining = Math.max(0, Math.ceil(remaining / (1000 * 60 * 60 * 24)));
 
         return { percentage, daysRemaining };
     };

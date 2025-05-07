@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from "react";
 import SetUpRestaurant from "../components/SetUpRestaurant.jsx";
-import {initialToastState} from "../utils/Utility.js";
+import {initialToastState, validateRestaurantDetails} from "../utils/Utility.js";
 import Toast from "../utils/Toast.jsx";
 import axios from "axios";
 import {FETCH_RESTAURANT, REGISTER_RESTAURANT} from "../utils/config.js";
@@ -52,8 +52,9 @@ const Settings = () => {
     };
 
     const handleUpdateRestaurant = () => {
-        if(!restaurant.name || !restaurant.mobile || !restaurant.pageName || !restaurant.logo || !restaurant.welcomeScreen) {
-            setToast({message: "Please fill all required restaurant details before proceeding.", type: "error"});
+        const result = validateRestaurantDetails(restaurant);
+        if (!result.valid) {
+            setToast({ message: result.message, type: "error" });
             return;
         }
         registerRestaurant().then(r => r);

@@ -112,3 +112,21 @@ export const validateFoodForm = (foodItem, setToast) => {
     }
     return true;
 }
+
+export function validateRestaurantDetails(restaurant) {
+    const mobileRegex = /^[6-9]\d{9}$/;
+    const pageNameRegex = /^[a-zA-Z0-9-_]{3,}$/;
+    if (!restaurant.name || !restaurant.name.trim()) {
+        return { valid: false, message: "Restaurant name cannot be empty." };
+    }
+
+    if (!restaurant.mobile || !mobileRegex.test(restaurant.mobile)) {
+        return { valid: false, message: "Enter a valid 10-digit mobile number." };
+    }
+
+    if (!restaurant.pageName || !pageNameRegex.test(restaurant.pageName)) {
+        return { valid: false, message: "Page name must be at least 3 characters and contain only letters, numbers, hyphens or underscores." };
+    }
+
+    return { valid: true };
+}

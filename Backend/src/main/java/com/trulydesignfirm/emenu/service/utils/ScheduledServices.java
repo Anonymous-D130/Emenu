@@ -1,13 +1,7 @@
 package com.trulydesignfirm.emenu.service.utils;
 
-import com.trulydesignfirm.emenu.model.Customer;
-import com.trulydesignfirm.emenu.model.Food;
-import com.trulydesignfirm.emenu.model.ImageFile;
-import com.trulydesignfirm.emenu.model.Restaurant;
-import com.trulydesignfirm.emenu.repository.CustomerRepo;
-import com.trulydesignfirm.emenu.repository.FileRepo;
-import com.trulydesignfirm.emenu.repository.FoodRepo;
-import com.trulydesignfirm.emenu.repository.RestaurantRepo;
+import com.trulydesignfirm.emenu.model.*;
+import com.trulydesignfirm.emenu.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
