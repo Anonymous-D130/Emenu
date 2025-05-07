@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface SubscriptionPlanRepo extends JpaRepository<SubscriptionPlan, UUID> {
     List<SubscriptionPlan> findAllByAvailableTrueOrderByPriceAsc();
-    boolean existsByTitleAndPriceAndDescription(String title, BigDecimal price, String description);
+    boolean existsByTitleAndPriceAndDescriptionAndAvailable(String title, BigDecimal price, String description, boolean available);
     List<SubscriptionPlan> findByAvailableFalse();
     List<SubscriptionPlan> findAllByOrderByPriceAsc();
 }

@@ -187,9 +187,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public Response createSubscriptionPlan(SubscriptionPlan subscriptionPlan) {
         Response response = new Response();
         isEmptyPlanBody(subscriptionPlan);
-        boolean exists = subscriptionPlanRepo.existsByTitleAndPriceAndDescription(subscriptionPlan.getTitle(),
+        boolean exists = subscriptionPlanRepo.existsByTitleAndPriceAndDescriptionAndAvailable(subscriptionPlan.getTitle(),
                 subscriptionPlan.getPrice(),
-                subscriptionPlan.getDescription()
+                subscriptionPlan.getDescription(),
+                true
         );
         if (exists) {
             response.setMessage("Similar Subscription plan already exists.");
@@ -207,8 +208,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public Response createSubscriptionPlans(List<SubscriptionPlan> subscriptionPlans) {
         Response response = new Response();
         List<SubscriptionPlan> newPlans = subscriptionPlans.stream()
-                .filter(plan -> !subscriptionPlanRepo.existsByTitleAndPriceAndDescription(
-                        plan.getTitle(), plan.getPrice(), plan.getDescription()))
+                .filter(plan -> !subscriptionPlanRepo.existsByTitleAndPriceAndDescriptionAndAvailable(
+                        plan.getTitle(), plan.getPrice(), plan.getDescription(), true))
                 .toList();
         subscriptionPlanRepo.saveAll(newPlans);
         response.setMessage("Subscription plans created.");
@@ -221,13 +222,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Response response = new Response();
         SubscriptionPlan plan = subscriptionPlanRepo.findById(planID)
                 .orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
-        if (!subscriptionRepo.existsByPlanId(planID)) {
-            subscriptionPlanRepo.deleteById(planID);
-            response.setMessage("Subscription plan removed.");
-        } else {
+        if (subscriptionRepo.existsByPlanId(planID)) {
             plan.setAvailable(false);
             subscriptionPlanRepo.save(plan);
             response.setMessage("Subscription plan queued for deletion.");
+        } else {
+            subscriptionPlanRepo.deleteById(planID);
+            response.setMessage("Subscription plan removed.");
         }
         response.setStatus(HttpStatus.OK);
         return response;

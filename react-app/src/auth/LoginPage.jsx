@@ -19,7 +19,10 @@ const LoginPage = () => {
         try {
             const response = await axios.get(FETCH_USER_PROFILE, {headers: {Authorization: `Bearer ${token}`}});
             localStorage.setItem("user", JSON.stringify(response.data));
-            navigate("/restaurant");
+            if(response.data.role === "ADMIN") {
+                navigate("/emenu/manager");
+            }
+            else navigate("/restaurant");
         } catch (error) {
             console.log("Error fetching user profile: ", error);
             setToast({message: error.response ? error.response.data.message : error.message, type: "error"});
