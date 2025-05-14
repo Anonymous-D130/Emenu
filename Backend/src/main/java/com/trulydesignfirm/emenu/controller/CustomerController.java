@@ -20,24 +20,24 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @GetMapping("/restaurant/{id}")
-    public ResponseEntity<Restaurant> getRestaurant(@PathVariable UUID id){
-        return ResponseEntity.ok(hasActiveSubscription(id));
+    @GetMapping("/restaurant/{pageName}")
+    public ResponseEntity<Restaurant> getRestaurant(@PathVariable String pageName){
+        return ResponseEntity.ok(hasActiveSubscription(pageName));
     }
 
-    @GetMapping("/restaurant/{id}/tables")
-    public ResponseEntity<Integer> getTables(@PathVariable UUID id){
-        return ResponseEntity.ok(hasActiveSubscription(id).getTables());
+    @GetMapping("/restaurant/{pageName}/tables")
+    public ResponseEntity<Integer> getTables(@PathVariable String pageName){
+        return ResponseEntity.ok(hasActiveSubscription(pageName).getTables());
     }
 
-    @GetMapping("/restaurant/{id}/tags")
-    ResponseEntity<Map<Tag, List<Food>>> getAllFoods(@PathVariable UUID id){
-        return ResponseEntity.ok(customerService.getFoodsByTag(hasActiveSubscription(id)));
+    @GetMapping("/restaurant/{pageName}/tags")
+    ResponseEntity<Map<Tag, List<Food>>> getAllFoods(@PathVariable String pageName){
+        return ResponseEntity.ok(customerService.getFoodsByTag(hasActiveSubscription(pageName)));
     }
 
-    @PostMapping("/register/{restaurantId}")
-    public ResponseEntity<Customer> registerCustomer(@RequestBody Customer customer, @PathVariable UUID restaurantId) {
-        return ResponseEntity.ok(customerService.registerCustomer(customer, hasActiveSubscription(restaurantId)));
+    @PostMapping("/register/{pageName}")
+    public ResponseEntity<Customer> registerCustomer(@RequestBody Customer customer, @PathVariable String pageName) {
+        return ResponseEntity.ok(customerService.registerCustomer(customer, hasActiveSubscription(pageName)));
     }
 
     @PutMapping("/table/{tableNumber}/{id}")
@@ -63,9 +63,9 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.placeOrder(customerId, cart));
     }
 
-    @GetMapping("/{customerId}/orders/{restaurantId}")
-    public ResponseEntity<List<Order>> getOrder(@PathVariable UUID customerId, @PathVariable UUID restaurantId) {
-        return ResponseEntity.ok(customerService.getOrders(customerId, hasActiveSubscription(restaurantId)));
+    @GetMapping("/{customerId}/orders/{pageName}")
+    public ResponseEntity<List<Order>> getOrder(@PathVariable UUID customerId, @PathVariable String pageName) {
+        return ResponseEntity.ok(customerService.getOrders(customerId, hasActiveSubscription(pageName)));
     }
 
     @GetMapping("/{customerId}/orders")
@@ -73,9 +73,9 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerOrderHistory(customerId));
     }
 
-    @PostMapping("/ring/{customerId}/{restaurantId}")
-    public ResponseEntity<Response> ring(@PathVariable UUID customerId, @PathVariable UUID restaurantId) {
-        Response response = customerService.ringBell(customerId, restaurantId);
+    @PostMapping("/ring/{customerId}/{pageName}")
+    public ResponseEntity<Response> ring(@PathVariable UUID customerId, @PathVariable String pageName) {
+        Response response = customerService.ringBell(customerId, pageName);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -85,8 +85,13 @@ public class CustomerController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    private Restaurant hasActiveSubscription(UUID restaurantId) {
-        Restaurant restaurant = customerService.findRestaurantById(restaurantId);
+    @GetMapping("/{pageName}/services")
+    public ResponseEntity<Map<UUID, String>> getServices(@PathVariable String pageName) {
+        return ResponseEntity.ok(customerService.getRestaurantServices(pageName));
+    }
+
+    private Restaurant hasActiveSubscription(String pageName) {
+        Restaurant restaurant = customerService.getRestaurantByPage(pageName);
         if(restaurant.getOwner().getSubscription() == null || restaurant.getOwner().getSubscription().isExpired())
             throw new RuntimeException("%s's subscription has expired".formatted(restaurant.getName()));
         else if (!restaurant.isActive()) {

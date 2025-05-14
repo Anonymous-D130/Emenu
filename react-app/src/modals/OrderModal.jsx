@@ -61,7 +61,7 @@ const OrderModal = ({ isOpen, onClose, tableNumber, order, updateOrderStatus, ca
                                     />
                                     <div>
                                         <div className="font-semibold">{item.food.name}</div>
-                                        <div className="text-sm text-gray-500">({item.food.description})</div>
+                                        {item.food.description && <div className="text-sm text-gray-500">({item.food.description})</div>}
                                     </div>
                                 </div>
                                 <div className="text-right">

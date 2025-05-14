@@ -12,19 +12,20 @@ import CustomerRoutes from "./customer/components/CustomerRoutes.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ComingSoon from "./pages/ComingSoon.jsx";
 import verifyJWT from "./utils/VerifyJWT.js";
-import AdminRoutes from "./admin/AdminRoutes.jsx";
+import AdminRoutes from "./routes/AdminRoutes.jsx";
 import "./utils/axiosInterceptor.js";
 import "./App.css";
+import {useScrollFix} from "./utils/useScrollFix.js";
 
 function App() {
 
     verifyJWT();
+    useScrollFix();
 
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/customer/order/restaurant/*" element={<CustomerRoutes/>} />
                 <Route path="/login" element={<LoginPage/>} />
                 <Route path="/register" element={<RegisterPage/>} />
                 <Route path="/oauth-success" element={<OauthSuccess/>} />
@@ -46,7 +47,7 @@ function App() {
                         </PrivateRoute>
                     }
                 />
-                <Route path="/restaurants/*" element={<ComingSoon />} />
+                <Route path="/:pageName/*" element={<CustomerRoutes/>} />
                 <Route path="/logout" element={<Logout/>} />
                 <Route path="/*" element={<NotFound />} />
             </Routes>

@@ -40,8 +40,8 @@ public class Customer {
 
     private LocalDateTime leftAt;
 
-    public UUID getRestaurantId() {
-        return restaurant.getId();
+    public String getPageName() {
+        return restaurant.getPageName();
     }
 
     @PrePersist

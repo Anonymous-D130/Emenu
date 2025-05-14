@@ -2,7 +2,6 @@ package com.trulydesignfirm.emenu.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,22 +24,33 @@ public class SubscriptionPlan {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @Positive(message = "Duration must be a positive number")
-    @Column(nullable = false)
-    private Long duration;    //days
-
-    @Min(value = 0, message = "Trial duration cannot be negative")
-    private Long trialDuration;    //days
+    private BigDecimal disPrice;
 
     @Column(nullable = false)
     private String description;
 
+    @Min(value = 5, message = "menuCount must be at least 5")
     private Integer menuCount;
+
+    @Min(value = 5, message = "qrCount must be at least 5")
     private Integer qrCount;
+
     private boolean ringBellIncluded;
 
     private boolean available = true;
 
     @ElementCollection
     private List<String> features;
+
+    public BigDecimal getDisPrice() {
+        return disPrice == null ? this.price : disPrice;
+    }
+
+    public long getDuration() {
+        return 30L;
+    }
+
+    public long getTrialDuration() {
+        return 30L;
+    }
 }

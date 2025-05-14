@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,27 +56,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public Response initiateSubscription(String token, UUID subscriptionID) {
-        SubscriptionPlan subscriptionPlan = subscriptionPlanRepo.findById(subscriptionID).
-                orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
-        if(!subscriptionPlan.isAvailable()) {
-            throw new RuntimeException("Subscription plan is not available");
-        }
-        LoginUser user = utility.getUserFromToken(token);
-        try {
-            String razorpayOrderId = paymentService.createOrder(subscriptionPlan, user);
-            int amount = subscriptionPlan.getPrice().intValueExact();
-            PaymentResponse response = new PaymentResponse();
-            response.setMessage("Payment initiated. Complete payment to confirm order.");
-            response.setStatus(HttpStatus.OK);
-            response.setData(Map.of("razorpay_order_id", razorpayOrderId, "amount", amount));
-            return response;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage());
-        }
-    }
-
-    @Override
     public Response activateTrial(String token, UUID subscriptionID) {
         Response response = new Response();
         LoginUser user = utility.getUserFromToken(token);
@@ -95,7 +75,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         details.setUser(user);
         details.setPlan(subscriptionPlan);
         details.setDuration(subscriptionPlan.getTrialDuration());
-        details.setAmount(new BigDecimal(0));
+        details.setAmount(BigDecimal.ZERO);
         details.setOrderId(null);
         details.setReceipt(null);
         details.setOrderStatus("PAID");
@@ -107,6 +87,41 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         response.setMessage("Trial activated successfully.");
         response.setStatus(HttpStatus.OK);
         return response;
+    }
+
+    @Override
+    @Transactional
+    public Response initiateSubscription(String token, UUID subscriptionID, boolean isUpgrade, boolean isAnnual) {
+        SubscriptionPlan subscriptionPlan = subscriptionPlanRepo.findById(subscriptionID).
+                orElseThrow(() -> new RuntimeException("Invalid subscription Plan"));
+        if(!subscriptionPlan.isAvailable()) {
+            throw new RuntimeException("Subscription plan is not available");
+        }
+        LoginUser user = utility.getUserFromToken(token);
+        long duration;
+        BigDecimal amount;
+        if (isUpgrade) {
+            UpgradeData upgradeData = upgradeData(user.getSubscription(), subscriptionPlan);
+            amount = upgradeData.amount();
+            duration = upgradeData.remainingDays();
+        } else {
+            amount = isAnnual
+                    ? subscriptionPlan.getDisPrice().multiply(BigDecimal.valueOf(12))
+                    : subscriptionPlan.getPrice();
+            duration = isAnnual
+                    ? subscriptionPlan.getDuration() * 12
+                    : subscriptionPlan.getDuration();
+        }
+        try {
+            String razorpayOrderId = paymentService.createOrder(subscriptionPlan, user, amount, duration, isUpgrade);
+            PaymentResponse response = new PaymentResponse();
+            response.setMessage("Payment initiated. Complete payment to confirm order.");
+            response.setStatus(HttpStatus.OK);
+            response.setData(Map.of("razorpay_order_id", razorpayOrderId, "amount", amount.intValueExact()));
+            return response;
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override
@@ -255,7 +270,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         paymentDetails.setPaymentId(paymentId);
         paymentRepo.save(paymentDetails);
         saveSubscriptionPlan(paymentDetails, user, paymentDetails.getDuration());
-        String body = emailStructures.generateSubscriptionSuccessEmail(user.getName(), paymentDetails.getPlan());
+        String body = emailStructures.generateSubscriptionSuccessEmail(user.getName(), paymentDetails.getPlan(),
+                paymentDetails.getDuration() == paymentDetails.getPlan().getDuration() * 12L);
         emailService.sendEmail(user.getEmail(), "🥳 Congrats! You’ve Subscribed", body);
         response.setMessage("Subscription purchased successfully.");
         response.setStatus(HttpStatus.OK);
@@ -270,4 +286,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription.setStatus(SubscriptionStatus.ACTIVE);
         subscriptionRepo.save(subscription);
     }
+
+    private UpgradeData upgradeData(Subscription subscription, SubscriptionPlan subscriptionPlan) {
+        long totalDays = ChronoUnit.DAYS.between(subscription.getStartDate(), subscription.getEndDate());
+        long remainingDays = ChronoUnit.DAYS.between(LocalDateTime.now(), subscription.getEndDate()) + 1;
+        long amountUsed = (totalDays - remainingDays) * subscription.getPlan().getDisPrice().longValueExact() /
+                subscription.getPlan().getDuration();
+        long planAmount = Math.ceilDiv(remainingDays,
+                subscriptionPlan.getDuration()) * subscriptionPlan.getDisPrice().longValueExact();
+        BigDecimal finalAmount = BigDecimal.valueOf(planAmount).subtract(BigDecimal.valueOf(amountUsed));
+        System.out.println(totalDays + "," + planAmount + "," + amountUsed + "," + finalAmount + ", " + remainingDays);
+        return new UpgradeData(finalAmount, remainingDays);
+    }
+
+    private record UpgradeData(BigDecimal amount, long remainingDays){}
 }

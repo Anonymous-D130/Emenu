@@ -9,15 +9,16 @@ import Veg from "../../assets/veg.png";
 import nonVeg from "../../assets/Non-veg.png";
 import FoodItemModal from "../components/FoodItemModal.jsx";
 import PlacingOrderModal from "../components/PlacingOrderModal.jsx";
-import {useSearchParams} from "react-router-dom";
 import axios from "axios";
-import {FETCH_ORDERS_USER, GET_RESTAURANT_TAGS, RING_BELL, UPDATE_TABLE} from "../../utils/config.js";
-import {formatEnumString, initialToastState} from "../../utils/Utility.js";
-import ErrorPage from "./ErrorPage.jsx";
-import Toast from "../../utils/Toast.jsx";
+import {
+    FETCH_ORDERS_USER,
+    FETCH_SERVICES_OFFERED,
+    GET_RESTAURANT_TAGS,
+    RING_BELL
+} from "../../utils/config.js";
+import {formatEnumString} from "../../utils/Utility.js";
 import OrderPlacedModal from "../components/OrderPlacedModal.jsx";
 import ContactModal from "../components/ContactModal.jsx";
-import customerActivity from "../utils/CustomerActivity.js";
 
 const filterOptions = [
     { label: "Veg", icon: <img src={`${Veg}`} alt="veg" className="w-4 h-4 bg-white" />, value: "VEG" },
@@ -25,80 +26,54 @@ const filterOptions = [
     { label: "Egg", icon: <IoEggOutline/>, value: "EGG" },
 ];
 
+const filters = ["VEG", "NON_VEG", "EGG", null];
+
 const offer = false;
 
-const Food = () => {
-    const [searchParams] = useSearchParams();
-    const restaurantId = searchParams.get('restaurantId');
-    const tableNumber = searchParams.get('tableNumber');
-    const logo = searchParams.get('logo');
+const Food = ({ restaurant, tableNumber, setHasError, setToast }) => {
+    const customer = JSON.parse(localStorage.getItem("customer"));
+    const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState({});
     const [taggedFoods, setTaggedFoods] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [toast, setToast] = useState(initialToastState);
-    const [loading, setLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFilter, setSelectedFilter] = useState(null);
-    const [customer, setCustomer] = useState(JSON.parse(localStorage.getItem("customer")));
+    const [services, setServices] = useState({});
     const [orders, setOrders] = useState([]);
     const [bellLoading, setBellLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
+    const [filterIndex, setFilterIndex] = useState(0);
     const [cart, setCart] = useState({
         id: null,
         items: [],
         totalAmount: 0,
     });
 
-    customerActivity(customer);
-    
-    const updateTable = useCallback(async () => {
-        try {
-            const response = await axios.put(UPDATE_TABLE(tableNumber, customer?.id));
-            setCustomer(response.data);
-            localStorage.setItem("customer", JSON.stringify(response.data));
-            setHasError(false);
-        } catch (error) {
-            console.error("Error fetching customer details : ", error);
-            setToast({message: error.response.data ? error.response?.data?.message : error.message, type: "error"});
-            setHasError(true);
-        }
-    }, [customer?.id, tableNumber]);
-    
-    useEffect(() => {
-        if(customer?.tableNumber !== tableNumber){
-            updateTable().then(r => r);
-        }
-    }, [customer?.tableNumber, tableNumber, updateTable]);
-
-    const fetchTags = async (restaurantId) => {
+    const fetchTags = useCallback(async (pageName) => {
         setLoading(true);
         try {
-            const response = await axios.get(GET_RESTAURANT_TAGS(restaurantId));
+            const response = await axios.get(GET_RESTAURANT_TAGS(pageName));
             setTaggedFoods(response.data);
-            setHasError(false);
         } catch (error) {
-            setHasError(true);
             console.error("Error fetching tags: ", error);
-            setHasError(true);
             setToast({ message: error.response ? error.response?.data?.message : error.message, type: "error" });
+            setHasError(true);
         } finally {
             setLoading(false);
         }
-    }
+    }, [setHasError, setToast]);
 
     useEffect(() => {
-        if(restaurantId) fetchTags(restaurantId).then(t => t);
-    }, [restaurantId]);
+        fetchTags(customer?.pageName).then(t => t);
+    }, [fetchTags, customer?.pageName]);
 
-    const fetchOrders = async (restaurantId, customerId) => {
+    const fetchOrders = useCallback(async (pageName, customerId) => {
         setLoading(true);
         try {
-            const response = await axios.get(FETCH_ORDERS_USER(customerId, restaurantId));
+            const response = await axios.get(FETCH_ORDERS_USER(customerId, pageName));
             setOrders(response.data);
             if(response.data.length > 0) setShowModal(true);
-            setHasError(false);
         } catch (error) {
             console.error("Error fetching orders: ", error);
             setToast({ message: error.response ? error.response?.data?.message : error.message, type: "error" });
@@ -106,17 +81,35 @@ const Food = () => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [setHasError, setToast]);
 
     const refreshOrders = () => {
-        fetchOrders(restaurantId, customer.id).then(t => t);
+        fetchOrders(customer?.pageName, customer.id).then(t => t);
     }
+
+    const fetchServices = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(FETCH_SERVICES_OFFERED(customer?.pageName));
+            setServices(response.data);
+            console.log(response);
+        } catch (error) {
+            console.log("Error fetching services: ", error);
+            setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
+        } finally {
+            setLoading(false);
+        }
+    }, [customer?.pageName, setToast]);
+
+    useEffect(() => {
+        fetchServices().then((response) => response);
+    }, [fetchServices]);
 
     const ringBell = async () => {
         if(customer.id){
             setBellLoading(true);
             try {
-                const response = await axios.post(RING_BELL(customer.id, restaurantId));
+                const response = await axios.post(RING_BELL(customer.id, customer?.pageName));
                 setToast({message: response?.data?.message, type: "success" });
             } catch (error) {
                 setToast({ message: error.response ? error.response?.data?.message : error?.message, type: "error" });
@@ -129,20 +122,8 @@ const Food = () => {
     }
 
     useEffect(() => {
-        if (restaurantId && customer) fetchOrders(restaurantId, customer.id).then(t => t);
-    }, [restaurantId, customer]);
-
-    const showErrorPage = !restaurantId || !tableNumber || hasError || !logo;
-
-    if (showErrorPage) {
-        return (
-            <ErrorPage
-                loading={loading}
-                toast={toast}
-                setToast={setToast}
-            />
-        );
-    }
+        if (customer?.pageName) fetchOrders(customer?.pageName, customer.id).then(t => t);
+    }, [customer.id, customer?.pageName, fetchOrders]);
 
     const toggleSection = (key) => {
         setExpanded((prev) => ({
@@ -159,15 +140,19 @@ const Food = () => {
         }
     }
 
+    const handleCycleFilter = () => {
+        handleApplyFilter(filters[filterIndex]);
+        setFilterIndex((prevIndex) => (prevIndex + 1) % filters.length);
+    };
+
     return (
         <div className="font-sans bg-[#F6F6F6] min-h-screen text-black max-w-screen">
             {/* Header */}
             {loading && <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
                 <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
             </div>}
-            {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast(initialToastState)} />}
             <div className="bg-yellow-400 px-4 py-3 flex items-center justify-between rounded-b-3xl">
-                <img src={logo} alt="logo" className="h-35 max-w-2/3" />
+                <img src={restaurant?.logo} alt="logo" className="h-35 max-w-2/3" />
                 <button className="border px-3 py-1 rounded-xl text-lg font-bold flex items-center gap-2">
                     <SiGoogletranslate/> English
                 </button>
@@ -187,7 +172,8 @@ const Food = () => {
             <div className="flex items-center gap-3 px-2 py-2 overflow-x-auto w-full scrollbar-hide">
                 <button
                     key="Filter"
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-white whitespace-nowrap transition border border-gray-300 hover:bg-gray-100 flex-shrink-0"
+                    onClick={handleCycleFilter}
+                    className="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-medium rounded-lg bg-white whitespace-nowrap transition border border-gray-300 hover:bg-gray-100 flex-shrink-0"
                 >
                     <IoMdOptions />
                     Filter
@@ -196,7 +182,7 @@ const Food = () => {
                     <button
                         key={filter.label}
                         onClick={() => handleApplyFilter(filter.value)}
-                        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition border border-gray-300 flex-shrink-0
+                        className={`flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition border border-gray-300 flex-shrink-0
                         ${selectedFilter === filter.value ? "bg-gray-800 text-white" : "bg-white hover:bg-gray-100"}`}
                     >
                         {filter.icon}
@@ -231,7 +217,7 @@ const Food = () => {
                                 setToast={setToast}
                                 setShowModal={setShowModal}
                                 refreshOrders={refreshOrders}
-                                customerId={customer.id}
+                                customerId={customer?.id}
                                 ringBell={ringBell}
                                 bellLoading={bellLoading}
                             />
@@ -275,7 +261,7 @@ const Food = () => {
             </div>}
 
             {/* Our Services Section */}
-            <div className="bg-yellow-400 rounded-t-3xl px-4 py-6 pb-20 mt-4">
+            {Object.entries(services).length > 0 && <div className="bg-yellow-400 rounded-t-3xl px-4 py-6 pb-20 mt-4">
                 <h2 className="text-xl font-semibold mb-3">Our Services</h2>
                 <img
                     src="https://th.bing.com/th/id/OIP.QPyjSw0DNXek-raegYayhwHaE6?rs=1&pid=ImgDetMain"
@@ -286,12 +272,9 @@ const Food = () => {
                     <h3 className="font-bold text-xl">We Do Catering Services</h3>
                     <p>Prepare a Tempting Table with Delicious Dishes from Our Catering Service!</p>
                     <ul className="list-disc ml-5 space-y-1 font-semibold">
-                        <li>Weddings & Engagements Celebrations</li>
-                        <li>Birthday Parties & Social Gatherings</li>
-                        <li>Buffet & Plated Service Options</li>
-                        <li>Corporate Events & Conferences</li>
-                        <li>Private Dinners & Special Occasions</li>
-                        <li>Custom Menus for All Dietary Needs</li>
+                        {Object.entries(services).map(([id, service]) => (
+                            <li key={id}>{service}</li>
+                        ))}
                     </ul>
                     <button
                         onClick={() => setShowContactModal(true)}
@@ -300,13 +283,13 @@ const Food = () => {
                         Book Our Catering Services
                     </button>
                 </div>
-            </div>
+            </div>}
 
             {/*Place Order*/}
             <footer className="flex items-center justify-between relative">
                 {cart?.items?.length > 0 ? <button
                     onClick={() => setIsModalOpen(true)}
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md bg-black p-4 md:p-5 lg:p-6 rounded-xl z-10"
+                    className="fixed bottom-5 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md bg-black p-4 md:p-5 lg:p-6 rounded-xl z-10"
                 >
                     <span className="text-md text-white">{cart.items.reduce((sum, item) => sum + item.quantity, 0)} Items Added</span>
                     <div
@@ -316,7 +299,7 @@ const Food = () => {
                     </div>
                 </button> : orders?.length > 0 && <button
                     onClick={() => setShowModal(true)}
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md bg-black p-4 md:p-5 lg:p-6 rounded-xl z-10"
+                    className="fixed bottom-5 left-1/2 -translate-x-1/2 flex items-center justify-between w-[90%] max-w-md bg-black p-4 md:p-5 lg:p-6 rounded-xl z-10"
                 >
                     <span className="text-md text-white">{orders.length} Orders placed</span>
                     <div
@@ -330,7 +313,7 @@ const Food = () => {
                     <button
                         onClick={ringBell}
                         disabled={bellLoading}
-                        className="fixed bottom-30 right-6 w-18 h-18 rounded-full bg-black border-[6px]
+                        className="fixed bottom-30 md:right-2/7 right-6 w-18 h-18 rounded-full bg-black border-[6px]
                         border-gray-300 flex flex-col items-center justify-center text-yellow-400 z-10"
                     >
                         {bellLoading ? (
@@ -352,7 +335,7 @@ const Food = () => {
             <ContactModal
                 open={showContactModal}
                 onClose={() => setShowContactModal(false)}
-                restaurantId={restaurantId}
+                restaurantId={restaurant?.id}
                 setToast={setToast}
             />
 

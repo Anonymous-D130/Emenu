@@ -9,7 +9,7 @@ import axios from "axios";
 import {
     ACTIVATE_TRIAL,
     COMPANY_NAME, FETCH_RESTAURANT, FETCH_USER_SUBSCRIPTION,
-    INITIATE_PAYMENT,
+    INITIATE_MONTHLY_PAYMENT,
     RAZORPAY_CURRENCY,
     RAZORPAY_KEY,
     REGISTER_RESTAURANT,
@@ -18,6 +18,7 @@ import {
 import Toast from "../utils/Toast.jsx";
 import {useNavigate} from "react-router-dom";
 import {initialToastState, validateRestaurantDetails} from "../utils/Utility.js";
+import BillingToggle from "../utils/BillingToggle.jsx";
 
 const initialRestaurantState = {
     name: "",
@@ -41,6 +42,7 @@ const CreateRestaurant = () => {
     const [subscription, setSubscription] = useState(null);
     const [toast, setToast] = useState(initialToastState);
     const [paymentLoading, setPaymentLoading] = useState(false);
+    const [billingType, setBillingType] = useState("annual");
 
     const fetchRestaurant = useCallback(async () => {
         try {
@@ -139,7 +141,7 @@ const CreateRestaurant = () => {
             }
 
             setToast({message: "Subscription successful! " + verification.data.message, type: "success"});
-            setTimeout(() => navigate("/restaurant/dashboard"), 300);
+            setTimeout(() => navigate("/restaurant/dashboard"), 150);
         } catch (err) {
             console.error("Payment verification failed:", err);
             setToast({
@@ -173,7 +175,7 @@ const CreateRestaurant = () => {
                 });
 
                 setToast({ message: data?.message, type: "success" });
-                setTimeout(() => navigate("/restaurant/dashboard"), 300);
+                setTimeout(() => window.location.href = "/restaurant/dashboard", 300);
             } catch (error) {
                 console.error("Trial activation failed:", error);
                 setToast({
@@ -192,7 +194,7 @@ const CreateRestaurant = () => {
             return;
         }
         try {
-            const { data } = await axios.post(INITIATE_PAYMENT(selectedPlan), {}, {
+            const { data } = await axios.post(INITIATE_MONTHLY_PAYMENT(selectedPlan), {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -204,12 +206,11 @@ const CreateRestaurant = () => {
             const razorpayOptions = createRazorpayOptions(order.razorpay_order_id, order.amount);
             const rzp = new window.Razorpay(razorpayOptions);
             rzp.open();
-            setPaymentLoading(false);
         } catch (error) {
             console.error("Subscription/payment initiation failed:", error);
             setToast({message: error.response ? error.response.data.message : error.message || "Failed to initiate payment", type: "error",});
         } finally {
-            setLoading(false);
+            setPaymentLoading(false);
         }
     };
 
@@ -221,7 +222,11 @@ const CreateRestaurant = () => {
             {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
             <Steps currentStep={currentStep} />
             <div className="pb-24">
-                {currentStep === 1 && <SetupSubscription selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} setTrialDuration={setTrialDuration} includeTrial={true} />}
+                {currentStep === 1 && (
+                    <div className="p-5">
+                        <BillingToggle billingType={billingType} setBillingType={setBillingType} />
+                        <SetupSubscription selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} setTrialDuration={setTrialDuration} includeTrial={true} billingType={billingType} />
+                    </div>)}
                 {currentStep === 2 && <SetUpRestaurant restaurant={restaurant} setRestaurant={setRestaurant} setToast={setToast} />}
                 {currentStep === 3 && <SetUpMenu setToast={setToast} />}
                 {currentStep === 4 && <GenerateQR setToast={setToast} logo={restaurant.logo} name={restaurant.name}/>}

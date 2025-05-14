@@ -21,6 +21,8 @@ public interface CustomerService {
     Response placeOrder(UUID customerId, Cart cart);
     List<Order> getOrders(UUID customerId, Restaurant restaurant);
     List<Order> getCustomerOrderHistory(UUID customerId);
-    Response ringBell(UUID customerId, UUID restaurantId);
+    Response ringBell(UUID customerId, String pageName);
     Response deleteCustomer(UUID customerId);
+    Restaurant getRestaurantByPage(String pageName);
+    Map<UUID, String> getRestaurantServices(String pageName);
 }

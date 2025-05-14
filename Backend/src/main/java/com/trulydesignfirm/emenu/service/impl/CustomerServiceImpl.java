@@ -95,7 +95,7 @@ public class CustomerServiceImpl implements CustomerService {
         orderItems.forEach(item -> item.setOrder(order));
         order.setOrderItems(orderItems);
         orderRepo.save(order);
-        sendNewOrder(order);
+        sendNewOrder(order, restaurant);
         response.setMessage("Order successfully placed");
         response.setStatus(HttpStatus.CREATED);
         return response;
@@ -113,8 +113,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Response ringBell(UUID customerId, UUID restaurantId) {
-        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+    public Response ringBell(UUID customerId, String pageName) {
+        Restaurant restaurant = getRestaurantByPage(pageName);
         LoginUser owner = restaurant.getOwner();
         if (owner.getSubscription() == null || owner.getSubscription().isExpired()) {
             throw new RuntimeException("%s's subscription is expired or not active.".formatted(restaurant.getName()));
@@ -123,7 +123,7 @@ public class CustomerServiceImpl implements CustomerService {
             throw new RuntimeException("This restaurant does not have the ring bell feature included in its subscription.");
         }
         Response response = new Response();
-        sendRingBell(getCustomerById(customerId).getTableNumber(), restaurantId);
+        sendRingBell(getCustomerById(customerId).getTableNumber(), restaurant.getId());
         response.setMessage("Restaurant has been notified.");
         response.setStatus(HttpStatus.OK);
         return response;
@@ -138,6 +138,16 @@ public class CustomerServiceImpl implements CustomerService {
         return response;
     }
 
+    @Override
+    public Restaurant getRestaurantByPage(String pageName) {
+        return restaurantService.getRestaurantByPage(pageName);
+    }
+
+    @Override
+    public Map<UUID, String> getRestaurantServices(String pageName) {
+        return restaurantService.getRestaurantServices(pageName);
+    }
+
     private OrderItem mapOrderItem(CartItem cartItem) {
         OrderItem orderItem = new OrderItem();
         Food food = foodRepo.findById(cartItem.getFood().getId())
@@ -149,8 +159,8 @@ public class CustomerServiceImpl implements CustomerService {
         return orderItem;
     }
 
-    private void sendNewOrder(Order order) {
-        messagingTemplate.convertAndSend("/topic/new-order", order);
+    private void sendNewOrder(Order order, Restaurant restaurant) {
+        messagingTemplate.convertAndSend("/topic/new-order/"+restaurant.getId(), order);
     }
 
     private void sendRingBell(Integer tableNumber, UUID restaurantId) {

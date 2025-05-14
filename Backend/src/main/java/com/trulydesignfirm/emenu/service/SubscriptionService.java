@@ -9,8 +9,8 @@ import java.util.UUID;
 
 @Service
 public interface SubscriptionService {
-    Response initiateSubscription(String token, UUID subscriptionID);
     Response activateTrial(String token, UUID subscriptionID);
+    Response initiateSubscription(String token, UUID subscriptionID, boolean isUpgrade, boolean isAnnual);
     Response verifyPayment(String token, String paymentId, String orderId, String signature);
     Response verifyWebhook(String payload, String razorpaySignature);
     List<SubscriptionPlan> getAllSubscriptionPlans();

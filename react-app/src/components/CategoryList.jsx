@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {MdAdd, MdDelete, MdEdit} from "react-icons/md";
 import AddCategoryModal from "../modals/AddCategoryModal.jsx";
 import AddSubCategoryModal from "../modals/AddSubCategoryModal.jsx";
@@ -171,10 +171,15 @@ const CategoryList = ({categories, setSelectedCategory, selectedCategory, select
         }
     };
 
+    useEffect(() => {
+        if(selectedCategory)
+            setSelectedSubCategory(selectedCategory?.subCategories[0]);
+    }, [selectedCategory, setSelectedSubCategory]);
+
     const handleSelectCategory = (category) => {
         if (selectedCategory !== category) {
             setSelectedCategory(category);
-            setSelectedSubCategory(category.subCategories[0]);
+            setSelectedSubCategory(category?.subCategories[0]);
         } else {
             setSelectedCategory("");
             setSelectedSubCategory("");

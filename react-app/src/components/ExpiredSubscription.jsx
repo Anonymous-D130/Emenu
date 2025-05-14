@@ -2,8 +2,7 @@ import SetupSubscription from "./SetupSubscription.jsx";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {
-    COMPANY_NAME,
-    INITIATE_PAYMENT,
+    COMPANY_NAME, INITIATE_ANNUAL_PAYMENT, INITIATE_MONTHLY_PAYMENT,
     RAZORPAY_CURRENCY,
     RAZORPAY_KEY,
     VERIFY_PAYMENT
@@ -11,6 +10,7 @@ import {
 import {initialToastState} from "../utils/Utility.js";
 import {useNavigate} from "react-router-dom";
 import Toast from "../utils/Toast.jsx";
+import BillingToggle from "../utils/BillingToggle.jsx";
 
 const ExpiredSubscription = () => {
     const token = localStorage.getItem("token");
@@ -19,6 +19,7 @@ const ExpiredSubscription = () => {
     const [loading, setLoading] = useState(false);
     const user = JSON.parse(localStorage.getItem("user"));
     const [selectedPlan, setSelectedPlan] = useState(null);
+    const [billingType, setBillingType] = useState("annual");
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {
@@ -78,14 +79,25 @@ const ExpiredSubscription = () => {
         }
         setLoading(true);
         try {
-            const { data } = await axios.post(INITIATE_PAYMENT(selectedPlan), {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const order = data?.data;
-            if (!order?.razorpay_order_id || !order?.amount) {
+            let paymentData;
+            if (billingType === "annual") {
+                const { data } = await axios.post(INITIATE_ANNUAL_PAYMENT(selectedPlan), {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                paymentData = data?.data;
+            } else if(billingType === "monthly") {
+                const { data } = await axios.post(INITIATE_MONTHLY_PAYMENT(selectedPlan), {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                paymentData = data?.data;
+            } else {
+                throw new Error("Invalid billing type.");
+            }
+
+            if (!paymentData?.razorpay_order_id || !paymentData?.amount) {
                 throw new Error("Invalid Razorpay order response.");
             }
-            const razorpayOptions = createRazorpayOptions(order.razorpay_order_id, order.amount);
+            const razorpayOptions = createRazorpayOptions(paymentData.razorpay_order_id, paymentData.amount);
             const rzp = new window.Razorpay(razorpayOptions);
             rzp.open();
         } catch (error) {
@@ -113,11 +125,12 @@ const ExpiredSubscription = () => {
                     <h2 className="text-3xl font-bold text-center text-gray-800">
                         Renew Your Subscription
                     </h2>
-                    <p className="text-sm text-center text-gray-500">
+                    <p className="text-sm text-center text-gray-500 pt-2">
                         To continue accessing all premium features, please renew your subscription by selecting a plan below.
                     </p>
                 </div>
-                <SetupSubscription selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} includeTrial={false}/>
+                <BillingToggle billingType={billingType} setBillingType={setBillingType} />
+                <SetupSubscription selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} includeTrial={false} setTrialDuration={null} billingType={billingType}/>
             </div>
         </main>
     );

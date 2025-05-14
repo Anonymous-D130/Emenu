@@ -87,6 +87,10 @@ const SetUpMenu = ({ setToast }) => {
         }
     };
 
+    useEffect(() => {
+        setSelectedCategory(categories[0]);
+    }, [categories]);
+
     return (
         <div className="w-full bg-white p-5 md:p-8 rounded-2xl">
             {loading && <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">

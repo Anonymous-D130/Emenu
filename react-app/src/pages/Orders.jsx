@@ -59,7 +59,7 @@ const Orders = () => {
         const stompClient = over(socket);
 
         stompClient.connect({}, () => {
-            stompClient.subscribe("/topic/new-order", (msg) => {
+            stompClient.subscribe(`/topic/new-order/${restaurantId}`, (msg) => {
                 const newOrder = JSON.parse(msg.body);
                 setOrders(prev => [newOrder, ...prev]);
             });
@@ -78,7 +78,7 @@ const Orders = () => {
             const response = await axios.get(FETCH_RESTAURANT, {headers: {Authorization: `Bearer ${token}`}});
             setRestaurantId(response.data.id);
         } catch (error) {
-            console.log("Error fetching orders: ", error);
+            console.error("Error fetching orders: ", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setLoading(false);
@@ -95,7 +95,7 @@ const Orders = () => {
             const response = await axios.get(FETCH_ORDERS, {headers: {Authorization: `Bearer ${token}`}});
             setOrders(response.data);
         } catch (error) {
-            console.log("Error fetching orders: ", error);
+            console.error("Error fetching orders: ", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setOrderLoading(false);
@@ -108,7 +108,7 @@ const Orders = () => {
             const response = await axios.get(FETCH_TODAY_ORDERS, {headers: {Authorization: `Bearer ${token}`}});
             setOrders(response.data);
         } catch (error) {
-            console.log("Error fetching orders: ", error);
+            console.error("Error fetching orders: ", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setOrderLoading(false);
@@ -140,7 +140,7 @@ const Orders = () => {
                 )
             );
         } catch (error) {
-            console.log("Error updating orderStatus: ", error);
+            console.error("Error updating orderStatus: ", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setUpdateLoading(null);
@@ -158,7 +158,7 @@ const Orders = () => {
                 )
             );
         } catch (error) {
-            console.log("Error cancelling order: ", error);
+            console.error("Error cancelling order: ", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
         } finally {
             setCancelLoading(null);
@@ -315,10 +315,10 @@ const Orders = () => {
                                         >
                                             {order?.orderItems.length > 0 ? (
                                                 order?.orderItems.map((item, i) => (
-                                                <>
+                                                <div key={i}>
                                                     {item?.foodName}
                                                     {i !== order?.orderItems.length - 1 ? ', ' : ''}
-                                                </>
+                                                </div>
                                                 ))
                                             ) : <p>No Info Available</p>}
                                             {order.status === "PENDING" && (

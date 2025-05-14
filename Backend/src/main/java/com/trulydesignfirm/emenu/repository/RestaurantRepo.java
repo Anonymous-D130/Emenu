@@ -17,4 +17,6 @@ public interface RestaurantRepo extends JpaRepository<Restaurant, UUID> {
 
     @Query("SELECT r.qrCodes FROM Restaurant r")
     List<List<String>> findAllQrCodes();
+
+    Optional<Restaurant> findByPageName(String pageName);
 }

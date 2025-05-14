@@ -5,8 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -38,6 +37,9 @@ public class Restaurant {
 
     @ElementCollection
     private List<String> qrCodes;
+
+    @ElementCollection
+    private Map<UUID, String> services = new HashMap<>();
 
     @JsonIgnore
     @ManyToOne

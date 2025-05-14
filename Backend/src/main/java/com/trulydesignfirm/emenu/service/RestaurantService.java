@@ -37,9 +37,17 @@ public interface RestaurantService {
     List<String> fetchRestaurantQrCodes(String token);
     Response generateTableQRCodes(String token, int tables) throws IOException;
     List<Order> getOrdersByRestaurant(String token);
+    List<Order> getOrdersByRestaurant(Restaurant restaurant);
     List<Order> getRestaurantTodayOrders(String token);
     Response updateOrderStatus(String token, UUID orderId, OrderStatus orderStatus);
     Response cancelOrder(String token, UUID orderId);
     List<Order> getOrdersByTable(String token, int tableNumber);
     boolean checkPageName(String token, String pageName);
+    List<Restaurant> getAllRestaurants();
+    boolean isPlanUpgradable(String token);
+    Restaurant getRestaurantByPage(String pageName);
+    Map<UUID, String> getOfferedServices(String token);
+    Map<UUID, String> getRestaurantServices(String pageName);
+    Response addService(String token, String service);
+    Response removeService(String token, UUID id);
 }

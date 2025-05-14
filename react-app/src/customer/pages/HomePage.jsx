@@ -1,93 +1,10 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {useNavigate, useSearchParams} from "react-router-dom";
-import axios from "axios";
-import {FETCH_RESTAURANT_INFO, REGISTER_CUSTOMER} from "../../utils/config.js";
-import {initialToastState} from "../../utils/Utility.js";
-import Toast from "../../utils/Toast.jsx";
-import ErrorPage from "./ErrorPage.jsx";
-import customerActivity from "../utils/CustomerActivity.js";
+import {useNavigate} from "react-router-dom";
 
-const HomePage = () => {
-    const [restaurant, setRestaurant] = useState(null);
-    const [searchParams] = useSearchParams();
-    const restaurantId = searchParams.get('restaurantId');
-    const tableNumber = searchParams.get('tableNumber');
+const HomePage = ({ restaurant }) => {
+
     const navigate = useNavigate();
-    const [toast, setToast] = useState(initialToastState);
-    const [loading, setLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const [customer, setCustomer] = useState(null);
-
-    customerActivity(customer);
-
-    const registerCustomer = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await axios.post(REGISTER_CUSTOMER(restaurantId), { tableNumber });
-            localStorage.setItem("customer", JSON.stringify(response.data));
-            setCustomer(response.data);
-            setHasError(false);
-        } catch (error) {
-            console.log(error);
-            setHasError(true);
-            setToast({ message: error.response?.data?.message || error.message, type: "error" });
-        } finally {
-            setLoading(false);
-        }
-    }, [restaurantId, tableNumber]);
-
-    const fetchRestaurantInfo = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(FETCH_RESTAURANT_INFO(restaurantId));
-            setRestaurant(response.data);
-            setHasError(false);
-        } catch (error) {
-            console.log("Error fetching restaurant: ", error);
-            setHasError(true);
-            setToast({ message: error.response?.data?.message || error.message, type: "error" });
-        } finally {
-            setLoading(false);
-        }
-    }, [restaurantId]);
-
-    useEffect(() => {
-        if (!restaurantId || !tableNumber) return;
-
-        const stored = JSON.parse(localStorage.getItem("customer"));
-        if (!stored || stored.restaurantId !== restaurantId) {
-            localStorage.removeItem("customer");
-            setCustomer(null);
-            registerCustomer().then(r => r);
-        }
-    }, [registerCustomer, restaurantId, tableNumber]);
-
-    useEffect(() => {
-        if (restaurantId) fetchRestaurantInfo().then(r => r);
-    }, [fetchRestaurantInfo, restaurantId]);
-    
-    useEffect(() => {
-        if(restaurantId) fetchRestaurantInfo().then(r => r);
-    }, [fetchRestaurantInfo, restaurantId]);
-
-    const showErrorPage = !restaurantId || !tableNumber || hasError;
-
-    if (showErrorPage) {
-        return (
-            <ErrorPage
-                loading={loading}
-                toast={toast}
-                setToast={setToast}
-            />
-        );
-    }
-
     return (
         <div className="w-full h-screen bg-black text-white flex flex-col items-center justify-start relative">
-            {toast.message && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "" })} />}
-            {loading && <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-            </div>}
             {/* Header Section */}
             <div className="w-full bg-white text-black pt-5 flex flex-col items-center rounded-b-3xl z-5">
                 <h2 className="text-2xl font-semibold">Welcome to</h2>
@@ -124,7 +41,7 @@ const HomePage = () => {
                         </svg>
                     </button>
                     <button
-                        onClick={() => navigate(`/customer/order/restaurant/tables?restaurantId=${restaurantId}&tableNumber=${tableNumber}&logo=${restaurant?.logo}`)}
+                        onClick={() => navigate(`/${restaurant?.pageName}/tables`)}
                         className="mt-4 text-lg font-bold cursor-pointer text-white p-1 bg-gray-600 rounded-lg"
                     >Skip Intro</button>
                 </div>

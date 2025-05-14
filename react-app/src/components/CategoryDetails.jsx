@@ -126,9 +126,9 @@ const CategoryDetails = ({ selectedCategory, selectedSubCategory, setToast, cate
                         )}
                     </div>
                 </>
-            ) : (
-                <p className="text-gray-500 text-center py-4">Please select a category to view details.</p>
-            )}
+            ) : selectedCategory ? (
+                <p className="text-gray-500 text-center py-4">Please select a sub-category to view details.</p>
+            ) :  <p className="text-gray-500 text-center py-4">Please select a category to view details.</p>}
             <AddItemModal
                 showItemModal={showItemModal}
                 closeAddItemModal={closeAddItemModal}

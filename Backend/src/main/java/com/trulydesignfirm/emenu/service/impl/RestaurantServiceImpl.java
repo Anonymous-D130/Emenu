@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -46,9 +48,6 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Value("${menu.website.url}")
     private String websiteUrl;
-
-    @Value("${menu.customer.route}")
-    private String customerRoute;
 
     @Value("${backend_url}")
     private String baseUrl;
@@ -448,6 +447,11 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
+    public List<Order> getOrdersByRestaurant(Restaurant restaurant) {
+        return orderRepo.findByRestaurantOrderByCreatedAtDesc(restaurant);
+    }
+
+    @Override
     public List<Order> getRestaurantTodayOrders(String token) {
         return orderRepo.findByRestaurantAndCreatedAtBetweenOrderByCreatedAtDesc(
                 getRestaurant(token),
@@ -506,6 +510,64 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurantRepo.existsByPageName(pageName) && !pageName.equals(restaurant.getPageName());
     }
 
+    @Override
+    public List<Restaurant> getAllRestaurants() {
+        return restaurantRepo.findAll();
+    }
+
+    @Override
+    public boolean isPlanUpgradable(String token) {
+        if (getSubscriptionStatus(token) == SubscriptionStatus.ACTIVE) {
+            Subscription subscription = utility.getUserFromToken(token).getSubscription();
+            long remainingDays = ChronoUnit.DAYS.between(LocalDateTime.now(), subscription.getEndDate());
+            return remainingDays > 30;
+        }
+        return false;
+    }
+
+    @Override
+    public Restaurant getRestaurantByPage(String pageName) {
+        return restaurantRepo.findByPageName(pageName)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+    }
+
+    @Override
+    public Map<UUID, String> getOfferedServices(String token) {
+        return getRestaurant(token).getServices();
+    }
+
+    @Override
+    public Map<UUID, String> getRestaurantServices(String pageName) {
+        return getRestaurantByPage(pageName).getServices();
+    }
+
+    @Override
+    public Response addService(String token, String service) {
+        Response response = new Response();
+        Restaurant restaurant = getRestaurantByToken(token);
+        if (restaurant.getServices().size() >= 10) {
+            response.setMessage("Cannot add more than 10 services.");
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return response;
+        }
+        restaurant.getServices().put(UUID.randomUUID(), service);
+        restaurantRepo.save(restaurant);
+        response.setMessage("Service added successfully");
+        response.setStatus(HttpStatus.OK);
+        return response;
+    }
+
+    @Override
+    public Response removeService(String token, UUID id) {
+        Response response = new Response();
+        Restaurant restaurant = getRestaurantByToken(token);
+        restaurant.getServices().remove(id);
+        restaurantRepo.save(restaurant);
+        response.setMessage("Service removed successfully");
+        response.setStatus(HttpStatus.OK);
+        return response;
+    }
+
     private Restaurant getRestaurantByToken(String token) {
         return restaurantRepo.getRestaurantByOwner(utility.getUserFromToken(token))
                 .orElseThrow(() -> new RuntimeException("You haven't registered your restaurant."));
@@ -530,7 +592,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             excessQrCodes.clear();
         } else {
             for (int tableNumber = qrCodeUrls.size() + 1; tableNumber <= tables; tableNumber++) {
-                String qrText = "%s/%s/?restaurantId=%s&tableNumber=%d".formatted(websiteUrl, customerRoute, restaurant.getId(), tableNumber);
+                String qrText = "%s/%s?tableNumber=%d".formatted(websiteUrl, restaurant.getPageName(), tableNumber);
                 Path localPath = Paths.get("qr-codes");
                 Path savedPath = qrCodeService.saveQRCodeToFile(qrText, localPath)
                         .orElseThrow(() -> new IOException("Failed to save QR code file"));

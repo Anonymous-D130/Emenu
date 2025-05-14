@@ -76,20 +76,27 @@ export const CANCEL_ORDER = (orderId) => `${BACKEND_URL}/api/restaurants/order/$
 //Payment Routes
 export const FETCH_PLANS = `${BACKEND_URL}/api/restaurants/plans`;
 export const ACTIVATE_TRIAL = (planId) => `${BACKEND_URL}/api/restaurants/trial/${planId}`;
-export const INITIATE_PAYMENT = (planId) => `${BACKEND_URL}/api/restaurants/subscribe/${planId}`;
+export const INITIATE_MONTHLY_PAYMENT = (planId) => `${BACKEND_URL}/api/restaurants/subscribe/${planId}`;
+export const INITIATE_ANNUAL_PAYMENT = (planId) => `${BACKEND_URL}/api/restaurants/subscribe/yearly/${planId}`;
+export const UPGRADE_PLAN_PAYMENT = (planId) => `${BACKEND_URL}/api/restaurants/upgrade/plan/${planId}`;
 export const VERIFY_PAYMENT = `${BACKEND_URL}/api/restaurants/verify-payment`;
 
-//Customer Routes
-export const REGISTER_CUSTOMER = (restaurantId) => `${BACKEND_URL}/api/customers/register/${restaurantId}`;
-export const FETCH_CUSTOMER = (customerId) => `${BACKEND_URL}/api/customers/${customerId}`;
-export const FETCH_RESTAURANT_INFO = (restaurantId) => `${BACKEND_URL}/api/customers/restaurant/${restaurantId}`;
-export const GET_RESTAURANT_TABLES = (restaurantId) => `${BACKEND_URL}/api/customers/restaurant/${restaurantId}/tables`;
-export const GET_RESTAURANT_TAGS = (restaurantId) => `${BACKEND_URL}/api/customers/restaurant/${restaurantId}/tags`;
-export const PLACE_ORDER = (customerId) => `${BACKEND_URL}/api/customers/${customerId}/place-order`;
-export const FETCH_ORDERS_USER = (customerId, restaurantId) => `${BACKEND_URL}/api/customers/${customerId}/orders/${restaurantId}`;
-export const INACTIVE_CUSTOMER = (customerId) => `${BACKEND_URL}/api/customers/${customerId}/left`;
-export const RING_BELL = (customerId, restaurantId) => `${BACKEND_URL}/api/customers/ring/${customerId}/${restaurantId}`;
-export const UPDATE_TABLE = (tableNumber, customerId) => `${BACKEND_URL}/api/customers/table/${tableNumber}/${customerId}`;
+//Services
+export const FETCH_SERVICES = `${BACKEND_URL}/api/restaurants/services`;
+export const ADD_SERVICE = `${BACKEND_URL}/api/restaurants/add/service`;
+export const REMOVE_SERVICE = (id) => `${BACKEND_URL}/api/restaurants/remove/service/${id}`;
 
+//Customer Routes
+export const REGISTER_CUSTOMER = (pageName) => `${BACKEND_URL}/api/customers/register/${pageName}`;
+export const FETCH_CUSTOMER = (customerId) => `${BACKEND_URL}/api/customers/${customerId}`;
+export const FETCH_RESTAURANT_INFO = (pageName) => `${BACKEND_URL}/api/customers/restaurant/${pageName}`;
+export const GET_RESTAURANT_TABLES = (pageName) => `${BACKEND_URL}/api/customers/restaurant/${pageName}/tables`;
+export const GET_RESTAURANT_TAGS = (pageName) => `${BACKEND_URL}/api/customers/restaurant/${pageName}/tags`;
+export const PLACE_ORDER = (customerId) => `${BACKEND_URL}/api/customers/${customerId}/place-order`;
+export const FETCH_ORDERS_USER = (customerId, pageName) => `${BACKEND_URL}/api/customers/${customerId}/orders/${pageName}`;
+export const INACTIVE_CUSTOMER = (customerId) => `${BACKEND_URL}/api/customers/${customerId}/left`;
+export const RING_BELL = (customerId, pageName) => `${BACKEND_URL}/api/customers/ring/${customerId}/${pageName}`;
+export const UPDATE_TABLE = (tableNumber, customerId) => `${BACKEND_URL}/api/customers/table/${tableNumber}/${customerId}`;
+export const FETCH_SERVICES_OFFERED = (pageName) => `${BACKEND_URL}/api/customers/${pageName}/services`;
 //websocket
 export const WEBSOCKET_URL = `${BACKEND_URL}/ws`;

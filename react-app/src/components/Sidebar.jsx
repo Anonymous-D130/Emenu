@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FiHome, FiShoppingCart, FiList, FiTag, FiGrid, FiSettings } from "react-icons/fi";
 import { MdSubscriptions } from "react-icons/md";
 import { IoClose, IoOptions } from "react-icons/io5";
+import {AiFillCustomerService} from "react-icons/ai";
 
 const Sidebar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,6 +15,7 @@ const Sidebar = () => {
         { name: "Orders", icon: <FiShoppingCart size={20} />, path: "/restaurant/orders" },
         { name: "Menu", icon: <FiList size={20} />, path: "/restaurant/menu" },
         { name: "Offer Zone", icon: <FiTag size={20} />, path: "/restaurant/offers" },
+        { name: "Services", icon: <AiFillCustomerService size={20} />, path: "/restaurant/services" },
         { name: "QR Code", icon: <FiGrid size={20} />, path: "/restaurant/qr-code" },
         { name: "Subscription", icon: <MdSubscriptions size={20} />, path: "/restaurant/subscription" },
         { name: "Settings", icon: <FiSettings size={20} />, path: "/restaurant/settings" },

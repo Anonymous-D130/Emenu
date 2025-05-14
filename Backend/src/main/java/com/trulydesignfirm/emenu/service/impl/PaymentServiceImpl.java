@@ -42,13 +42,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public String createOrder(SubscriptionPlan plan, LoginUser user) throws RazorpayException {
-        System.out.println(user.getSubscription());
-        if (user.getSubscription() != null && !user.getSubscription().isExpired()) {
+    public String createOrder(SubscriptionPlan plan, LoginUser user, BigDecimal amount, long planDuration, boolean isUpgrade) throws RazorpayException {
+        if (!isUpgrade && (user.getSubscription() != null && !user.getSubscription().isExpired())) {
             throw new IllegalStateException("User already has an active subscription");
         }
-        int amountInPaise = plan.getPrice().multiply(BigDecimal.valueOf(100)).intValueExact();
-        return getString(plan, user, amountInPaise);
+        int amountInPaise = amount.multiply(BigDecimal.valueOf(100)).intValueExact();
+        return getString(plan, user, amountInPaise, planDuration);
     }
 
     @Override
@@ -69,23 +68,29 @@ public class PaymentServiceImpl implements PaymentService {
         return "Refund successful. Refund ID: " + refund.get("id");
     }
 
-    private String getString(SubscriptionPlan plan, LoginUser user, int amountInPaise) throws RazorpayException {
+    private String getString(SubscriptionPlan plan, LoginUser user, int amountInPaise, long planDuration) throws RazorpayException {
         JSONObject options = new JSONObject();
         options.put("amount", amountInPaise);
         options.put("currency", currency);
         options.put("receipt", "txn_" + System.currentTimeMillis());
         options.put("payment_capture", 1);
         Order order = razorpayClient.orders.create(options);
-        savePaymentDetails(order, user, plan);
+        savePaymentDetails(order, user, plan, planDuration);
         return order.get("id");
     }
 
-    private void savePaymentDetails(Order order, LoginUser user, SubscriptionPlan plan) {
+    private void savePaymentDetails(Order order, LoginUser user, SubscriptionPlan plan, long planDuration) {
         PaymentDetails details = paymentRepo.getPaymentDetailsByUser(user).orElse(new PaymentDetails());
         details.setUser(user);
         details.setPlan(plan);
-        details.setDuration(plan.getDuration());
-        details.setAmount(new BigDecimal(order.get("amount").toString()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+        details.setDuration(planDuration);
+        Object amountObj = order.get("amount");
+        if (amountObj == null) {
+            throw new IllegalArgumentException("Amount is missing in Razorpay order");
+        }
+        BigDecimal amount = new BigDecimal(amountObj.toString())
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        details.setAmount(amount);
         details.setOrderId(order.get("id"));
         details.setReceipt(order.get("receipt"));
         details.setOrderStatus("CREATED");

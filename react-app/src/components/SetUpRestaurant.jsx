@@ -122,7 +122,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Contact Number <span className="text-red-600">*</span></label>
                             <input
-                                type="text"
+                                type="number"
                                 name="mobile"
                                 value={restaurant.mobile}
                                 onChange={handleChange}
@@ -133,7 +133,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
 
                     {/* Restaurant URL */}
                     <div className="flex items-center mt-1 border-b-2 pb-2 mr-4">
-                        <span className="hidden md:inline">{FRONTEND_URL}/restaurants/</span>
+                        <span className="hidden md:inline">{FRONTEND_URL}/</span>
                         {editingSlug ? (
                             <input
                                 type="text"
@@ -141,7 +141,7 @@ const SetupRestaurant = ({ restaurant, setRestaurant, setToast }) => {
                                 value={restaurant.pageName}
                                 onChange={handleSlugChange}
                                 onBlur={() => setEditingSlug(false)}
-                                className="border-none bg-transparent focus:ring-0 w-full px-2"
+                                className="border-none bg-transparent focus:ring-0 w-full outline-0"
                                 autoFocus
                             />
                         ) : (

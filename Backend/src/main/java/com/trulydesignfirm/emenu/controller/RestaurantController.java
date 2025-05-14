@@ -36,7 +36,20 @@ public class RestaurantController {
 
     @PostMapping("/subscribe/{planId}")
     public ResponseEntity<Response> subscribe(@RequestHeader("Authorization") String token, @PathVariable UUID planId) {
-        Response response = subscriptionService.initiateSubscription(token, planId);
+        Response response = subscriptionService.initiateSubscription(token, planId, false, false);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/subscribe/yearly/{planId}")
+    public ResponseEntity<Response> subscribeYearly(@RequestHeader("Authorization") String token, @PathVariable UUID planId) {
+        Response response = subscriptionService.initiateSubscription(token, planId, false, true);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/upgrade/plan/{planId}")
+    public ResponseEntity<Response> upgradePlan(@RequestHeader("Authorization") String token, @PathVariable UUID planId) {
+        if(!restaurantService.isPlanUpgradable(token)) throw new IllegalArgumentException("You are not eligible for plan upgrade.");
+        Response response = subscriptionService.initiateSubscription(token, planId, true, false);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -218,5 +231,22 @@ public class RestaurantController {
             @RequestHeader("Authorization") String token,
             @PathVariable int tableNumber) {
         return ResponseEntity.ok(restaurantService.getOrdersByTable(token, tableNumber));
+    }
+
+    @GetMapping("/services")
+    public ResponseEntity<Map<UUID, String>> getServices(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(restaurantService.getOfferedServices(token));
+    }
+
+    @PostMapping("/add/service")
+    public ResponseEntity<Response> addService(@RequestHeader("Authorization") String token, @RequestBody String service) {
+        Response response = restaurantService.addService(token, service);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping("/remove/service/{id}")
+    public ResponseEntity<Response> deleteService(@RequestHeader("Authorization") String token, @PathVariable UUID id) {
+        Response response = restaurantService.removeService(token, id);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

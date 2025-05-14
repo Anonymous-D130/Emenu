@@ -74,12 +74,12 @@ const GenerateQR = ({ setToast, logo, name }) => {
 
 
     return (
-        <div className="flex flex-col gap-6 w-full px-4 py-6">
+        <div className="flex flex-col gap-6 w-full">
             {/* Top Section */}
             <div className="flex flex-col md:flex-row items-start w-full gap-6">
                 {/* QR Generator Form */}
                 <div
-                    className="flex flex-col gap-4 bg-white rounded-2xl p-5 shadow-lg border w-full max-w-md"
+                    className="flex flex-col gap-4 bg-white rounded-2xl p-5 mr-5 shadow-lg w-full max-w-md"
                 >
                     <h2 className="text-2xl font-bold text-center md:text-left">Generate QR</h2>
                     <label className="block text-gray-700">
@@ -136,9 +136,12 @@ const GenerateQR = ({ setToast, logo, name }) => {
                                         </div>
 
                                         {/* Branding Section */}
-                                        <div className="bg-purple-600 w-full p-2 flex items-center justify-center rounded-b-2xl gap-2">
+                                        <div className="bg-purple-600 w-full p-1 flex flex-col items-center justify-center rounded-b-2xl">
                                             <img src={`${logo}`} alt="Brand Logo" className="h-10 mb-1 rounded-xl" />
-                                            <p className="text-xs font-bold text-center leading-tight text-white text-wrap">
+                                            <p
+                                                className="font-bold text-center leading-tight text-white text-wrap"
+                                                style={{ fontSize: "10px" }}
+                                            >
                                                 {name}
                                             </p>
                                         </div>

@@ -1,31 +1,19 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Check} from "lucide-react";
 import { IoChevronBackOutline } from "react-icons/io5";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import {GET_RESTAURANT_TABLES} from "../../utils/config.js";
-import {initialToastState} from "../../utils/Utility.js";
-import ErrorPage from "./ErrorPage.jsx";
+import {GET_RESTAURANT_TABLES, UPDATE_TABLE} from "../../utils/config.js";
 
-const SelectTable = () => {
-    const [selectedTable, setSelectedTable] = useState(null);
+const SelectTable = ({ restaurant, tableNumber, setTableNumber, setToast, setLoading, setHasError }) => {
     const [totalTables, setTotalTables] = useState(0);
-
-    const [searchParams] = useSearchParams();
-    const restaurantId = searchParams.get('restaurantId');
-    const tableNumber = searchParams.get('tableNumber');
-    const logo = searchParams.get('logo');
     const navigate = useNavigate();
-    const [toast, setToast] = useState(initialToastState);
-    const [loading, setLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
-
+    const [customer, setCustomer] = useState(JSON.parse(localStorage.getItem("customer")));
     const fetchTables = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get(GET_RESTAURANT_TABLES(restaurantId));
+            const response = await axios.get(GET_RESTAURANT_TABLES(restaurant?.pageName));
             setTotalTables(response.data);
-            setHasError(false);
         } catch (error) {
             console.error("Error fetching tables: ", error);
             setToast({ message: error.response ? error.response.data.message : error.message, type: "error" });
@@ -33,39 +21,44 @@ const SelectTable = () => {
         } finally {
             setLoading(false);
         }
-    }, [restaurantId]);
+    }, [restaurant?.pageName, setHasError, setLoading, setToast]);
 
     useEffect(() => {
         fetchTables().then(f => f);
     }, [fetchTables])
 
-    const showErrorPage = !restaurantId || !tableNumber || hasError || !logo;
-
-    useEffect(() => {
-        if(!showErrorPage) setSelectedTable(tableNumber);
-    }, [showErrorPage, tableNumber]);
-
-    if (showErrorPage) {
-        return (
-            <ErrorPage
-                loading={loading}
-                toast={toast}
-                setToast={setToast}
-            />
-        );
-    }
+    useEffect(() => {setTableNumber(tableNumber);
+    }, [setTableNumber, tableNumber]);
 
     const handleTableSelect = (tableNum) => {
-        setSelectedTable(tableNum);
-        setTimeout(() => navigate(`/customer/order/restaurant/food?restaurantId=${restaurantId}&tableNumber=${tableNum}&logo=${logo}`), 200);
+        setTableNumber(tableNum);
+        setTimeout(() => navigate(`/${restaurant?.pageName}/foods`), 200);
     };
+
+    const updateTable = useCallback(async () => {
+        try {
+            const response = await axios.put(UPDATE_TABLE(tableNumber, customer?.id));
+            setCustomer(response.data);
+            localStorage.setItem("customer", JSON.stringify(response.data));
+        } catch (error) {
+            console.error("Error fetching customer details : ", error);
+            setToast({message: error.response.data ? error.response?.data?.message : error.message, type: "error"});
+            setHasError(true);
+        }
+    }, [customer?.id, setHasError, setToast, tableNumber]);
+
+    useEffect(() => {
+        if(customer?.tableNumber !== tableNumber){
+            updateTable().then(r => r);
+        }
+    }, [customer?.tableNumber, tableNumber, updateTable]);
 
     return (
         <div className="min-h-screen bg-white p-4 w-full">
             {/* Header */}
             <div className="flex items-center gap-2 bg-[#F5F5F5] p-2 mb-10 rounded-lg">
                 <button
-                    onClick={() => navigate(`/customer/order/restaurant?restaurantId=${restaurantId}&tableNumber=${tableNumber}`)}
+                    onClick={() => navigate(`/${restaurant?.pageName}`)}
                     className="text-xl font-bold border border-white bg-white p-2 rounded-full cursor-pointer"
                 >
                     <IoChevronBackOutline className="text-2xl"/>
@@ -76,7 +69,7 @@ const SelectTable = () => {
             {/* Grid of Tables */}
             <div className="flex justify-around items-center gap-4 flex-wrap">
                 {Array.from({ length: totalTables }, (_, i) => (i + 1).toString()).map((tableNum) => {
-                    const isSelected = selectedTable === tableNum;
+                    const isSelected = tableNumber === tableNum;
                     return (
                         <button
                             key={`${tableNum}`}

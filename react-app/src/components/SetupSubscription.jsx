@@ -4,7 +4,7 @@ import {FETCH_PLANS} from "../utils/config.js";
 import Toast from "../utils/Toast.jsx";
 import {initialToastState} from "../utils/Utility.js";
 
-const SetupSubscription = ({ selectedPlan, setSelectedPlan, setTrialDuration, includeTrial }) => {
+const SetupSubscription = ({ selectedPlan, setSelectedPlan, includeTrial, setTrialDuration, billingType }) => {
     const token = localStorage.getItem("token");
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ const SetupSubscription = ({ selectedPlan, setSelectedPlan, setTrialDuration, in
     },[fetchPlans])
 
     const handleSelectPlan = (plan, trial) => {
-        if(!selectedPlan) {
+        if(!selectedPlan || selectedPlan !== plan) {
             setSelectedPlan(plan);
             setTrialDuration(trial);
         } else {
@@ -44,7 +44,7 @@ const SetupSubscription = ({ selectedPlan, setSelectedPlan, setTrialDuration, in
                 {loading && <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
                     <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
                 </div>}
-                {plans.map(({ id, title, price, description, features, duration, trialDuration }) => (
+                {plans.map(({ id, title, price, disPrice, description, features, duration, trialDuration }) => (
                     <div
                         key={title}
                         className={`p-5 rounded-2xl shadow-md border-2 transition-all bg-white flex flex-col justify-between hover:shadow-lg cursor-pointer ${
@@ -54,9 +54,31 @@ const SetupSubscription = ({ selectedPlan, setSelectedPlan, setTrialDuration, in
                     >
                         <div className="flex flex-col gap-2">
                             <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-                            <p className="text-lg font-bold text-purple-700">₹{price}</p>
+                            {billingType === "monthly" && (
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex items-center space-x-1">
+                                        <p className="text-2xl font-semibold text-purple-700">₹{price}</p>
+                                        <p className="text-sm text-gray-400">/month</p>
+                                    </div>
+                                    <p className="text-xs text-gray-500">Billed Monthly</p>
+                                </div>
+                            )}
+
+                            {billingType === "annual" && (
+                                <div className="flex items-center space-x-4">
+                                    {price > disPrice && (
+                                        <p className="text-sm font-semibold text-gray-500 line-through">₹{price}</p>
+                                    )}
+                                    <div className="flex items-center space-x-1">
+                                        <p className="text-2xl font-semibold text-purple-700">₹{disPrice}</p>
+                                        <p className="text-sm text-gray-400">/month</p>
+                                    </div>
+                                    <p className="text-xs text-gray-500">Billed Annually</p>
+                                </div>
+                            )}
+
                             <p className="text-md font-semibold text-gray-700">{description}</p>
-                            <p className="text-sm font-medium text-gray-600">Duration: {duration / 30} months</p>
+                            <p className="text-sm font-medium text-gray-600">Duration: {Math.round((billingType === "annual" ? duration * 12 : duration) / 30)} months</p>
                             {includeTrial && trialDuration > 0 && <p className="text-sm font-medium text-purple-600">Includes {trialDuration} days free
                                 trial</p>}
                             <ul className="mt-4 text-gray-600 text-sm space-y-2">

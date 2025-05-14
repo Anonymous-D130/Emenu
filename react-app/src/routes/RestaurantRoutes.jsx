@@ -15,6 +15,7 @@ import {IS_SUBSCRIPTION_ACTIVE} from "../utils/config.js";
 import OfferZone from "../pages/OfferZone.jsx";
 import ExpiredSubscription from "../components/ExpiredSubscription.jsx";
 import BellButton from "../components/BellButton.jsx";
+import Services from "../pages/Services.jsx";
 
 const RestaurantRoutes = () => {
     const token = localStorage.getItem("token");
@@ -53,6 +54,7 @@ const RestaurantRoutes = () => {
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/menu" element={<Menu />} />
                 <Route path="/offers" element={<OfferZone />} />
+                <Route path="/services" element={<Services />} />
                 <Route path="/qr-code" element={<QRCode />} />
                 <Route path="/subscription" element={<Subscription />} />
                 <Route path="/settings" element={<Settings />} />

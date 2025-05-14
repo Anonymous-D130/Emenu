@@ -1,9 +1,12 @@
 import {Routes, Route} from "react-router-dom";
 import NotFound from "../pages/NotFound.jsx";
-import AdminPanel from "./AdminPanel.jsx";
 import axios from "axios";
 import {FETCH_USER_PROFILE} from "../utils/config.js";
 import {useCallback, useEffect} from "react";
+import {AdminHeader} from "../admin/AdminHeader.jsx";
+import PlansHandling from "../admin/PlansHandling.jsx";
+import AdminDashboard from "../admin/AdminDashboard.jsx";
+import AdminPanel from "../admin/AdminPanel.jsx";
 
 const AdminRoutes = () => {
 
@@ -21,8 +24,11 @@ const AdminRoutes = () => {
 
     return (
         <div className="flex min-h-screen bg-gray-100 justify-center">
+            <AdminHeader />
             <Routes>
                 <Route path="/" element={<AdminPanel/>} />
+                <Route path="/partners" element={<AdminDashboard/>} />
+                <Route path="/plans" element={<PlansHandling/>} />
                 <Route path="/*" element={<NotFound />} />
             </Routes>
         </div>
