@@ -48,10 +48,10 @@ const SelectTable = ({ tableNumber, setTableNumber, setToast, setLoading, setHas
     }, [customer?.id, setHasError, setToast, tableNumber]);
 
     useEffect(() => {
-        if(customer?.tableNumber !== tableNumber){
+        if(customer && customer?.tableNumber !== tableNumber){
             updateTable().then(r => r);
         }
-    }, [customer?.tableNumber, tableNumber, updateTable]);
+    }, [customer, tableNumber, updateTable]);
 
     return (
         <div className="min-h-screen bg-white p-4 w-full">

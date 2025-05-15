@@ -50,6 +50,11 @@ const Food = ({ restaurant, tableNumber, setHasError, setToast }) => {
         totalAmount: 0,
     });
 
+    if(!customer || !restaurant) {
+        setHasError(true);
+        setToast({message: "Requested Page Not Found", type: "error"});
+    }
+
     const fetchTags = useCallback(async (pageName) => {
         setLoading(true);
         try {
@@ -84,7 +89,7 @@ const Food = ({ restaurant, tableNumber, setHasError, setToast }) => {
     }, [setHasError, setToast]);
 
     const refreshOrders = () => {
-        fetchOrders(customer?.pageName, customer.id).then(t => t);
+        fetchOrders(customer?.pageName, customer?.id).then(t => t);
     }
 
     const fetchServices = useCallback(async () => {
@@ -106,10 +111,10 @@ const Food = ({ restaurant, tableNumber, setHasError, setToast }) => {
     }, [fetchServices]);
 
     const ringBell = async () => {
-        if(customer.id){
+        if(customer?.id){
             setBellLoading(true);
             try {
-                const response = await axios.post(RING_BELL(customer.id, customer?.pageName));
+                const response = await axios.post(RING_BELL(customer?.id, customer?.pageName));
                 setToast({message: response?.data?.message, type: "success" });
             } catch (error) {
                 setToast({ message: error.response ? error.response?.data?.message : error?.message, type: "error" });
@@ -122,8 +127,8 @@ const Food = ({ restaurant, tableNumber, setHasError, setToast }) => {
     }
 
     useEffect(() => {
-        if (customer?.pageName) fetchOrders(customer?.pageName, customer.id).then(t => t);
-    }, [customer.id, customer?.pageName, fetchOrders]);
+        if (customer?.pageName) fetchOrders(customer?.pageName, customer?.id).then(t => t);
+    }, [customer?.id, customer?.pageName, fetchOrders]);
 
     const toggleSection = (key) => {
         setExpanded((prev) => ({
