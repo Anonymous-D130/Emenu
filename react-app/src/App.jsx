@@ -10,7 +10,6 @@ import OauthSuccess from "./components/OauthSuccess.jsx";
 import Logout from "./auth/Logout.jsx";
 import CustomerRoutes from "./customer/components/CustomerRoutes.jsx";
 import NotFound from "./pages/NotFound.jsx";
-import ComingSoon from "./pages/ComingSoon.jsx";
 import verifyJWT from "./utils/VerifyJWT.js";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
 import "./utils/axiosInterceptor.js";
@@ -49,7 +48,7 @@ function App() {
                 />
                 <Route path="/:pageName/*" element={<CustomerRoutes/>} />
                 <Route path="/logout" element={<Logout/>} />
-                <Route path="/*" element={<NotFound />} />
+                <Route path="/not-found" element={<NotFound />} />
             </Routes>
         </Router>
     );

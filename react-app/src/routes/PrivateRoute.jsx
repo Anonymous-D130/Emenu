@@ -9,7 +9,7 @@ const PrivateRoute = ({ children, roles }) => {
     }
 
     if (roles?.length && !roles.includes(user.role)) {
-        return <Navigate to="/not-authorized" replace />;
+        return <Navigate to="/not-found" replace />;
     }
 
     return children;

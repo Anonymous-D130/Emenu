@@ -5,14 +5,14 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {GET_RESTAURANT_TABLES, UPDATE_TABLE} from "../../utils/config.js";
 
-const SelectTable = ({ restaurant, tableNumber, setTableNumber, setToast, setLoading, setHasError }) => {
+const SelectTable = ({ tableNumber, setTableNumber, setToast, setLoading, setHasError, pageName }) => {
     const [totalTables, setTotalTables] = useState(0);
     const navigate = useNavigate();
     const [customer, setCustomer] = useState(JSON.parse(localStorage.getItem("customer")));
     const fetchTables = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get(GET_RESTAURANT_TABLES(restaurant?.pageName));
+            const response = await axios.get(GET_RESTAURANT_TABLES(pageName));
             setTotalTables(response.data);
         } catch (error) {
             console.error("Error fetching tables: ", error);
@@ -21,7 +21,7 @@ const SelectTable = ({ restaurant, tableNumber, setTableNumber, setToast, setLoa
         } finally {
             setLoading(false);
         }
-    }, [restaurant?.pageName, setHasError, setLoading, setToast]);
+    }, [pageName, setHasError, setLoading, setToast]);
 
     useEffect(() => {
         fetchTables().then(f => f);
@@ -32,7 +32,7 @@ const SelectTable = ({ restaurant, tableNumber, setTableNumber, setToast, setLoa
 
     const handleTableSelect = (tableNum) => {
         setTableNumber(tableNum);
-        setTimeout(() => navigate(`/${restaurant?.pageName}/foods`), 200);
+        setTimeout(() => navigate(`/${pageName}/foods`), 200);
     };
 
     const updateTable = useCallback(async () => {
@@ -58,7 +58,7 @@ const SelectTable = ({ restaurant, tableNumber, setTableNumber, setToast, setLoa
             {/* Header */}
             <div className="flex items-center gap-2 bg-[#F5F5F5] p-2 mb-10 rounded-lg">
                 <button
-                    onClick={() => navigate(`/${restaurant?.pageName}`)}
+                    onClick={() => navigate(`/${pageName}`)}
                     className="text-xl font-bold border border-white bg-white p-2 rounded-full cursor-pointer"
                 >
                     <IoChevronBackOutline className="text-2xl"/>

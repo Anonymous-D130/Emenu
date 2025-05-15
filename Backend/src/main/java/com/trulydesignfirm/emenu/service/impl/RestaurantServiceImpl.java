@@ -72,7 +72,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         LoginUser owner = utility.getUserFromToken(token);
         Restaurant restaurant = restaurantRepo.getRestaurantByOwner(owner).orElse(null);
         if(checkPageName(token, restaurantRequest.getPageName())) {
-            throw new IllegalArgumentException("Page name already taken. Please choose another one.");
+            throw new IllegalArgumentException("Page name not available. Please choose another one.");
         }
         if (restaurant == null) {
             restaurantRequest.setOwner(owner);
@@ -503,6 +503,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public boolean checkPageName(String token, String pageName) {
+        if (Utility.reservedWords().contains(pageName.toLowerCase())) return true;
         LoginUser owner = utility.getUserFromToken(token);
         Optional<Restaurant> optionalRestaurant = restaurantRepo.getRestaurantByOwner(owner);
         if (optionalRestaurant.isEmpty()) return restaurantRepo.existsByPageName(pageName);

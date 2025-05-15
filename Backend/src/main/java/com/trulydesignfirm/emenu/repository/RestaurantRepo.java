@@ -14,9 +14,8 @@ import java.util.UUID;
 public interface RestaurantRepo extends JpaRepository<Restaurant, UUID> {
     Optional<Restaurant> getRestaurantByOwner(LoginUser owner);
     boolean existsByPageName(String pageName);
+    Optional<Restaurant> findByPageName(String pageName);
 
     @Query("SELECT r.qrCodes FROM Restaurant r")
     List<List<String>> findAllQrCodes();
-
-    Optional<Restaurant> findByPageName(String pageName);
 }

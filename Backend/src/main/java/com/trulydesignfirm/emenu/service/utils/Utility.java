@@ -6,6 +6,8 @@ import com.trulydesignfirm.emenu.repository.UserRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class Utility {
@@ -25,5 +27,9 @@ public class Utility {
         return (lastSlashIndex != -1 && lastSlashIndex + 1 < url.length())
                 ? url.substring(lastSlashIndex + 1)
                 : null;
+    }
+
+    public static List<String> reservedWords() {
+        return List.of("login", "register", "forgot-password", "reset-password", "oauth-success", "restaurant", "emenu", "logout", "not-found");
     }
 }

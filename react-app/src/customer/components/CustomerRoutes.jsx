@@ -85,7 +85,7 @@ const CustomerRoutes = () => {
             <div className="max-w-md w-full">
                 <Routes>
                     <Route path="/" element={<HomePage restaurant={restaurant} />} />
-                    <Route path="/tables" element={<SelectTable setHasError={setHasError} tableNumber={tableNumber} setTableNumber={setTableNumber} restaurant={restaurant} setToast={setToast} setLoading={setLoading} />} />
+                    <Route path="/tables" element={<SelectTable setHasError={setHasError} tableNumber={tableNumber} setTableNumber={setTableNumber} pageName={pageName} setToast={setToast} setLoading={setLoading} />} />
                     <Route path="/foods" element={<Food setHasError={setHasError} setToast={setToast} restaurant={restaurant} tableNumber={tableNumber} />} />
                     <Route path="/*" element={<NotFound />} />
                 </Routes>
