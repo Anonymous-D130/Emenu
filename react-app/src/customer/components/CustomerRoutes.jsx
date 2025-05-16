@@ -2,7 +2,6 @@ import {Routes, Route, useSearchParams, useParams} from "react-router-dom";
 import HomePage from "../pages/HomePage.jsx";
 import SelectTable from "../pages/SelectTable.jsx";
 import Food from "../pages/Food.jsx";
-import NotFound from "../../pages/NotFound.jsx";
 import customerActivity from "../utils/CustomerActivity.js";
 import React, {useCallback, useEffect, useState} from "react";
 import axios from "axios";
@@ -12,7 +11,7 @@ import Toast from "../../utils/Toast.jsx";
 import ErrorPage from "../pages/ErrorPage.jsx";
 
 const CustomerRoutes = () => {
-    const [restaurant, setRestaurant] = useState(null);
+    const [restaurant, setRestaurant] = useState({});
     const [searchParams] = useSearchParams();
     const { pageName } = useParams();
     const tableNo = searchParams.get('tableNumber');
@@ -86,8 +85,7 @@ const CustomerRoutes = () => {
                 <Routes>
                     <Route path="/" element={<HomePage restaurant={restaurant} />} />
                     <Route path="/tables" element={<SelectTable setHasError={setHasError} tableNumber={tableNumber} setTableNumber={setTableNumber} pageName={pageName} setToast={setToast} setLoading={setLoading} />} />
-                    <Route path="/foods" element={<Food setHasError={setHasError} setToast={setToast} restaurant={restaurant} tableNumber={tableNumber} />} />
-                    <Route path="/*" element={<NotFound />} />
+                    <Route path="/foods" element={<Food setHasError={setHasError} setToast={setToast} restaurant={restaurant} tableNumber={tableNumber}/>}/>
                 </Routes>
             </div>}
         </main>

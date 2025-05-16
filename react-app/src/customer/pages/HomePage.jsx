@@ -15,15 +15,19 @@ const HomePage = ({ restaurant }) => {
 
             {/* Main Image and Video Section */}
             <div className="flex-1 w-full flex flex-col items-center justify-end relative">
+                {/* Background Image */}
                 <img
                     src={restaurant?.welcomeScreen}
-                    alt="Delicious Food"
-                    className="w-full h-[calc(100vh-150px)] object-cover absolute overflow-hidden -top-10 left-0 z-[1]"
+                    alt="Welcome to our Restaurant"
+                    className="absolute inset-0 w-full h-[calc(100vh-10rem)] object-cover -top-10 z-0"
                 />
 
-                <div className="z-10 flex flex-col items-center mb-30">
+                {/* Overlay Content */}
+                <div className="z-10 flex flex-col items-center mb-20">
+                    {/* Play Button */}
                     <button
-                        className="bg-white rounded-full p-4 shadow-lg"
+                        className="bg-white rounded-full p-4 shadow-lg hover:scale-105 transition-transform duration-200"
+                        aria-label="Play Intro Video"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -40,10 +44,14 @@ const HomePage = ({ restaurant }) => {
                             />
                         </svg>
                     </button>
+
+                    {/* Skip Intro Button */}
                     <button
                         onClick={() => navigate(`/${restaurant?.pageName}/tables`)}
-                        className="mt-4 text-lg font-bold cursor-pointer text-white p-1 bg-gray-600 rounded-lg"
-                    >Skip Intro</button>
+                        className="mt-4 text-lg font-semibold text-white px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+                    >
+                        Skip Intro
+                    </button>
                 </div>
             </div>
         </div>
