@@ -6,7 +6,7 @@ import ForgotPassword from "./auth/ForgotPassword.jsx";
 import ResetPassword from "./auth/ResetPassword.jsx";
 import PrivateRoute from "./routes/PrivateRoute.jsx";
 import RestaurantRoutes from "./routes/RestaurantRoutes.jsx";
-import OauthSuccess from "./components/OauthSuccess.jsx";
+import OauthSuccess from "./auth/OauthSuccess.jsx";
 import Logout from "./auth/Logout.jsx";
 import CustomerRoutes from "./customer/components/CustomerRoutes.jsx";
 import NotFound from "./pages/NotFound.jsx";
