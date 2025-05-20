@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface RestaurantService {
     Restaurant getRestaurant(String token);
     SubscriptionStatus getSubscriptionStatus(String token);
-    Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest);
+    Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest) throws IOException;
     Restaurant getRestaurantById(UUID id);
     Map<String, ?> getDashboard(String token);
     List<Category> getRestaurantCategories(String token);

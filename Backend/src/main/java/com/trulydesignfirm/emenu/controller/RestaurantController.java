@@ -78,7 +78,7 @@ public class RestaurantController {
     public ResponseEntity<Response> registerOrUpdateRestaurant(
             @RequestHeader("Authorization") String token,
             @RequestBody Restaurant restaurant
-    ) {
+    ) throws IOException {
         Response response = restaurantService.createOrUpdateRestaurant(token, restaurant);
         return new ResponseEntity<>(response, response.getStatus());
     }

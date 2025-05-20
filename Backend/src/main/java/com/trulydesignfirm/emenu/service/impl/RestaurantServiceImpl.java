@@ -52,6 +52,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Value("${backend_url}")
     private String baseUrl;
 
+    private final Path localPath = Paths.get("qr-codes");
+
     @Override
     public Restaurant getRestaurant(String token) {
         return getRestaurantByToken(token);
@@ -68,7 +70,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest) {
+    public Response createOrUpdateRestaurant(String token, Restaurant restaurantRequest) throws IOException {
         LoginUser owner = utility.getUserFromToken(token);
         Restaurant restaurant = restaurantRepo.getRestaurantByOwner(owner).orElse(null);
         if(checkPageName(token, restaurantRequest.getPageName())) {
@@ -88,10 +90,14 @@ public class RestaurantServiceImpl implements RestaurantService {
         } else {
             restaurant.setName(restaurantRequest.getName());
             restaurant.setMobile(restaurantRequest.getMobile());
+            restaurant.setQrCodes(
+                    Objects.equals(restaurantRequest.getPageName(), restaurant.getPageName())
+                            ? restaurant.getQrCodes()
+                            : regenerateQrCodes(restaurantRequest)
+            );
             restaurant.setPageName(restaurantRequest.getPageName());
             restaurant.setLogo(restaurantRequest.getLogo());
             restaurant.setWelcomeScreen(restaurantRequest.getWelcomeScreen());
-            restaurant.setQrCodes(restaurantRequest.getQrCodes());
             restaurantRepo.save(restaurant);
             Response response = new Response();
             response.setMessage("Restaurant updated successfully.");
@@ -591,22 +597,36 @@ public class RestaurantServiceImpl implements RestaurantService {
                 log.info("Successfully deleted QR code: {}", info);
             }
             excessQrCodes.clear();
-        } else {
-            for (int tableNumber = qrCodeUrls.size() + 1; tableNumber <= tables; tableNumber++) {
-                String qrText = "%s/%s?tableNumber=%d".formatted(websiteUrl, restaurant.getPageName(), tableNumber);
-                Path localPath = Paths.get("qr-codes");
-                Path savedPath = qrCodeService.saveQRCodeToFile(qrText, localPath)
-                        .orElseThrow(() -> new IOException("Failed to save QR code file"));
-                String url = baseUrl + "/api/files/get-image/" + fileService.uploadFile(savedPath).getId();
-                qrCodeUrls.add(url);
-                Files.deleteIfExists(savedPath);
-            }
-        }
+        } else for (int tableNumber = qrCodeUrls.size() + 1; tableNumber <= tables; tableNumber++) createQr(restaurant, qrCodeUrls, tableNumber);
         restaurant.setQrCodes(qrCodeUrls);
         restaurantRepo.save(restaurant);
         response.setMessage("QR code(s) generated successfully");
         response.setStatus(HttpStatus.CREATED);
         return response;
+    }
+
+    private List<String> regenerateQrCodes(Restaurant restaurant) throws IOException {
+        int tables = restaurant.getQrCodes().size();
+        List<String> oldQrCodes = new ArrayList<>(restaurant.getQrCodes());
+        for (String oldQr : oldQrCodes) {
+            String fileId = utility.extractIdFromUrl(oldQr);
+            String info = fileService.deleteFile(UUID.fromString(fileId));
+            log.info("Successfully deleted old QR code: {}", info);
+        }
+        List<String> newQrCodes = new ArrayList<>();
+        Files.createDirectories(localPath);
+
+        for (int tableNumber = 1; tableNumber <= tables; tableNumber++) createQr(restaurant, newQrCodes, tableNumber);
+        return newQrCodes;
+    }
+
+    private void createQr(Restaurant restaurant, List<String> qrCodeUrls, int tableNumber) throws IOException {
+        String qrText = "%s/%s?tableNumber=%d".formatted(websiteUrl, restaurant.getPageName(), tableNumber);
+        Path savedPath = qrCodeService.saveQRCodeToFile(qrText, localPath)
+                .orElseThrow(() -> new IOException("Failed to save QR code file"));
+        String url = baseUrl + "/api/files/get-image/" + fileService.uploadFile(savedPath).getId();
+        qrCodeUrls.add(url);
+        Files.deleteIfExists(savedPath);
     }
 
 }
