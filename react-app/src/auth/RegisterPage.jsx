@@ -246,7 +246,7 @@ const RegisterPage = () => {
                                             : "bg-purple-600 hover:bg-purple-700"
                                     }`}
                                 >
-                                    {loading ? <Loader/> : "CONTINUE"}
+                                    {loading ? <Loader className="w-full" /> : "CONTINUE"}
                                 </button>
                             </form>
                             <p className="text-center mt-6 text-gray-700 font-bold">Already have an account?</p>
