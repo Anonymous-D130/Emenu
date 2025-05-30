@@ -164,42 +164,8 @@ For deployment, consider using Docker to containerize both the frontend and back
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-
-2. Create a new branch:
-
-   ```bash
-   git checkout -b feature/YourFeature
-   ```
-
-3. Commit your changes:
-
-   ```bash
-   git commit -m "Add YourFeature"
-   ```
-
-4. Push to the branch:
-
-   ```bash
-   git push origin feature/YourFeature
-   ```
-
-5. Open a pull request detailing your changes.
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
 ## 📧 Contact
 
-For any inquiries or feedback, please reach out to [Dhruv Gupta](mailto:dhruv@example.com).
+For any inquiries or feedback, please reach out to [Dhruv Gupta](mailto:dhruvgupta130@gmail.com) or connect on [LinkedIn](https://www.linkedin.com/in/dhruvgupta130).
 
 ---
